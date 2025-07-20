@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Dados de Reuniões</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- XLSX Library CDN for reading Excel files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        /* Custom styles for specific elements not fully covered by Tailwind or for specific overrides */
+        .file-input::-webkit-file-upload-button {
+            margin-right: 1rem; /* file:mr-4 */
+            padding: 0.5rem 1rem; /* file:py-2 file:px-4 */
+            border-radius: 9999px; /* file:rounded-full */
+            border: 0; /* file:border-0 */
+            font-size: 0.875rem; /* file:text-sm */
+            font-weight: 600; /* file:font-semibold */
+            background-color: #eff6ff; /* file:bg-blue-50 */
+            color: #1d4ed8; /* file:text-blue-700 */
+            cursor: pointer;
+        }
+
+        .file-input:hover::-webkit-file-upload-button {
+            background-color: #dbeafe; /* hover:file:bg-blue-100 */
+        }
+
+        /* Center content in day columns */
+        .data-table .day-cell {
+            text-align: center;
+            cursor: pointer; /* Indicate it's clickable */
+        }
+        .data-table .editable-text-cell {
+            cursor: pointer; /* Indicate it's clickable */
+        }
+        /* Style for collapsible section */
+        .collapsible-header {
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: #e2e8f0; /* gray-200 */
+            border-radius: 0.5rem; /* rounded-md */
+            font-weight: 600; /* font-semibold */
+            color: #475569; /* text-gray-600 */
+            margin-bottom: 1rem;
+        }
+        .collapsible-content {
+            display: block; /* Default to visible */
+        }
+        .collapsible-content.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-8 text-center">
+            Informações de Contato e Disponibilidade
+        </h1>
+
+        <div class="mb-8 p-6 bg-white rounded-lg shadow-md flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <input type="file" id="excelFile" accept=".xlsx, .xls" class="file-input block w-full sm:w-auto text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
+            <button id="loadExcel" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 w-full sm:w-auto">
+                Carregar Planilha
+            </button>
+            <button id="saveData" class="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 w-full sm:w-auto">
+                Salvar Dados Localmente
+            </button>
+            <button id="loadData" class="px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-75 w-full sm:w-auto">
+                Carregar Dados Locais
+            </button>
+            <button id="exportExcel" class="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 w-full sm:w-auto">
+                Exportar para Excel
+            </button>
+            <button id="deleteSelectedBtn" class="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-75 w-full sm:w-auto">
+                Excluir Selecionados
+            </button>
+        </div>
+
+        <!-- Add New Person Form -->
+        <div class="mb-8 p-6 bg-white rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Adicionar Nova Pessoa</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                <input type="text" id="newName" placeholder="Nome Completo" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                
+                <select id="newMeetingDayWeekday" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Reunião Meio de Semana (Nenhuma)</option>
+                    <option value="segunda">Segunda-feira</option>
+                    <option value="terca">Terça-feira</option>
+                    <option value="quarta">Quarta-feira</option>
+                    <option value="quinta">Quinta-feira</option>
+                    <option value="sexta">Sexta-feira</option>
+                </select>
+                <select id="newMeetingDayWeekend" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">Reunião Fim de Semana (Nenhuma)</option>
+                    <option value="sabado">Sábado</option>
+                    <option value="domingo">Domingo</option>
+                    <option value="final de semana">Fim de Semana (Sábado e Domingo)</option>
+                </select>
+                <input type="date" id="newCongressDate" placeholder="Dia Congresso" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex flex-wrap gap-2 mb-4">
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" id="newSeg" class="form-checkbox text-blue-600 rounded">
+                    <span>Seg</span>
+                </label>
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" id="newTer" class="form-checkbox text-blue-600 rounded">
+                    <span>Ter</span>
+                </label>
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" id="newQua" class="form-checkbox text-blue-600 rounded">
+                    <span>Qua</span>
+                </label>
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" id="newQui" class="form-checkbox text-blue-600 rounded">
+                    <span>Qui</span>
+                </label>
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" id="newSex" class="form-checkbox text-blue-600 rounded">
+                    <span>Sex</span>
+                </label>
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" id="newSab" class="form-checkbox text-blue-600 rounded">
+                    <span>Sab</span>
+                </label>
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" id="newDom" class="form-checkbox text-blue-600 rounded">
+                    <span>Dom</span>
+                </label>
+            </div>
+            <button id="addPersonBtn" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 w-full">
+                Adicionar Pessoa
+            </button>
+        </div>
+
+
+        <div id="message-box" class="hidden p-4 mb-4 text-sm text-center rounded-lg" role="alert"></div>
+
+        <!-- Collapsible Data Table Section -->
+        <div class="mb-8">
+            <div id="dataTableToggle" class="collapsible-header">
+                <span>Tabela de Dados de Pessoas</span>
+                <span id="toggleIcon">▼</span>
+            </div>
+            <div id="dataTableContent" class="collapsible-content">
+                <div id="data-container" class="overflow-x-auto">
+                    <!-- Data will be loaded here by JavaScript in a table format -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Generator Section -->
+        <div class="mb-8 p-6 bg-white rounded-lg shadow-md">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Gerador de Escala de Trabalho</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label for="scheduleMonth" class="block text-sm font-medium text-gray-700">Mês de Início:</label>
+                    <select id="scheduleMonth" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <!-- Options will be populated by JS -->
+                    </select>
+                </div>
+                <div>
+                    <label for="scheduleYear" class="block text-sm font-medium text-gray-700">Ano:</label>
+                    <input type="number" id="scheduleYear" value="2025" min="2024" max="2050" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="scheduleType" class="block text-sm font-medium text-gray-700">Tipo de Escala:</label>
+                    <select id="scheduleType" class="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="atendente">Atendente</option>
+                        <option value="vigia">Vigia</option>
+                    </select>
+                </div>
+            </div>
+            <button id="generateScheduleBtn" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 w-full">
+                Gerar Escala
+            </button>
+            <div id="schedule-output" class="mt-6 overflow-x-auto">
+                <!-- Schedule will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Array to store the parsed people data
+        var peopleData = [];
+
+        const excelFileInput = document.getElementById('excelFile');
+        const loadExcelButton = document.getElementById('loadExcel');
+        const saveDataButton = document.getElementById('saveData');
+        const loadDataButton = document.getElementById('loadData');
+        const exportExcelButton = document.getElementById('exportExcel');
+        const deleteSelectedButton = document.getElementById('deleteSelectedBtn');
+        const dataContainer = document.getElementById('data-container');
+        const messageBox = document.getElementById('message-box');
+
+        // New Person Form Elements
+        const newNameInput = document.getElementById('newName');
+        const newMeetingDayWeekdaySelect = document.getElementById('newMeetingDayWeekday'); // NEW SELECT for weekday
+        const newMeetingDayWeekendSelect = document.getElementById('newMeetingDayWeekend'); // NEW SELECT for weekend
+        const newCongressDateInput = document.getElementById('newCongressDate');
+        const newSegCheckbox = document.getElementById('newSeg');
+        const newTerCheckbox = document.getElementById('newTer');
+        const newQuaCheckbox = document.getElementById('newQua');
+        const newQuiCheckbox = document.getElementById('newQui');
+        const newSexCheckbox = document.getElementById('newSex');
+        const newSabCheckbox = document.getElementById('newSab');
+        const newDomCheckbox = document.getElementById('newDom');
+        const addPersonBtn = document.getElementById('addPersonBtn');
+
+        // Schedule Generator Elements
+        const scheduleMonthSelect = document.getElementById('scheduleMonth');
+        const scheduleYearInput = document.getElementById('scheduleYear');
+        const scheduleTypeSelect = document.getElementById('scheduleType');
+        const generateScheduleBtn = document.getElementById('generateScheduleBtn');
+        const scheduleOutputDiv = document.getElementById('schedule-output');
+
+        // Collapsible Section Elements
+        const dataTableToggle = document.getElementById('dataTableToggle');
+        const dataTableContent = document.getElementById('dataTableContent');
+        const toggleIcon = document.getElementById('toggleIcon');
+
+
+        // New hidden file input for loading JSON data
+        const loadDataFileInput = document.createElement('input');
+        loadDataFileInput.type = 'file';
+        loadDataFileInput.id = 'loadDataFileInput';
+        loadDataFileInput.accept = '.json'; // Accept JSON files
+        loadDataFileInput.style.display = 'none'; // Keep it hidden
+        document.body.appendChild(loadDataFileInput); // Append to body
+
+        // Function to display messages to the user
+        function showMessage(message, type = 'info') {
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden', 'bg-blue-100', 'text-blue-800', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+            if (type === 'success') {
+                messageBox.classList.add('bg-green-100', 'text-green-800');
+            } else if (type === 'error') {
+                messageBox.classList.add('bg-red-100', 'text-red-800');
+            } else {
+                messageBox.classList.add('bg-blue-100', 'text-blue-800');
+            }
+            messageBox.classList.remove('hidden');
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Function to save data to local storage (for automatic persistence)
+        function saveDataToLocalStorage() {
+            try {
+                localStorage.setItem('peopleData', JSON.stringify(peopleData));
+                // showMessage('Dados salvos localmente!', 'success'); // Optional: show message on every save
+            } catch (error) {
+                console.error('Erro ao salvar dados no localStorage:', error);
+                showMessage('Erro ao salvar dados localmente. Seu navegador pode estar cheio ou o recurso desabilitado.', 'error');
+            }
+        }
+
+        // Function to load data from local storage (for automatic persistence)
+        function loadDataFromLocalStorage() {
+            try {
+                const storedData = localStorage.getItem('peopleData');
+                if (storedData) {
+                    peopleData = JSON.parse(storedData);
+                    renderData();
+                    showMessage('Dados carregados do armazenamento local com sucesso!', 'success');
+                } else {
+                    showMessage('Nenhum dado salvo localmente encontrado.', 'info');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar dados do localStorage:', error);
+                showMessage('Erro ao carregar dados locais. O formato dos dados pode estar corrompido.', 'error');
+            }
+        }
+
+        // Function to save data to a file (triggered by "Salvar Dados Localmente" button)
+        function saveDataToFile() {
+            if (peopleData.length === 0) {
+                showMessage('Não há dados para salvar. Carregue uma planilha ou adicione pessoas.', 'info');
+                return;
+            }
+            try {
+                const blob = new Blob([JSON.stringify(peopleData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'banco_de_dados.json'; // Suggested filename
+                document.body.appendChild(a); // Temporarily add to DOM
+                a.click(); // Programmatically click the link
+                document.body.removeChild(a); // Clean up
+                URL.revokeObjectURL(url); // Release the object URL
+                showMessage('Dados salvos como "banco_de_dados.json" com sucesso!', 'success');
+            } catch (error) {
+                console.error('Erro ao salvar dados no arquivo:', error);
+                showMessage('Erro ao salvar dados no arquivo. Tente novamente.', 'error');
+            }
+        }
+
+        // Function to load data from a file (triggered by hidden file input)
+        function loadDataFromFile(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                showMessage('Nenhum arquivo selecionado para carregar.', 'info');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const loadedData = JSON.parse(e.target.result);
+                    if (Array.isArray(loadedData) && loadedData.every(item => typeof item === 'object' && item !== null)) {
+                        peopleData = loadedData;
+                        renderData();
+                        showMessage('Dados carregados do arquivo com sucesso!', 'success');
+                        saveDataToLocalStorage(); // Also save to local storage after loading from file
+                    } else {
+                        showMessage('Formato de arquivo inválido. Por favor, selecione um arquivo JSON de dados válido.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Erro ao ler o arquivo de dados:', error);
+                    showMessage('Erro ao processar o arquivo de dados. Verifique se é um arquivo JSON válido.', 'error');
+                }
+            };
+            reader.onerror = (error) => {
+                console.error('Erro ao ler o arquivo:', error);
+                showMessage('Erro ao ler o arquivo. Tente novamente.', 'error');
+            };
+            reader.readAsText(file);
+        }
+
+
+        // Function to render the data in a table format
+        function renderData() {
+            dataContainer.innerHTML = ''; // Clear existing content
+            if (peopleData.length === 0) {
+                dataContainer.innerHTML = '<p class="text-center text-gray-600 col-span-full">Nenhum dado para exibir. Carregue uma planilha ou adicione uma pessoa.</p>';
+                return;
+            }
+
+            const table = document.createElement('table');
+            table.classList.add('w-full', 'border-collapse', 'mt-6', 'bg-white', 'rounded-lg', 'overflow-hidden', 'shadow-md', 'data-table');
+
+            // Create table header
+            const thead = document.createElement('thead');
+            thead.innerHTML = `
+                <tr>
+                    <th class="p-4 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-600 uppercase text-sm">
+                        <input type="checkbox" id="selectAllCheckbox" class="form-checkbox text-blue-600 rounded">
+                    </th>
+                    <th class="p-4 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Nome</th>
+                    <th class="p-4 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Reunião Semana</th>
+                    <th class="p-4 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Reunião Fim Semana</th>
+                    <th class="p-4 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Congresso</th>
+                    <th class="p-4 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Seg</th>
+                    <th class="p-4 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Ter</th>
+                    <th class="p-4 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Qua</th>
+                    <th class="p-4 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Qui</th>
+                    <th class="p-4 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Sex</th>
+                    <th class="p-4 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Sab</th>
+                    <th class="p-4 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Dom</th>
+                    <th class="p-4 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Ações</th>
+                </tr>
+            `;
+            table.appendChild(thead);
+
+            // Define the order of days for rendering and their corresponding internal keys
+            const daysOfWeekMapping = {
+                "Seg": 'segunda',
+                "Ter": 'terca',
+                "Qua": 'quarta',
+                "Qui": 'quinta',
+                "Sex": 'sexta',
+                "Sab": 'sabado',
+                "Dom": 'domingo'
+            };
+            const daysOrder = Object.keys(daysOfWeekMapping); // Get the display order for headers
+
+            // Create table body
+            const tbody = document.createElement('tbody');
+            peopleData.forEach((person, index) => {
+                const tr = document.createElement('tr');
+                tr.classList.add(index % 2 === 0 ? 'bg-white' : 'bg-gray-50', 'hover:bg-blue-50'); // Alternating row colors
+
+                // Checkbox for selection
+                const checkboxTd = document.createElement('td');
+                checkboxTd.classList.add('p-4', 'border-b', 'border-gray-200');
+                const rowCheckbox = document.createElement('input');
+                rowCheckbox.type = 'checkbox';
+                rowCheckbox.classList.add('row-checkbox', 'form-checkbox', 'text-blue-600', 'rounded');
+                rowCheckbox.dataset.index = index;
+                checkboxTd.appendChild(rowCheckbox);
+                tr.appendChild(checkboxTd);
+
+                // Name
+                const nameTd = document.createElement('td');
+                nameTd.classList.add('p-4', 'border-b', 'border-gray-200');
+                nameTd.textContent = person.name || 'N/A';
+                tr.appendChild(nameTd);
+
+                // Meeting Day Weekday (Editable)
+                const meetingDayWeekdayTd = document.createElement('td');
+                meetingDayWeekdayTd.classList.add('p-4', 'border-b', 'border-gray-200', 'editable-text-cell');
+                meetingDayWeekdayTd.dataset.field = 'meetingDayWeekday';
+                meetingDayWeekdayTd.dataset.index = index;
+                const displayMeetingDayWeekdayMap = {
+                    '': 'Nenhuma',
+                    'segunda': 'Segunda-feira',
+                    'terca': 'Terça-feira',
+                    'quarta': 'Quarta-feira',
+                    'quinta': 'Quinta-feira',
+                    'sexta': 'Sexta-feira'
+                };
+                meetingDayWeekdayTd.textContent = displayMeetingDayWeekdayMap[person.meetingDayWeekday] || 'N/A';
+                tr.appendChild(meetingDayWeekdayTd);
+
+                // Meeting Day Weekend (Editable)
+                const meetingDayWeekendTd = document.createElement('td');
+                meetingDayWeekendTd.classList.add('p-4', 'border-b', 'border-gray-200', 'editable-text-cell');
+                meetingDayWeekendTd.dataset.field = 'meetingDayWeekend';
+                meetingDayWeekendTd.dataset.index = index;
+                const displayMeetingDayWeekendMap = {
+                    '': 'Nenhuma',
+                    'sabado': 'Sábado',
+                    'domingo': 'Domingo',
+                    'final de semana': 'Fim de Semana'
+                };
+                meetingDayWeekendTd.textContent = displayMeetingDayWeekendMap[person.meetingDayWeekend] || 'N/A';
+                tr.appendChild(meetingDayWeekendTd);
+
+                // Congress (Editable)
+                const congressTd = document.createElement('td');
+                congressTd.classList.add('p-4', 'border-b', 'border-gray-200', 'editable-text-cell');
+                congressTd.dataset.field = 'congress';
+                congressTd.dataset.index = index;
+                congressTd.textContent = person.congress || 'N/A';
+                tr.appendChild(congressTd);
+
+                // Add cells for each day of the week (Clickable to toggle)
+                daysOrder.forEach(dayDisplay => {
+                    const dayKey = daysOfWeekMapping[dayDisplay]; // Get the internal key like 'segunda'
+                    const dayTd = document.createElement('td');
+                    dayTd.classList.add('p-4', 'border-b', 'border-gray-200', 'day-cell');
+                    dayTd.dataset.field = dayKey; // Store the field name
+                    dayTd.dataset.index = index; // Store the person's index
+
+                    // Check the boolean flag in the person object for availability
+                    if (person[dayKey]) {
+                        dayTd.textContent = '✓'; // Checkmark for available
+                        dayTd.style.color = '#16a34a'; // Green color for checkmark
+                        dayTd.style.fontWeight = 'bold';
+                    } else {
+                        dayTd.textContent = '✗'; // X for not available
+                        dayTd.style.color = '#dc2626'; // Red color for X
+                        dayTd.style.fontWeight = 'bold';
+                    }
+                    tr.appendChild(dayTd);
+                });
+
+                // Actions column (Delete button)
+                const actionsTd = document.createElement('td');
+                actionsTd.classList.add('p-4', 'border-b', 'border-gray-200');
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Excluir';
+                deleteBtn.classList.add('px-4', 'py-2', 'bg-red-500', 'text-white', 'rounded-md', 'shadow-sm', 'hover:bg-red-600', 'focus:outline-none', 'focus:ring-2', 'focus:ring-red-500', 'focus:ring-opacity-75');
+                deleteBtn.dataset.index = index; // Store the index to identify which person to delete
+                deleteBtn.addEventListener('click', (event) => {
+                    const idxToDelete = parseInt(event.target.dataset.index);
+                    deletePerson(idxToDelete);
+                });
+                actionsTd.appendChild(deleteBtn);
+                tr.appendChild(actionsTd);
+
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            dataContainer.appendChild(table);
+
+            // Add event listeners for inline editing after rendering
+            document.querySelectorAll('.editable-text-cell').forEach(cell => {
+                cell.addEventListener('click', handleTextCellEdit);
+            });
+            document.querySelectorAll('.day-cell').forEach(cell => {
+                cell.addEventListener('click', handleDayCellToggle);
+            });
+
+            // Add event listeners for checkboxes
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = false; // Reset select all checkbox state
+                selectAllCheckbox.addEventListener('change', handleSelectAll);
+            }
+            document.querySelectorAll('.row-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', handleRowCheckboxChange);
+            });
+        }
+
+        // --- Multi-select Deletion Logic ---
+        function handleSelectAll(event) {
+            const isChecked = event.target.checked;
+            document.querySelectorAll('.row-checkbox').forEach(checkbox => {
+                checkbox.checked = isChecked;
+            });
+        }
+
+        function handleRowCheckboxChange() {
+            const allCheckboxes = document.querySelectorAll('.row-checkbox');
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const allChecked = Array.from(allCheckboxes).every(checkbox => checkbox.checked);
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = allChecked;
+            }
+        }
+
+        deleteSelectedButton.addEventListener('click', deleteSelectedPeople); // Event listener for the new button
+
+        function deleteSelectedPeople() {
+            const selectedIndices = [];
+            // Collect indices of checked checkboxes. Iterate in reverse to handle splicing correctly.
+            const checkboxes = Array.from(document.querySelectorAll('.row-checkbox'));
+            for (let i = checkboxes.length - 1; i >= 0; i--) {
+                if (checkboxes[i].checked) {
+                    selectedIndices.push(parseInt(checkboxes[i].dataset.index));
+                }
+            }
+
+            if (selectedIndices.length === 0) {
+                showMessage('Nenhuma pessoa selecionada para exclusão.', 'info');
+                return;
+            }
+
+            if (confirm(`Tem certeza que deseja excluir ${selectedIndices.length} pessoa(s) selecionada(s)?`)) {
+                // Sort in descending order to avoid index issues when splicing
+                selectedIndices.sort((a, b) => b - a);
+                selectedIndices.forEach(index => {
+                    peopleData.splice(index, 1);
+                });
+                renderData();
+                saveDataToLocalStorage();
+                showMessage(`${selectedIndices.length} pessoa(s) excluída(s) com sucesso!`, 'success');
+            }
+        }
+
+        // --- CRUD Operations ---
+
+        // Add Person Function
+        addPersonBtn.addEventListener('click', () => {
+            const name = newNameInput.value.trim();
+            const meetingDayWeekday = newMeetingDayWeekdaySelect.value.trim();
+            const meetingDayWeekend = newMeetingDayWeekendSelect.value.trim();
+            const congressDate = newCongressDateInput.value;
+
+            if (!name) {
+                showMessage('O nome é obrigatório para adicionar uma pessoa.', 'error');
+                return;
+            }
+
+            const newPerson = {
+                name: name,
+                phone: '', // Phone will be empty as input is removed from form
+                meetingDayWeekday: meetingDayWeekday,
+                meetingDayWeekend: meetingDayWeekend,
+                congress: congressDate, // Store congress date as YYYY-MM-DD
+                segunda: newSegCheckbox.checked,
+                terca: newTerCheckbox.checked,
+                quarta: newQuaCheckbox.checked,
+                quinta: newQuiCheckbox.checked,
+                sexta: newSexCheckbox.checked,
+                sabado: newSabCheckbox.checked,
+                domingo: newDomCheckbox.checked
+            };
+
+            peopleData.push(newPerson);
+            renderData();
+            saveDataToLocalStorage();
+            showMessage('Pessoa adicionada com sucesso!', 'success');
+
+            // Clear form fields
+            newNameInput.value = '';
+            newMeetingDayWeekdaySelect.value = ''; // Reset select
+            newMeetingDayWeekendSelect.value = ''; // Reset select
+            newCongressDateInput.value = ''; // Reset date input
+            newSegCheckbox.checked = false;
+            newTerCheckbox.checked = false;
+            newQuaCheckbox.checked = false;
+            newQuiCheckbox.checked = false;
+            newSexCheckbox.checked = false;
+            newSabCheckbox.checked = false;
+            newDomCheckbox.checked = false;
+        });
+
+        // Delete Single Person Function (from individual row button)
+        function deletePerson(index) {
+            if (confirm('Tem certeza que deseja excluir esta pessoa?')) {
+                peopleData.splice(index, 1);
+                renderData();
+                saveDataToLocalStorage();
+                showMessage('Pessoa excluída com sucesso!', 'success');
+            }
+        }
+
+        // Handle Inline Text Cell Editing (Meeting Day, Congress)
+        function handleTextCellEdit(event) {
+            const cell = event.target;
+            const index = parseInt(cell.dataset.index);
+            const field = cell.dataset.field;
+
+            // Prevent editing if already an input or select
+            if (cell.querySelector('input') || cell.querySelector('select')) {
+                return;
+            }
+
+            const currentValue = peopleData[index][field]; // Get actual data value
+            let inputElement;
+
+            if (field === 'congress') {
+                inputElement = document.createElement('input');
+                inputElement.type = 'date';
+                inputElement.value = currentValue;
+            } else if (field === 'meetingDayWeekday') {
+                inputElement = document.createElement('select');
+                const options = [
+                    { value: '', text: 'Nenhuma' },
+                    { value: 'segunda', text: 'Segunda-feira' },
+                    { value: 'terca', text: 'Terça-feira' },
+                    { value: 'quarta', text: 'Quarta-feira' },
+                    { value: 'quinta', text: 'Quinta-feira' },
+                    { value: 'sexta', text: 'Sexta-feira' }
+                ];
+                options.forEach(optionData => {
+                    const option = document.createElement('option');
+                    option.value = optionData.value;
+                    option.textContent = optionData.text;
+                    if (optionData.value === peopleData[index].meetingDayWeekday) {
+                        option.selected = true;
+                    }
+                    inputElement.appendChild(option);
+                });
+            } else if (field === 'meetingDayWeekend') {
+                inputElement = document.createElement('select');
+                const options = [
+                    { value: '', text: 'Nenhuma' },
+                    { value: 'sabado', text: 'Sábado' },
+                    { value: 'domingo', text: 'Domingo' },
+                    { value: 'final de semana', text: 'Fim de Semana (Sábado e Domingo)' }
+                ];
+                options.forEach(optionData => {
+                    const option = document.createElement('option');
+                    option.value = optionData.value;
+                    option.textContent = optionData.text;
+                    if (optionData.value === peopleData[index].meetingDayWeekend) {
+                        option.selected = true;
+                    }
+                    inputElement.appendChild(option);
+                });
+            } else {
+                inputElement = document.createElement('input');
+                inputElement.type = 'text';
+                inputElement.value = currentValue;
+            }
+
+            inputElement.classList.add('w-full', 'p-1', 'border', 'border-blue-400', 'rounded-md', 'focus:outline-none');
+
+            const saveChanges = () => {
+                let newValue;
+                if (inputElement.tagName === 'SELECT') {
+                    newValue = inputElement.value.trim();
+                } else {
+                    newValue = inputElement.value.trim();
+                }
+                peopleData[index][field] = newValue;
+                renderData();
+                saveDataToLocalStorage();
+                showMessage('Dados atualizados com sucesso!', 'success');
+            };
+
+            if (inputElement.tagName === 'SELECT') {
+                inputElement.addEventListener('change', saveChanges);
+                inputElement.addEventListener('blur', saveChanges);
+            } else {
+                inputElement.addEventListener('blur', saveChanges);
+                inputElement.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        inputElement.blur();
+                    }
+                });
+            }
+
+            cell.innerHTML = '';
+            cell.appendChild(inputElement);
+            inputElement.focus();
+        }
+
+        // Handle Day Cell Toggle
+        function handleDayCellToggle(event) {
+            const cell = event.target;
+            const index = parseInt(cell.dataset.index);
+            const field = cell.dataset.field; // e.g., 'segunda', 'terca'
+
+            // Toggle the boolean value
+            peopleData[index][field] = !peopleData[index][field];
+
+            // Update the cell's visual representation immediately
+            if (peopleData[index][field]) {
+                cell.textContent = '✓';
+                cell.style.color = '#16a34a';
+            } else {
+                cell.textContent = '✗';
+                cell.style.color = '#dc2626';
+            }
+            saveDataToLocalStorage();
+            showMessage('Disponibilidade atualizada!', 'success');
+        }
+
+
+        // --- Excel Import/Export ---
+
+        // Event listener for loading Excel file
+        loadExcelButton.addEventListener('click', () => {
+            const file = excelFileInput.files[0];
+            if (!file) {
+                showMessage('Por favor, selecione um arquivo Excel primeiro.', 'info');
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+
+                    // Assuming the first sheet contains the data
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+
+                    // Get the full range of the worksheet
+                    const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1:A1');
+                    const maxRow = range.e.r; // Max row index (0-based)
+                    const maxCol = range.e.c; // Max column index (0-based)
+                    console.log('Worksheet reference range (!ref):', worksheet['!ref']);
+                    console.log('Detected max row (0-based):', maxRow);
+                    console.log('Detected max col (0-based):', maxCol);
+
+                    // Read all data from the sheet as an array of arrays, without header processing by XLSX
+                    const allSheetData = XLSX.utils.sheet_to_json(worksheet, { header: 1, range: { s: { r: 0, c: 0 }, e: { r: maxRow, c: maxCol } }, raw: true });
+
+                    if (allSheetData.length === 0) {
+                        showMessage('A planilha está vazia ou não contém dados.', 'error');
+                        peopleData = [];
+                        renderData();
+                        return;
+                    }
+
+                    // Extract the first row as headers
+                    const headersRaw = allSheetData[0] || [];
+                    console.log('headersRaw (raw data from first row):', headersRaw); // DEBUG: Log raw headers
+
+                    // Normalize headers (lowercase, trim, remove non-alphanumeric except spaces, normalize spaces)
+                    const headers = headersRaw.map(h => String(h || '')
+                                                    .replace(/[^a-z0-9\s]/gi, '') // Remove non-alphanumeric except spaces
+                                                    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+                                                    .trim().toLowerCase());
+                    console.log('Cabeçalhos lidos da planilha (normalizados):', headers); // DEBUG: Log normalized headers
+
+                    // Define expected headers for mapping (all lowercase) and their corresponding internal keys
+                    const expectedHeaderMap = {
+                        'primeiro': 'firstName',
+                        'meio': 'middleName',
+                        'último': 'lastName',
+                        'celular': 'phone',
+                        'dia reunião semana': 'meetingDayWeekday', // NEW HEADER
+                        'dia reunião fim de semana': 'meetingDayWeekend', // NEW HEADER
+                        'congresso': 'congress',
+                        'seg': 'segunda',
+                        'ter': 'terca',
+                        'qua': 'quarta',
+                        'qui': 'quinta',
+                        'sex': 'sexta',
+                        'sab': 'sabado',
+                        'dom': 'domingo'
+                    };
+
+                    // Create a mapping from expected internal key to actual column index
+                    const columnIndices = {};
+                    const missingHeaders = [];
+
+                    Object.keys(expectedHeaderMap).forEach(expectedExcelHeaderLower => {
+                        const actualColIndex = headers.indexOf(expectedExcelHeaderLower);
+                        console.log(`DEBUG: Index of '${expectedExcelHeaderLower}': ${actualColIndex}`); // Debug individual header search
+                        if (actualColIndex !== -1) {
+                            columnIndices[expectedHeaderMap[expectedExcelHeaderLower]] = actualColIndex;
+                        } else {
+                            const originalExpectedHeader = Object.keys(expectedHeaderMap).find(k => k.toLowerCase() === expectedExcelHeaderLower);
+                            missingHeaders.push(originalExpectedHeader || expectedExcelHeaderLower);
+                            columnIndices[expectedHeaderMap[expectedExcelHeaderLower]] = -1; // Indicate not found
+                        }
+                    });
+
+                    console.log('Column Indices Mapping:', columnIndices); // DEBUG: Log the resolved column indices
+                    console.log('Missing headers (based on actual content and name):', missingHeaders); // DEBUG: Log missing headers
+
+                    if (missingHeaders.length > 0) {
+                        showMessage(`Aviso: Alguns cabeçalhos esperados não foram encontrados: ${missingHeaders.join(', ')}. Os dados dessas colunas podem não ser exibidos.`, 'info');
+                    }
+
+
+                    // Extract data rows starting from the second row (index 1)
+                    const dataRows = allSheetData.slice(1);
+                    console.log('dataRows (raw data from row 2 onwards):', dataRows); // DEBUG: Log raw data rows
+
+                    peopleData = dataRows.map(row => {
+                        const person = {};
+                        // Concatenate name parts
+                        const firstName = columnIndices.firstName >= 0 ? (row[columnIndices.firstName] || '') : '';
+                        const middleName = columnIndices.middleName >= 0 ? (row[columnIndices.middleName] || '') : '';
+                        const lastName = columnIndices.lastName >= 0 ? (row[columnIndices.lastName] || '') : '';
+                        person.name = [firstName, middleName, lastName].filter(Boolean).join(' ').trim();
+
+
+                        person.phone = columnIndices.phone >= 0 ? (row[columnIndices.phone] || '') : '';
+                        
+                        // Handle meetingDayWeekday from Excel
+                        let rawMeetingDayWeekday = columnIndices.meetingDayWeekday >= 0 ? (String(row[columnIndices.meetingDayWeekday] || '').trim().toLowerCase()) : '';
+                        const excelMeetingDayWeekdayMap = {
+                            'segunda-feira': 'segunda', 'segunda': 'segunda',
+                            'terça-feira': 'terca', 'terca': 'terca',
+                            'quarta-feira': 'quarta', 'quarta': 'quarta',
+                            'quinta-feira': 'quinta', 'quinta': 'quinta',
+                            'sexta-feira': 'sexta', 'sexta': 'sexta',
+                            'meio de semana': 'semana',
+                            'semana': 'semana'
+                        };
+                        person.meetingDayWeekday = excelMeetingDayWeekdayMap[rawMeetingDayWeekday] || '';
+
+                        // Handle meetingDayWeekend from Excel
+                        let rawMeetingDayWeekend = columnIndices.meetingDayWeekend >= 0 ? (String(row[columnIndices.meetingDayWeekend] || '').trim().toLowerCase()) : '';
+                        const excelMeetingDayWeekendMap = {
+                            'sábado': 'sabado', 'sabado': 'sabado',
+                            'domingo': 'domingo', 'domingo': 'domingo',
+                            'final de semana': 'final de semana',
+                            'fim de semana': 'final de semana'
+                        };
+                        person.meetingDayWeekend = excelMeetingDayWeekendMap[rawMeetingDayWeekend] || '';
+
+
+                        person.congress = columnIndices.congress >= 0 ? (row[columnIndices.congress] || '') : '';
+
+                        person.segunda = columnIndices.segunda >= 0 ? (row[columnIndices.segunda] !== undefined && row[columnIndices.segunda] !== null && String(row[columnIndices.segunda]).trim() !== '') : false;
+                        person.terca = columnIndices.terca >= 0 ? (row[columnIndices.terca] !== undefined && row[columnIndices.terca] !== null && String(row[columnIndices.terca]).trim() !== '') : false;
+                        person.quarta = columnIndices.quarta >= 0 ? (row[columnIndices.quarta] !== undefined && row[columnIndices.quarta] !== null && String(row[columnIndices.quarta]).trim() !== '') : false;
+                        person.quinta = columnIndices.quinta >= 0 ? (row[columnIndices.quinta] !== undefined && row[columnIndices.quinta] !== null && String(row[columnIndices.quinta]).trim() !== '') : false;
+                        person.sexta = columnIndices.sexta >= 0 ? (row[columnIndices.sexta] !== undefined && row[columnIndices.sexta] !== null && String(row[columnIndices.sexta]).trim() !== '') : false;
+                        person.sabado = columnIndices.sabado >= 0 ? (row[columnIndices.sabado] !== undefined && row[columnIndices.sabado] !== null && String(row[columnIndices.sabado]).trim() !== '') : false;
+                        person.domingo = columnIndices.domingo >= 0 ? (row[columnIndices.domingo] !== undefined && row[columnIndices.domingo] !== null && String(row[columnIndices.domingo]).trim() !== '') : false;
+
+                        return person;
+                    }).filter(person => {
+                        // A row is considered valid if it has a non-empty name OR at least one day is marked as available
+                        return (person.name && String(person.name).trim() !== '') ||
+                               person.segunda || person.terca || person.quarta || person.quinta ||
+                               person.sexta || person.sabado || person.domingo;
+                    });
+
+                    console.log('Dados processados (após mapeamento e filtragem):', peopleData); // DEBUG: Log processed data
+
+                    if (peopleData.length === 0) {
+                        showMessage('Nenhum dado válido encontrado na planilha após a leitura.', 'info');
+                    } else {
+                        showMessage('Dados da planilha carregados com sucesso!', 'success');
+                    }
+                    renderData();
+                    saveDataToLocalStorage(); // Save newly loaded data
+                } catch (error) {
+                    console.error('Erro ao ler o arquivo Excel:', error);
+                    showMessage('Erro ao processar o arquivo Excel. Verifique o formato e os nomes das colunas.', 'error');
+                }
+            };
+
+            reader.onerror = (error) => {
+                console.error('Erro ao ler o arquivo:', error);
+                showMessage('Erro ao ler o arquivo. Tente novamente.', 'error');
+            };
+
+            reader.readAsArrayBuffer(file);
+        });
+
+        // Export to Excel Function
+        exportExcelButton.addEventListener('click', () => {
+            if (peopleData.length === 0) {
+                showMessage('Não há dados para exportar. Carregue uma planilha ou adicione pessoas.', 'info');
+                return;
+            }
+
+            // Prepare data for export, mapping internal keys back to desired Excel headers
+            const exportData = peopleData.map(person => {
+                const row = {};
+                // Assuming 'Primeiro', 'Meio', 'Último' are not needed in exported Excel,
+                // and 'Nome' already contains the full name.
+                row['Nome'] = person.name;
+                row['Telefone'] = person.phone; // Include phone in export data
+                row['Dia Reunião Semana'] = person.meetingDayWeekday; // Export new field
+                row['Dia Reunião Fim de Semana'] = person.meetingDayWeekend; // Export new field
+                row['Congresso'] = person.congress;
+                row['Seg'] = person.segunda ? 'x' : ''; // 'x' for true, empty for false
+                row['Ter'] = person.terca ? 'x' : '';
+                row['Qua'] = person.quarta ? 'x' : '';
+                row['Qui'] = person.quinta ? 'x' : '';
+                row['Sex'] = person.sexta ? 'x' : '';
+                row['Sab'] = person.sabado ? 'x' : '';
+                row['Dom'] = person.domingo ? 'x' : '';
+                return row;
+            });
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Dados de Pessoas");
+            XLSX.writeFile(wb, "dados_reunioes.xlsx");
+            showMessage('Dados exportados para "dados_reunioes.xlsx" com sucesso!', 'success');
+        });
+
+
+        // Event listeners for file-based save/load
+        saveDataButton.addEventListener('click', saveDataToFile);
+        loadDataButton.addEventListener('click', () => loadDataFileInput.click()); // Trigger hidden file input click
+        loadDataFileInput.addEventListener('change', loadDataFromFile); // Handle file selection
+
+
+        // Initial load on document ready
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDataFromLocalStorage(); // Try to load saved data on page load
+            populateScheduleControls(); // Populate month/year for schedule generator
+        });
+
+        // --- Schedule Generator Logic ---
+        const monthNames = [
+            "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+        ];
+        const dayNamesShort = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"]; // Corresponds to getDay()
+
+        // Populate month and year dropdowns
+        function populateScheduleControls() {
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth(); // 0-indexed
+
+            // Populate months
+            scheduleMonthSelect.innerHTML = '';
+            monthNames.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = month;
+                if (index === 7) { // Agosto (August is 7 in 0-indexed)
+                    option.selected = true;
+                }
+                scheduleMonthSelect.appendChild(option);
+            });
+
+            // Populate years
+            scheduleYearInput.value = currentYear;
+        }
+
+        generateScheduleBtn.addEventListener('click', generateSchedule);
+
+        function generateSchedule() {
+            if (peopleData.length === 0) {
+                showMessage('Não há pessoas cadastradas para gerar a escala.', 'error');
+                return;
+            }
+
+            const month = parseInt(scheduleMonthSelect.value);
+            const year = parseInt(scheduleYearInput.value);
+            const scheduleType = scheduleTypeSelect.value; // 'atendente' or 'vigia'
+
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const schedule = [];
+
+            let currentPersonIndex = 0; // To cycle through people
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dayOfWeekIndex = date.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+                const dayName = dayNamesShort[dayOfWeekIndex]; // 'domingo', 'segunda', etc.
+                const formattedDate = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`; // YYYY-MM-DD for comparison
+
+                let assignedPerson = 'N/A';
+                let foundPerson = false;
+                let attempts = 0;
+                const maxAttempts = peopleData.length * 2; // Prevent infinite loop
+
+                // Find an available person for this day
+                while (!foundPerson && attempts < maxAttempts) {
+                    const person = peopleData[currentPersonIndex];
+
+                    let isAvailable = true;
+
+                    // 1. Check Congress Day
+                    if (person.congress && person.congress === formattedDate) {
+                        isAvailable = false;
+                    }
+
+                    // 2. Check Meeting Day Weekday restriction
+                    if (isAvailable && person.meetingDayWeekday) {
+                        const isWeekday = (dayOfWeekIndex >= 1 && dayOfWeekIndex <= 5); // Monday to Friday
+                        if (person.meetingDayWeekday === 'semana') {
+                            if (!isWeekday) { // If person's meeting day is 'semana' and current day is not weekday
+                                isAvailable = false;
+                            }
+                        } else { // Specific weekday like 'segunda', 'terca', etc.
+                            if (person.meetingDayWeekday !== dayName) {
+                                isAvailable = false;
+                            }
+                        }
+                    }
+
+                    // 3. Check Meeting Day Weekend restriction
+                    if (isAvailable && person.meetingDayWeekend) {
+                        const isWeekend = (dayOfWeekIndex === 0 || dayOfWeekIndex === 6); // Sunday or Saturday
+                        if (person.meetingDayWeekend === 'final de semana') {
+                            if (!isWeekend) { // If person's meeting day is 'final de semana' and current day is not weekend
+                                isAvailable = false;
+                            }
+                        } else { // Specific weekend day like 'sabado', 'domingo'
+                            if (person.meetingDayWeekend !== dayName) {
+                                isAvailable = false;
+                            }
+                        }
+                    }
+
+                    // 4. Check specific day availability (Seg, Ter, etc.)
+                    if (isAvailable && !person[dayName]) { // if person.segunda is false for Monday
+                        isAvailable = false;
+                    }
+
+
+                    if (isAvailable) {
+                        assignedPerson = person.name;
+                        foundPerson = true;
+                    }
+                    currentPersonIndex = (currentPersonIndex + 1) % peopleData.length; // Cycle to next person
+                    attempts++;
+                }
+
+                schedule.push({
+                    date: `${day}/${month + 1}/${year}`,
+                    dayOfWeek: dayName.charAt(0).toUpperCase() + dayName.slice(1), // Capitalize first letter
+                    shift: '18:00 - 07:00',
+                    assignedTo: assignedPerson
+                });
+            }
+
+            // Render the schedule
+            let scheduleHtml = `
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Escala de ${scheduleType === 'atendente' ? 'Atendente' : 'Vigia'} - ${monthNames[month]} de ${year}</h3>
+                <table class="w-full border-collapse bg-white rounded-lg shadow-md data-table">
+                    <thead>
+                        <tr>
+                            <th class="p-4 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Data</th>
+                            <th class="p-4 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Dia da Semana</th>
+                            <th class="p-4 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Turno</th>
+                            <th class="p-4 text-left border-b border-gray-200 bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Atribuído a</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            schedule.forEach((entry, index) => {
+                scheduleHtml += `
+                    <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50">
+                        <td class="p-4 border-b border-gray-200">${entry.date}</td>
+                        <td class="p-4 border-b border-gray-200">${entry.dayOfWeek}</td>
+                        <td class="p-4 border-b border-gray-200">${entry.shift}</td>
+                        <td class="p-4 border-b border-gray-200">${entry.assignedTo}</td>
+                    </tr>
+                `;
+            });
+
+            scheduleHtml += `
+                    </tbody>
+                </table>
+            `;
+            scheduleOutputDiv.innerHTML = scheduleHtml;
+            showMessage('Escala gerada com sucesso!', 'success');
+        }
+
+        // --- Collapsible Section Logic ---
+        dataTableToggle.addEventListener('click', () => {
+            dataTableContent.classList.toggle('hidden');
+            if (dataTableContent.classList.contains('hidden')) {
+                toggleIcon.textContent = '►'; // Right arrow
+            } else {
+                toggleIcon.textContent = '▼'; // Down arrow
+            }
+        });
+
+
+        // Initial load on document ready
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDataFromLocalStorage(); // Try to load saved data on page load
+            populateScheduleControls(); // Populate month/year for schedule generator
+        });
+    </script>
+</body>
+</html>
