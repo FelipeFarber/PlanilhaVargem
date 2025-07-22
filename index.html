@@ -258,7 +258,7 @@
 
                 <!-- Add New Person Form -->
                 <div class="mb-8 p-6 bg-white rounded-lg shadow-md no-print">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Adicionar Nova Pessoa</h2>
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Adicionar Novo Publicador</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                         <input type="text" id="newName" placeholder="Nome Completo" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <select id="newMeetingDayWeekday" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -304,7 +304,7 @@
                         <label class="flex items-center space-x-2"><input type="checkbox" id="newSab" class="form-checkbox" checked><span>Sab</span></label>
                         <label class="flex items-center space-x-2"><input type="checkbox" id="newDom" class="form-checkbox" checked><span>Dom</span></label>
                     </div>
-                    <button id="addPersonBtn" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 w-full transform hover:scale-105">Adicionar Pessoa</button>
+                    <button id="addPersonBtn" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 w-full transform hover:scale-105">Adicionar Publicador</button>
                 </div>
                 <div id="message-box" class="hidden p-4 mb-4 text-sm text-center rounded-lg no-print" role="alert"></div>
 
@@ -742,7 +742,7 @@
             
             renderAll();
             saveDataToLocalStorage();
-            showMessage('Pessoa(s) adicionada(s) com sucesso!', 'success');
+            showMessage('Publicador(es) adicionado(s) com sucesso!', 'success');
             
             // Clear form
             newNameInput.value = '';
@@ -756,12 +756,12 @@
         }
 
         function deletePerson(index) {
-            showConfirmModal('Tem certeza que deseja excluir esta pessoa?', (confirmed) => {
+            showConfirmModal('Tem certeza que deseja excluir este publicador?', (confirmed) => {
                 if (confirmed) {
                     peopleData.splice(index, 1);
                     renderAll();
                     saveDataToLocalStorage();
-                    showMessage('Pessoa excluída com sucesso!', 'success');
+                    showMessage('Publicador excluído com sucesso!', 'success');
                 }
             });
         }
@@ -769,15 +769,15 @@
         function deleteSelectedPeople() {
             const selectedIndices = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => parseInt(cb.dataset.index));
             if (selectedIndices.length === 0) {
-                showMessage('Nenhuma pessoa selecionada.', 'info');
+                showMessage('Nenhum publicador selecionado.', 'info');
                 return;
             }
-            showConfirmModal(`Tem certeza que deseja excluir ${selectedIndices.length} pessoa(s)?`, (confirmed) => {
+            showConfirmModal(`Tem certeza que deseja excluir ${selectedIndices.length} publicador(es)?`, (confirmed) => {
                 if (confirmed) {
                     selectedIndices.sort((a, b) => b - a).forEach(index => peopleData.splice(index, 1));
                     renderAll();
                     saveDataToLocalStorage();
-                    showMessage(`${selectedIndices.length} pessoa(s) excluída(s)!`, 'success');
+                    showMessage(`${selectedIndices.length} publicador(es) excluído(s)!`, 'success');
                 }
             });
         }
@@ -1004,7 +1004,7 @@
                     { wch: 5 }, { wch: 5 }, { wch: 5 }, { wch: 5 },
                     { wch: 5 }, { wch: 5 }, { wch: 5 }
                 ];
-                XLSX.utils.book_append_sheet(wb, wsPeople, "Dados de Pessoas");
+                XLSX.utils.book_append_sheet(wb, wsPeople, "Publicadores");
             }
 
             // --- Schedule Sheet ---
@@ -1174,7 +1174,7 @@
 
         function generateSchedule() {
             if (peopleData.length === 0) {
-                showMessage('Não há pessoas cadastradas para gerar a escala.', 'error');
+                showMessage('Não há publicadores cadastrados para gerar a escala.', 'error');
                 return;
             }
             const month = parseInt(scheduleMonthSelect.value);
