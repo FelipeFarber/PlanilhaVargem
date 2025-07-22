@@ -61,6 +61,24 @@
         .data-table .day-cell, .data-table .editable-text-cell { cursor: pointer; }
         .data-table .day-cell { text-align: center; }
         
+        /* New Data Table Styles */
+        .data-table thead th {
+            background-color: #2c5282; /* A nice darker blue */
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .data-table tbody tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
+        .data-table tbody tr:nth-child(even) {
+            background-color: #edf2f7; /* A light gray */
+        }
+        .data-table tbody tr:hover {
+            background-color: #bee3f8; /* A light blue on hover */
+        }
+
         /* New Schedule Table Styles */
         .schedule-table thead th {
             background-color: #1e3a8a; /* Dark blue */
@@ -112,11 +130,12 @@
         /* Print Styles */
         @media print {
             body {
-                background-color: #fff;
+                background-color: #fff !important;
+                font-size: 11pt;
             }
             main {
                 margin-left: 0 !important;
-                padding: 1rem;
+                padding: 1rem !important;
             }
             .no-print {
                 display: none !important;
@@ -129,13 +148,46 @@
                 display: block !important;
             }
             .p-6.bg-white {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+            }
+            h1.main-title, h2, h3 {
+                text-align: center;
+                color: #000;
+                text-shadow: none;
+            }
+
+            /* Specific styles for printing the schedule */
+            body.printing-schedule .schedule-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            body.printing-schedule .schedule-table th,
+            body.printing-schedule .schedule-table td {
+                border: 1px solid #666;
+                padding: 8px;
+                color: #000;
+                background-color: #fff !important;
+            }
+            body.printing-schedule .schedule-table thead th {
+                background-color: #e5e7eb !important; /* gray-200 */
+                color: #000;
+            }
+            
+            /* Specific styles for printing occurrences */
+            body.printing-occurrences #occurrences-list .bg-white {
+                border: 1px solid #ccc;
                 box-shadow: none;
-                border: 1px solid #ddd;
+                page-break-inside: avoid;
+            }
+            body.printing-occurrences img {
+                display: none; /* Hide images for cleaner print */
             }
         }
     </style>
 </head>
-<body>
+<body class="group">
     <!-- Loading Screen (Initial Page Load) -->
     <div id="loading-screen">
         <img src="images/colete.png" alt="Carregando..." class="pulsing-image w-32 h-32">
@@ -161,7 +213,7 @@
     <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
 
     <!-- Vertical Sidebar Navigation -->
-    <nav id="navbar" class="fixed top-0 left-0 h-full w-60 bg-blue-900 text-white shadow-xl z-30 flex flex-col items-center py-8 no-print transform -translate-x-full transition-transform duration-300 ease-in-out">
+    <nav id="navbar" class="fixed top-0 left-0 h-full w-60 bg-blue-900 text-white shadow-xl z-30 flex flex-col items-center py-8 no-print transform -translate-x-full group-[.menu-open]:translate-x-0 transition-transform duration-300 ease-in-out">
         <!-- Logo at the top -->
         <div class="mb-10">
             <img src="images/logo.png" alt="Logo" class="h-12">
@@ -175,13 +227,13 @@
     </nav>
 
     <!-- Menu Toggle Button -->
-    <button id="menu-toggle" class="fixed top-4 left-4 z-40 p-2 bg-blue-800 text-white rounded-md hover:bg-blue-700 transition-all duration-300 ease-in-out no-print">
+    <button id="menu-toggle" class="fixed top-4 left-4 z-40 p-2 bg-blue-800 text-white rounded-md hover:bg-blue-700 transition-all duration-300 ease-in-out no-print lg:group-[.menu-open]:left-64">
         <svg id="menu-open-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
         <svg id="menu-close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
     </button>
 
     <!-- Main Content Area -->
-    <main id="main-content" class="p-4 sm:p-6 lg:p-8 transition-all duration-300 ease-in-out">
+    <main id="main-content" class="p-4 sm:p-6 lg:p-8 transition-all duration-300 ease-in-out lg:group-[.menu-open]:ml-60">
         <div class="max-w-7xl mx-auto">
             <!-- Title with new class for styling -->
             <h1 id="main-title" class="main-title text-4xl sm:text-5xl font-extrabold mb-8 text-center">
@@ -190,14 +242,18 @@
 
             <!-- Info Section -->
             <div id="info-section" class="content-section hidden">
-                <div class="mb-8 p-6 bg-white rounded-lg shadow-md flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4 no-print">
-                    <input type="file" id="excelFile" accept=".xlsx, .xls" class="file-input block w-full sm:w-auto text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
-                    <button id="loadExcel" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto transform hover:scale-105">Carregar Planilha</button>
-                    <button id="saveData" class="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 w-full sm:w-auto transform hover:scale-105">Salvar Dados</button>
-                    <button id="loadData" class="px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 w-full sm:w-auto transform hover:scale-105">Carregar Dados</button>
-                    <button id="exportExcel" class="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-auto transform hover:scale-105">Exportar p/ Excel</button>
-                    <button id="deleteSelectedBtn" class="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 w-full sm:w-auto transform hover:scale-105">Excluir Selecionados</button>
-                    <button id="clearAllDataBtn" class="px-6 py-3 bg-yellow-500 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 w-full sm:w-auto transform hover:scale-105">Limpar Tudo</button>
+                <div class="mb-8 p-6 bg-white rounded-lg shadow-md no-print">
+                    <div class="flex flex-col items-center gap-4">
+                        <input type="file" id="excelFile" accept=".xlsx, .xls" class="file-input block w-full max-w-sm text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 w-full">
+                            <button id="loadExcel" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 w-full">Carregar Planilha</button>
+                            <button id="saveData" class="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 w-full">Salvar Dados</button>
+                            <button id="loadData" class="px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 w-full">Carregar Dados</button>
+                            <button id="exportExcel" class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 w-full">Exportar p/ Excel</button>
+                            <button id="deleteSelectedBtn" class="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 w-full">Excluir</button>
+                            <button id="clearAllDataBtn" class="px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-600 w-full">Limpar Tudo</button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Add New Person Form -->
@@ -255,7 +311,7 @@
                 <!-- Collapsible Data Table Section -->
                 <div class="mb-8">
                     <div id="dataTableToggle" class="collapsible-header no-print">
-                        <span>Tabela de Dados de Pessoas</span>
+                        <span>Publicadores</span>
                         <span id="toggleIcon">▼</span>
                     </div>
                     <div id="dataTableContent" class="collapsible-content">
@@ -294,33 +350,53 @@
             
             <!-- Occurrences Section -->
             <div id="occurrences-section" class="content-section hidden">
-                <div class="mb-8 p-6 bg-white rounded-lg shadow-md no-print">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-2xl font-semibold text-gray-800">Registro de Ocorrências</h2>
-                        <button id="printOccurrencesBtn" class="px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 transform hover:scale-105">Imprimir Ocorrências</button>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="flex flex-col md:flex-row-reverse gap-6">
+                    <!-- Filter Sidebar -->
+                    <aside id="occurrence-filters" class="w-full md:w-64 flex-shrink-0 bg-white p-4 rounded-lg shadow-md no-print self-start">
+                        <h3 class="font-semibold text-lg mb-4 text-gray-700">Filtrar Ocorrências</h3>
                         <div>
-                            <label for="occurrenceDate" class="block text-sm font-medium text-gray-700">Data da Ocorrência:</label>
-                            <input type="date" id="occurrenceDate" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                            <label for="filterYear" class="block text-sm font-medium text-gray-600">Ano</label>
+                            <select id="filterYear" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select>
                         </div>
-                        <div>
-                            <label for="occurrencePeople" class="block text-sm font-medium text-gray-700">No turno:</label>
-                            <select id="occurrencePeople" multiple class="mt-1 block w-full p-2 border border-gray-300 rounded-md h-32"></select>
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-600">Mês</label>
+                            <div id="filterMonth" class="mt-1 space-y-1">
+                                <!-- Months will be populated by JS -->
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Main Occurrences Area (Form + List) -->
+                    <div class="flex-grow">
+                        <div class="mb-8 p-6 bg-white rounded-lg shadow-md no-print">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="text-2xl font-semibold text-gray-800">Registro de Ocorrências</h2>
+                                <button id="printOccurrencesBtn" class="px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 transform hover:scale-105">Imprimir Ocorrências</button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label for="occurrenceDate" class="block text-sm font-medium text-gray-700">Data da Ocorrência:</label>
+                                    <input type="date" id="occurrenceDate" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                                </div>
+                                <div>
+                                    <label for="occurrencePeople" class="block text-sm font-medium text-gray-700">No turno:</label>
+                                    <select id="occurrencePeople" multiple class="mt-1 block w-full p-2 border border-gray-300 rounded-md h-32"></select>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="occurrenceImages" class="block text-sm font-medium text-gray-700">Imagens da Ocorrência:</label>
+                                <input type="file" id="occurrenceImages" multiple accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            </div>
+                            <div class="mb-4">
+                                <label for="occurrenceDescription" class="block text-sm font-medium text-gray-700">Descrição:</label>
+                                <textarea id="occurrenceDescription" rows="4" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Descreva o que aconteceu..."></textarea>
+                            </div>
+                            <button id="addOccurrenceBtn" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 w-full transform hover:scale-105">Salvar Ocorrência</button>
+                        </div>
+                         <div id="occurrences-list" class="mt-6">
+                            <!-- Occurrences will be rendered here -->
                         </div>
                     </div>
-                    <div class="mb-4">
-                        <label for="occurrenceImages" class="block text-sm font-medium text-gray-700">Imagens da Ocorrência:</label>
-                        <input type="file" id="occurrenceImages" multiple accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                    </div>
-                    <div class="mb-4">
-                        <label for="occurrenceDescription" class="block text-sm font-medium text-gray-700">Descrição:</label>
-                        <textarea id="occurrenceDescription" rows="4" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Descreva o que aconteceu..."></textarea>
-                    </div>
-                    <button id="addOccurrenceBtn" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 w-full transform hover:scale-105">Salvar Ocorrência</button>
-                </div>
-                 <div id="occurrences-list" class="mt-6">
-                    <!-- Occurrences will be rendered here -->
                 </div>
             </div>
         </div>
@@ -332,6 +408,8 @@
         var occurrencesData = [];
         let currentSchedule = []; // To hold the generated schedule data for editing
         let congressDatePicker; // To hold the flatpickr instance
+        let currentFilterYear = new Date().getFullYear();
+        let currentFilterMonth = new Date().getMonth();
 
         // --- DOM Elements ---
         const loadingScreen = document.getElementById('loading-screen');
@@ -400,6 +478,9 @@
         const sidebarOverlay = document.getElementById('sidebar-overlay');
         const menuOpenIcon = document.getElementById('menu-open-icon');
         const menuCloseIcon = document.getElementById('menu-close-icon');
+        // Occurrence Filter Elements
+        const filterYearSelect = document.getElementById('filterYear');
+        const filterMonthDiv = document.getElementById('filterMonth');
 
 
         // --- Utility & Core Functions ---
@@ -537,21 +618,21 @@
             table.innerHTML = `
                 <thead>
                     <tr>
-                        <th class="p-4 text-left border-b bg-gray-50"><input type="checkbox" id="selectAllCheckbox" class="form-checkbox"></th>
-                        <th class="p-4 text-left border-b bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Nome</th>
-                        <th class="p-4 text-left border-b bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Status</th>
-                        <th class="p-4 text-left border-b bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Cônjuge</th>
-                        <th class="p-4 text-left border-b bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Reunião Semana</th>
-                        <th class="p-4 text-left border-b bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Reunião Fim Semana</th>
-                        <th class="p-4 text-left border-b bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Congresso</th>
-                        <th class="p-4 text-center border-b bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Seg</th>
-                        <th class="p-4 text-center border-b bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Ter</th>
-                        <th class="p-4 text-center border-b bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Qua</th>
-                        <th class="p-4 text-center border-b bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Qui</th>
-                        <th class="p-4 text-center border-b bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Sex</th>
-                        <th class="p-4 text-center border-b bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Sab</th>
-                        <th class="p-4 text-center border-b bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Dom</th>
-                        <th class="p-4 text-left border-b bg-gray-50 font-semibold text-gray-600 uppercase text-sm">Ações</th>
+                        <th class="p-4 text-left border-b"><input type="checkbox" id="selectAllCheckbox" class="form-checkbox"></th>
+                        <th class="p-4 text-left border-b">Nome</th>
+                        <th class="p-4 text-left border-b">Status</th>
+                        <th class="p-4 text-left border-b">Cônjuge</th>
+                        <th class="p-4 text-left border-b">Reunião Semana</th>
+                        <th class="p-4 text-left border-b">Reunião Fim Semana</th>
+                        <th class="p-4 text-left border-b">Congresso</th>
+                        <th class="p-4 text-center border-b">Seg</th>
+                        <th class="p-4 text-center border-b">Ter</th>
+                        <th class="p-4 text-center border-b">Qua</th>
+                        <th class="p-4 text-center border-b">Qui</th>
+                        <th class="p-4 text-center border-b">Sex</th>
+                        <th class="p-4 text-center border-b">Sab</th>
+                        <th class="p-4 text-center border-b">Dom</th>
+                        <th class="p-4 text-left border-b">Ações</th>
                     </tr>
                 </thead>
                 <tbody></tbody>`;
@@ -562,10 +643,17 @@
 
             peopleData.forEach((person, index) => {
                 const tr = tbody.insertRow();
-                tr.className = `${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`;
                 
                 const displayMeetingDayWeekdayMap = { '': 'Nenhuma', 'segunda': 'Segunda-feira', 'terca': 'Terça-feira', 'quarta': 'Quarta-feira', 'quinta': 'Quinta-feira', 'sexta': 'Sexta-feira' };
                 const displayMeetingDayWeekendMap = { '': 'Nenhuma', 'sabado': 'Sábado', 'domingo': 'Domingo', 'final de semana': 'Fim de Semana' };
+                
+                const formattedCongressDates = (person.congress || [])
+                    .map(dateStr => {
+                        // Handles both YYYY-MM-DD and potentially other formats if data is old
+                        const date = new Date(dateStr + 'T00:00:00');
+                        return isNaN(date) ? dateStr : date.toLocaleDateString('pt-BR');
+                    })
+                    .join(', ');
 
                 let cells = `
                     <td class="p-4 border-b"><input type="checkbox" class="row-checkbox form-checkbox" data-index="${index}"></td>
@@ -574,7 +662,7 @@
                     <td class="p-4 border-b editable-text-cell" data-field="spouseName" data-index="${index}">${person.spouseName || ''}</td>
                     <td class="p-4 border-b editable-text-cell" data-field="meetingDayWeekday" data-index="${index}">${displayMeetingDayWeekdayMap[person.meetingDayWeekday] || 'N/A'}</td>
                     <td class="p-4 border-b editable-text-cell" data-field="meetingDayWeekend" data-index="${index}">${displayMeetingDayWeekendMap[person.meetingDayWeekend] || 'N/A'}</td>
-                    <td class="p-4 border-b editable-text-cell" data-field="congress" data-index="${index}">${(Array.isArray(person.congress) && person.congress.length > 0) ? person.congress.join(', ') : 'N/A'}</td>
+                    <td class="p-4 border-b editable-text-cell" data-field="congress" data-index="${index}">${formattedCongressDates || 'N/A'}</td>
                 `;
 
                 daysOrder.forEach(dayDisplay => {
@@ -1002,13 +1090,21 @@
         }
 
         function renderOccurrences() {
+            populateOccurrenceFilters();
+            const filteredOccurrences = occurrencesData.filter(o => {
+                const occurrenceDate = new Date(o.date + "T00:00:00");
+                const yearMatch = occurrenceDate.getFullYear() === currentFilterYear;
+                const monthMatch = currentFilterMonth === -1 || occurrenceDate.getMonth() === currentFilterMonth;
+                return yearMatch && monthMatch;
+            }).sort((a,b) => new Date(b.date) - new Date(a.date));
+
             occurrencesListDiv.innerHTML = '<h3 class="text-xl font-semibold text-gray-800 mb-4">Ocorrências Registradas</h3>';
-            if (occurrencesData.length === 0) {
-                occurrencesListDiv.innerHTML += '<p class="text-gray-600">Nenhuma ocorrência registrada.</p>';
+            if (filteredOccurrences.length === 0) {
+                occurrencesListDiv.innerHTML += '<p class="text-gray-600">Nenhuma ocorrência encontrada para este período.</p>';
                 return;
             }
-            occurrencesData.sort((a,b) => new Date(b.date) - new Date(a.date));
-            occurrencesData.forEach(o => {
+
+            filteredOccurrences.forEach(o => {
                 const occurrenceEl = document.createElement('div');
                 occurrenceEl.className = 'bg-white p-4 rounded-lg shadow-md mb-4';
 
@@ -1026,7 +1122,7 @@
                         <div>
                             <p class="font-bold text-lg text-blue-700">${new Date(o.date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
                             ${imagesHtml}
-                            <p class="font-semibold text-gray-700 mt-1">Envolvidos: ${o.people.join(', ')}</p>
+                            <p class="font-semibold text-gray-700 mt-1">No turno: ${o.people.join(', ')}</p>
                             <p class="text-gray-600 mt-2">${o.description.replace(/\n/g, '<br>')}</p>
                         </div>
                         <button class="px-3 py-1 bg-red-500 text-white rounded-md text-sm delete-occurrence-btn no-print" data-id="${o.id}">Excluir</button>
@@ -1044,6 +1140,24 @@
                             showMessage('Ocorrência excluída.', 'success');
                         }
                     });
+                });
+            });
+        }
+
+        function populateOccurrenceFilters() {
+            const years = [...new Set(occurrencesData.map(o => new Date(o.date + "T00:00:00").getFullYear()))].sort((a, b) => b - a);
+            filterYearSelect.innerHTML = years.map(y => `<option value="${y}" ${y === currentFilterYear ? 'selected' : ''}>${y}</option>`).join('');
+
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            let monthsHtml = `<a href="#" data-month="-1" class="block p-2 rounded-md text-sm ${currentFilterMonth === -1 ? 'bg-blue-600 text-white' : 'hover:bg-gray-100'}">Todos os Meses</a>`;
+            monthsHtml += monthNames.map((m, i) => `<a href="#" data-month="${i}" class="block p-2 rounded-md text-sm ${i === currentFilterMonth ? 'bg-blue-600 text-white' : 'hover:bg-gray-100'}">${m}</a>`).join('');
+            filterMonthDiv.innerHTML = monthsHtml;
+
+            filterMonthDiv.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    currentFilterMonth = parseInt(e.target.dataset.month);
+                    renderOccurrences();
                 });
             });
         }
@@ -1347,27 +1461,34 @@
 
             // Responsive menu toggle logic
             menuToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('-translate-x-full');
+                document.body.classList.toggle('menu-open');
                 menuOpenIcon.classList.toggle('hidden');
                 menuCloseIcon.classList.toggle('hidden');
-
-                if (window.innerWidth < 1024) { // Mobile view
-                    sidebarOverlay.classList.toggle('hidden');
-                } else { // Desktop view
-                    mainContent.classList.toggle('lg:ml-60');
-                    menuToggle.classList.toggle('lg:left-64');
+                if (window.innerWidth < 1024) {
+                    sidebarOverlay.classList.toggle('hidden', !document.body.classList.contains('menu-open'));
                 }
             });
             
             sidebarOverlay.addEventListener('click', () => {
-                 sidebar.classList.add('-translate-x-full');
+                 document.body.classList.remove('menu-open');
                  sidebarOverlay.classList.add('hidden');
                  menuOpenIcon.classList.remove('hidden');
                  menuCloseIcon.classList.add('hidden');
+            });
+
+            // Set initial menu state on load
+            if (window.innerWidth >= 1024) {
+                document.body.classList.add('menu-open');
+                menuOpenIcon.classList.add('hidden');
+                menuCloseIcon.classList.remove('hidden');
+            }
+            
+            filterYearSelect.addEventListener('change', (e) => {
+                currentFilterYear = parseInt(e.target.value);
+                renderOccurrences();
             });
 
         });
     </script>
 </body>
 </html>
-"
