@@ -157,8 +157,11 @@
         </div>
     </div>
 
+    <!-- Sidebar Overlay for mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
+
     <!-- Vertical Sidebar Navigation -->
-    <nav id="navbar" class="fixed top-0 left-0 h-full w-60 bg-blue-900 text-white shadow-xl z-20 flex flex-col items-center py-8 no-print">
+    <nav id="navbar" class="fixed top-0 left-0 h-full w-60 bg-blue-900 text-white shadow-xl z-30 flex flex-col items-center py-8 no-print transform -translate-x-full transition-transform duration-300 ease-in-out">
         <!-- Logo at the top -->
         <div class="mb-10">
             <img src="images/logo.png" alt="Logo" class="h-12">
@@ -171,8 +174,14 @@
         </div>
     </nav>
 
+    <!-- Menu Toggle Button -->
+    <button id="menu-toggle" class="fixed top-4 left-4 z-40 p-2 bg-blue-800 text-white rounded-md hover:bg-blue-700 transition-all duration-300 ease-in-out no-print">
+        <svg id="menu-open-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        <svg id="menu-close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    </button>
+
     <!-- Main Content Area -->
-    <main class="ml-60 p-4 sm:p-6 lg:p-8">
+    <main id="main-content" class="p-4 sm:p-6 lg:p-8 transition-all duration-300 ease-in-out">
         <div class="max-w-7xl mx-auto">
             <!-- Title with new class for styling -->
             <h1 id="main-title" class="main-title text-4xl sm:text-5xl font-extrabold mb-8 text-center">
@@ -384,6 +393,14 @@
         const confirmModalYes = document.getElementById('confirm-modal-yes');
         const confirmModalNo = document.getElementById('confirm-modal-no');
         let confirmCallback = null;
+        // Responsive Menu Elements
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('navbar');
+        const mainContent = document.getElementById('main-content');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const menuOpenIcon = document.getElementById('menu-open-icon');
+        const menuCloseIcon = document.getElementById('menu-close-icon');
+
 
         // --- Utility & Core Functions ---
         function showMessage(message, type = 'info') {
@@ -1328,7 +1345,29 @@
                 }
             });
 
+            // Responsive menu toggle logic
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+                menuOpenIcon.classList.toggle('hidden');
+                menuCloseIcon.classList.toggle('hidden');
+
+                if (window.innerWidth < 1024) { // Mobile view
+                    sidebarOverlay.classList.toggle('hidden');
+                } else { // Desktop view
+                    mainContent.classList.toggle('lg:ml-60');
+                    menuToggle.classList.toggle('lg:left-64');
+                }
+            });
+            
+            sidebarOverlay.addEventListener('click', () => {
+                 sidebar.classList.add('-translate-x-full');
+                 sidebarOverlay.classList.add('hidden');
+                 menuOpenIcon.classList.remove('hidden');
+                 menuCloseIcon.classList.add('hidden');
+            });
+
         });
     </script>
 </body>
 </html>
+"
