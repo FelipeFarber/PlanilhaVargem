@@ -88,12 +88,6 @@
         .schedule-table .weekend-day {
             background-color: #f3f4f6; /* gray-100 */
         }
-        .schedule-table .attendant-cell {
-            background-color: #e0f2fe; /* sky-100 */
-        }
-        .schedule-table .watchman-cell {
-            background-color: #dcfce7; /* green-100 */
-        }
         .schedule-table .editable-schedule-cell { 
             cursor: pointer; 
             transition: background-color 0.2s ease-in-out;
@@ -190,12 +184,12 @@
 <body class="group">
     <!-- Loading Screen (Initial Page Load) -->
     <div id="loading-screen">
-        <img src="images/colete.png" alt="Carregando..." class="pulsing-image w-32 h-32">
+        <img src="https://placehold.co/128x128/f0f4f8/1e3a8a?text=Loading" alt="Carregando..." class="pulsing-image w-32 h-32">
     </div>
 
     <!-- Section Loading Screen (for transitions between sections) -->
     <div id="section-loading-screen" class="hidden">
-        <img src="images/colete.png" alt="Carregando..." class="pulsing-image w-32 h-32">
+        <img src="https://placehold.co/128x128/f0f4f8/1e3a8a?text=Loading" alt="Carregando..." class="pulsing-image w-32 h-32">
     </div>
 
     <!-- Custom Confirmation Modal -->
@@ -216,7 +210,7 @@
     <nav id="navbar" class="fixed top-0 left-0 h-full w-60 bg-blue-900 text-white shadow-xl z-30 flex flex-col items-center py-8 no-print transform -translate-x-full group-[.menu-open]:translate-x-0 transition-transform duration-300 ease-in-out">
         <!-- Logo at the top -->
         <div class="mb-10">
-            <img src="images/logo.png" alt="Logo" class="h-12">
+            <img src="https://placehold.co/120x48/1e3a8a/ffffff?text=Logo" alt="Logo" class="h-12">
         </div>
         <!-- Navigation Links -->
         <div class="flex flex-col space-y-4 w-full px-4">
@@ -285,10 +279,27 @@
                                 <option value="Casal">Casal</option>
                             </select>
                         </div>
-                        <div id="spouse-name-container" class="hidden">
+                        <div id="main-person-gender-container">
+                             <label for="newGender" class="block text-sm font-medium text-gray-700">Gênero</label>
+                             <select id="newGender" class="p-2 border border-gray-300 rounded-md w-full">
+                                 <option value="Feminino">Feminino</option>
+                                 <option value="Masculino">Masculino</option>
+                             </select>
+                         </div>
+                    </div>
+                    <!-- Couple specific fields -->
+                    <div id="couple-container" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
                              <label for="newSpouseName" class="block text-sm font-medium text-gray-700">Nome do Cônjuge</label>
                             <input type="text" id="newSpouseName" placeholder="Nome do Cônjuge" class="p-2 border border-gray-300 rounded-md w-full">
                         </div>
+                        <div id="spouse-gender-container">
+                             <label for="newSpouseGender" class="block text-sm font-medium text-gray-700">Gênero do Cônjuge</label>
+                             <select id="newSpouseGender" class="p-2 border border-gray-300 rounded-md w-full">
+                                 <option value="Masculino">Masculino</option>
+                                 <option value="Feminino">Feminino</option>
+                             </select>
+                         </div>
                     </div>
                     <!-- Congress Date Selection -->
                     <div class="mb-4">
@@ -325,7 +336,7 @@
                 <div class="mb-8 p-6 bg-white rounded-lg shadow-md">
                     <div class="no-print">
                         <h2 class="text-2xl font-semibold text-gray-800 mb-4">Gerador de Escala de Trabalho</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <div>
                                 <label for="scheduleMonth" class="block text-sm font-medium text-gray-700">Mês:</label>
                                 <select id="scheduleMonth" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select>
@@ -333,6 +344,13 @@
                             <div>
                                 <label for="scheduleYear" class="block text-sm font-medium text-gray-700">Ano:</label>
                                 <input type="number" id="scheduleYear" value="2025" min="2024" max="2050" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                            </div>
+                            <div>
+                                <label for="scheduleMonthType" class="block text-sm font-medium text-gray-700">Tipo de Mês</label>
+                                <select id="scheduleMonthType" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                                    <option value="com_evento">Com Eventos</option>
+                                    <option value="sem_evento">Sem Eventos</option>
+                                </select>
                             </div>
                         </div>
                         <div class="flex items-center mb-4">
@@ -434,8 +452,12 @@
         const newMeetingDayWeekdaySelect = document.getElementById('newMeetingDayWeekday');
         const newMeetingDayWeekendSelect = document.getElementById('newMeetingDayWeekend');
         const newStatusSelect = document.getElementById('newStatus');
-        const spouseNameContainer = document.getElementById('spouse-name-container');
+        const coupleContainer = document.getElementById('couple-container');
         const newSpouseNameInput = document.getElementById('newSpouseName');
+        const mainPersonGenderContainer = document.getElementById('main-person-gender-container');
+        const newGenderSelect = document.getElementById('newGender');
+        const spouseGenderContainer = document.getElementById('spouse-gender-container');
+        const newSpouseGenderSelect = document.getElementById('newSpouseGender');
         const newCongressDatesInput = document.getElementById('newCongressDates');
         const newSegCheckbox = document.getElementById('newSeg');
         const newTerCheckbox = document.getElementById('newTer');
@@ -447,6 +469,7 @@
         const addPersonBtn = document.getElementById('addPersonBtn');
         const scheduleMonthSelect = document.getElementById('scheduleMonth');
         const scheduleYearInput = document.getElementById('scheduleYear');
+        const scheduleMonthTypeSelect = document.getElementById('scheduleMonthType');
         const scheduleCouplesTogetherCheckbox = document.getElementById('scheduleCouplesTogether');
         const generateScheduleBtn = document.getElementById('generateScheduleBtn');
         const printScheduleBtn = document.getElementById('printScheduleBtn');
@@ -545,8 +568,6 @@
             }
         }
 
-        // --- NEW COMMENT: This function saves all data to a file on your computer.
-        // It opens your file manager so you can choose where to save it.
         function saveDataToFile() {
             if (peopleData.length === 0 && occurrencesData.length === 0) {
                 showMessage('Não há dados para salvar.', 'info');
@@ -562,7 +583,7 @@
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = 'banco_de_dados_organizacional.json';
-                a.click(); // This line triggers the browser's "Save As..." dialog
+                a.click();
                 URL.revokeObjectURL(url);
                 showMessage('Dados salvos em "banco_de_dados_organizacional.json"!', 'success');
             } catch (error) {
@@ -571,8 +592,6 @@
             }
         }
 
-        // --- NEW COMMENT: This function loads data from a file you select on your computer.
-        // The "Carregar Dados" button triggers this process.
         function loadDataFromFile(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -620,6 +639,7 @@
                     <tr>
                         <th class="p-4 text-left border-b"><input type="checkbox" id="selectAllCheckbox" class="form-checkbox"></th>
                         <th class="p-4 text-left border-b">Nome</th>
+                        <th class="p-4 text-left border-b">Gênero</th>
                         <th class="p-4 text-left border-b">Status</th>
                         <th class="p-4 text-left border-b">Cônjuge</th>
                         <th class="p-4 text-left border-b">Reunião Semana</th>
@@ -649,7 +669,6 @@
                 
                 const formattedCongressDates = (person.congress || [])
                     .map(dateStr => {
-                        // Handles both YYYY-MM-DD and potentially other formats if data is old
                         const date = new Date(dateStr + 'T00:00:00');
                         return isNaN(date) ? dateStr : date.toLocaleDateString('pt-BR');
                     })
@@ -658,6 +677,7 @@
                 let cells = `
                     <td class="p-4 border-b"><input type="checkbox" class="row-checkbox form-checkbox" data-index="${index}"></td>
                     <td class="p-4 border-b editable-text-cell" data-field="name" data-index="${index}">${person.name || 'N/A'}</td>
+                    <td class="p-4 border-b editable-text-cell" data-field="gender" data-index="${index}">${person.gender || 'N/A'}</td>
                     <td class="p-4 border-b editable-text-cell" data-field="status" data-index="${index}">${person.status || 'N/A'}</td>
                     <td class="p-4 border-b editable-text-cell" data-field="spouseName" data-index="${index}">${person.spouseName || ''}</td>
                     <td class="p-4 border-b editable-text-cell" data-field="meetingDayWeekday" data-index="${index}">${displayMeetingDayWeekdayMap[person.meetingDayWeekday] || 'N/A'}</td>
@@ -696,6 +716,8 @@
             }
             const status = newStatusSelect.value;
             const spouseName = (status === 'Casal') ? newSpouseNameInput.value.trim() : '';
+            const gender = newGenderSelect.value;
+
             if (status === 'Casal' && !spouseName) {
                 showMessage('O nome do cônjuge é obrigatório para o status "Casal".', 'error');
                 return;
@@ -722,22 +744,34 @@
                 domingo: newDomCheckbox.checked
             };
 
-            const person1 = {
-                ...commonData,
-                name: name,
-                status: status,
-                spouseName: spouseName,
-            };
-            peopleData.push(person1);
-
             if (status === 'Casal') {
+                 const spouseGender = newSpouseGenderSelect.value;
+                 const person1 = {
+                    ...commonData,
+                    name: name,
+                    gender: gender,
+                    status: status,
+                    spouseName: spouseName,
+                };
+                peopleData.push(person1);
+                
                 const person2 = {
                     ...commonData,
                     name: spouseName,
+                    gender: spouseGender,
                     status: status,
                     spouseName: name,
                 };
                 peopleData.push(person2);
+            } else {
+                 const person1 = {
+                    ...commonData,
+                    name: name,
+                    gender: gender,
+                    status: status,
+                    spouseName: '',
+                };
+                peopleData.push(person1);
             }
             
             renderAll();
@@ -748,7 +782,8 @@
             newNameInput.value = '';
             newStatusSelect.value = 'Solteiro(a)';
             newSpouseNameInput.value = '';
-            spouseNameContainer.classList.add('hidden');
+            coupleContainer.classList.add('hidden');
+            mainPersonGenderContainer.classList.remove('hidden');
             newMeetingDayWeekdaySelect.value = '';
             newMeetingDayWeekendSelect.value = '';
             congressDatePicker.clear();
@@ -829,6 +864,11 @@
                 inputElement = createSelect([
                     { value: 'Solteiro(a)', text: 'Solteiro(a)' },
                     { value: 'Casal', text: 'Casal' }
+                ], currentValue);
+            } else if (field === 'gender') {
+                inputElement = createSelect([
+                    { value: 'Masculino', text: 'Masculino' },
+                    { value: 'Feminino', text: 'Feminino' }
                 ], currentValue);
             } else if (field === 'congress') {
                 const tempInput = document.createElement('input');
@@ -934,6 +974,9 @@
                     };
 
                     const nameIndex = getIndex(['nome', 'primeiro nome']);
+                    const genderIndex = getIndex(['gênero', 'genero']);
+                    const statusIndex = getIndex(['status']);
+                    const spouseIndex = getIndex(['cônjuge', 'conjuge']);
                     const meetingWeekIndex = getIndex(['dia reunião semana', 'reunião semana']);
                     const meetingWeekendIndex = getIndex(['dia reunião fim de semana', 'reunião fim de semana']);
                     const congress1Index = getIndex(['congresso1', 'congresso 1']);
@@ -951,7 +994,9 @@
 
                         const person = {
                             name: row[nameIndex] || '',
-                            phone: '',
+                            gender: row[genderIndex] || '',
+                            status: row[statusIndex] || 'Solteiro(a)',
+                            spouseName: row[spouseIndex] || '',
                             meetingDayWeekday: String(row[meetingWeekIndex] || '').toLowerCase().trim(),
                             meetingDayWeekend: String(row[meetingWeekendIndex] || '').toLowerCase().trim(),
                             congress: congressDates,
@@ -990,6 +1035,7 @@
             if (peopleData.length > 0) {
                 const exportPeople = peopleData.map(p => ({
                     'Nome': p.name,
+                    'Gênero': p.gender,
                     'Status': p.status,
                     'Cônjuge': p.spouseName,
                     'Reunião Semana': p.meetingDayWeekday,
@@ -1000,7 +1046,7 @@
                 }));
                 const wsPeople = XLSX.utils.json_to_sheet(exportPeople);
                 wsPeople['!cols'] = [
-                    { wch: 30 }, { wch: 15 }, { wch: 30 }, { wch: 20 }, { wch: 20 }, { wch: 30 },
+                    { wch: 30 }, { wch: 15 }, { wch: 15 }, { wch: 30 }, { wch: 20 }, { wch: 20 }, { wch: 30 },
                     { wch: 5 }, { wch: 5 }, { wch: 5 }, { wch: 5 },
                     { wch: 5 }, { wch: 5 }, { wch: 5 }
                 ];
@@ -1112,7 +1158,7 @@
                 if (o.images && o.images.length > 0) {
                     imagesHtml += '<div class="flex flex-wrap gap-2 mb-2">';
                     o.images.forEach(imgData => {
-                        imagesHtml += `<img src="${imgData}" class="w-32 h-32 object-cover rounded-md border">`;
+                        imagesHtml += `<img src="${imgData}" class="w-32 h-32 object-cover rounded-md border" alt="Imagem da ocorrência">`;
                     });
                     imagesHtml += '</div>';
                 }
@@ -1190,52 +1236,60 @@
                 const dayName = dayNamesShort[date.getDay()];
                 const formattedDate = flatpickr.formatDate(date, "Y-m-d");
 
-                let availablePeople = peopleData.filter(person => {
+                // 1. Get all available people for the day
+                const availablePeople = peopleData.filter(person => {
                     let isAvailable = person[dayName];
                     if (isAvailable && Array.isArray(person.congress) && person.congress.includes(formattedDate)) isAvailable = false;
                     if (isAvailable && person.meetingDayWeekday === dayName) isAvailable = false;
                     if (isAvailable && (person.meetingDayWeekend === dayName || (person.meetingDayWeekend === 'final de semana' && (dayName === 'sabado' || dayName === 'domingo')))) isAvailable = false;
                     return isAvailable;
                 });
+                
+                // 2. Separate into gender pools and sort by least worked
+                let availableMen = availablePeople.filter(p => p.gender === 'Masculino').sort((a, b) => workCount[a.name] - workCount[b.name]);
+                let availableWomen = availablePeople.filter(p => p.gender === 'Feminino').sort((a, b) => workCount[a.name] - workCount[b.name]);
 
-                let pool = [...availablePeople].sort((a, b) => workCount[a.name] - workCount[b.name]);
                 let attendant = 'VAGO';
                 let watchman = 'VAGO';
-                let assignedNames = [];
+                let coupleAssigned = false;
 
-                // Assign Attendant
-                if (pool.length > 0) {
-                    const person1 = pool.shift();
-                    if (groupCouples && person1.status === 'Casal') {
-                        const spouseIndex = pool.findIndex(p => p.name === person1.spouseName);
-                        if (spouseIndex !== -1) {
-                            const spouse = pool.splice(spouseIndex, 1)[0];
-                            attendant = `${person1.name} e ${spouse.name}`;
-                            watchman = attendant; // Assign couple to both roles
-                            assignedNames.push(person1.name, spouse.name);
-                        } else {
-                            attendant = person1.name; // Assign as single if spouse not available
-                            assignedNames.push(person1.name);
+                // 3. Try to assign a couple if requested and possible
+                if (groupCouples) {
+                    for (const man of availableMen) {
+                        if (man.status === 'Casal') {
+                            const spouseIndex = availableWomen.findIndex(woman => woman.name === man.spouseName);
+                            if (spouseIndex !== -1) {
+                                const spouse = availableWomen[spouseIndex];
+                                attendant = spouse.name;
+                                watchman = man.name;
+                                
+                                workCount[man.name]++;
+                                workCount[spouse.name]++;
+                                
+                                // Remove them from the available pools
+                                availableMen = availableMen.filter(p => p.name !== man.name);
+                                availableWomen.splice(spouseIndex, 1);
+                                
+                                coupleAssigned = true;
+                                break; // Couple found and assigned, exit loop
+                            }
                         }
-                    } else {
-                        attendant = person1.name;
-                        assignedNames.push(person1.name);
                     }
                 }
 
-                // Assign Watchman if not already filled by a couple
-                if (watchman === 'VAGO' && pool.length > 0) {
-                    const person2 = pool.shift();
-                    watchman = person2.name;
-                    assignedNames.push(person2.name);
-                }
-
-                // Update work counts
-                assignedNames.forEach(name => {
-                    if (workCount.hasOwnProperty(name)) {
-                        workCount[name]++;
+                // 4. Assign individuals if no couple was assigned
+                if (!coupleAssigned) {
+                    if (availableWomen.length > 0) {
+                        const assignedWoman = availableWomen.shift();
+                        attendant = assignedWoman.name;
+                        workCount[assignedWoman.name]++;
                     }
-                });
+                    if (availableMen.length > 0) {
+                        const assignedMan = availableMen.shift();
+                        watchman = assignedMan.name;
+                        workCount[assignedMan.name]++;
+                    }
+                }
 
                 currentSchedule.push({ date: formattedDate, dayOfWeek: dayName, attendant, watchman });
             }
@@ -1244,6 +1298,7 @@
             showMessage('Escala gerada com sucesso!', 'success');
             printScheduleBtn.classList.remove('hidden');
         }
+
 
         function renderScheduleTable() {
             const month = parseInt(scheduleMonthSelect.value);
@@ -1276,7 +1331,6 @@
             scheduleHtml += `</tbody></table>`;
             scheduleOutputDiv.innerHTML = scheduleHtml;
 
-            // Add event listeners for editing
             document.querySelectorAll('.editable-schedule-cell').forEach(cell => {
                 cell.addEventListener('click', handleScheduleEdit);
             });
@@ -1288,7 +1342,6 @@
             const role = cell.dataset.role;
             const scheduleEntry = currentSchedule[dayIndex];
             
-            // Find who is available on this day
             const availablePeople = peopleData.filter(person => {
                 let isAvailable = person[scheduleEntry.dayOfWeek];
                 if (isAvailable && Array.isArray(person.congress) && person.congress.includes(scheduleEntry.date)) isAvailable = false;
@@ -1296,17 +1349,15 @@
                 if (isAvailable && (person.meetingDayWeekend === scheduleEntry.dayOfWeek || (person.meetingDayWeekend === 'final de semana' && (scheduleEntry.dayOfWeek === 'sabado' || scheduleEntry.dayOfWeek === 'domingo')))) isAvailable = false;
                 return isAvailable;
             });
+            
+            // Filter by GENDER for the specific role
+            const genderForRole = role === 'attendant' ? 'Feminino' : 'Masculino';
+            const roleSpecificOptions = availablePeople.filter(p => p.gender === genderForRole);
 
-            // Exclude the person already assigned to the other role
             const otherRole = role === 'attendant' ? 'watchman' : 'attendant';
             const otherPersonName = scheduleEntry[otherRole];
-            // Also exclude the spouse of the other person if they are a couple
-            const otherPersonObject = peopleData.find(p => p.name === otherPersonName);
-            const otherSpouseName = otherPersonObject ? otherPersonObject.spouseName : null;
+            const finalOptions = roleSpecificOptions.filter(p => p.name !== otherPersonName);
 
-            const finalOptions = availablePeople.filter(p => p.name !== otherPersonName && p.name !== otherSpouseName);
-
-            // Create select dropdown
             const select = document.createElement('select');
             select.className = 'w-full p-1 border border-blue-400 rounded-md';
             
@@ -1328,7 +1379,7 @@
 
             const saveChange = () => {
                 scheduleEntry[role] = select.value;
-                renderScheduleTable(); // Re-render the table to reflect change
+                renderScheduleTable();
             };
 
             select.addEventListener('blur', saveChange);
@@ -1356,7 +1407,6 @@
 
         // --- Page Navigation & Initial Setup ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize Flatpickr for congress dates
             congressDatePicker = flatpickr("#newCongressDates", {
                 mode: "range",
                 dateFormat: "Y-m-d",
@@ -1371,9 +1421,8 @@
             function showSection(targetSection) {
                 sectionLoadingScreen.classList.add('visible');
                 
-                // Update main title based on section
                 if (targetSection === infoSection) {
-                    mainTitle.textContent = 'Informações';
+                    mainTitle.textContent = 'Informações dos Publicadores';
                 } else if (targetSection === scheduleSection) {
                     mainTitle.textContent = 'Escala de Trabalho';
                 } else if (targetSection === occurrencesSection) {
@@ -1402,7 +1451,6 @@
                 populateScheduleControls();
             }, 1500);
 
-            // Clean up print classes after printing
             window.onafterprint = () => {
                 document.body.classList.remove('printing-schedule', 'printing-occurrences');
             };
@@ -1449,17 +1497,15 @@
             newMeetingDayWeekdaySelect.addEventListener('change', updateAvailability);
             newMeetingDayWeekendSelect.addEventListener('change', updateAvailability);
 
-            // Show/hide spouse name field based on status
             newStatusSelect.addEventListener('change', (e) => {
                 if (e.target.value === 'Casal') {
-                    spouseNameContainer.classList.remove('hidden');
+                    coupleContainer.classList.remove('hidden');
                 } else {
-                    spouseNameContainer.classList.add('hidden');
+                    coupleContainer.classList.add('hidden');
                     newSpouseNameInput.value = '';
                 }
             });
 
-            // Responsive menu toggle logic
             menuToggle.addEventListener('click', () => {
                 document.body.classList.toggle('menu-open');
                 menuOpenIcon.classList.toggle('hidden');
@@ -1470,13 +1516,12 @@
             });
             
             sidebarOverlay.addEventListener('click', () => {
-                 document.body.classList.remove('menu-open');
-                 sidebarOverlay.classList.add('hidden');
-                 menuOpenIcon.classList.remove('hidden');
-                 menuCloseIcon.classList.add('hidden');
+                document.body.classList.remove('menu-open');
+                sidebarOverlay.classList.add('hidden');
+                menuOpenIcon.classList.remove('hidden');
+                menuCloseIcon.classList.add('hidden');
             });
 
-            // Set initial menu state on load
             if (window.innerWidth >= 1024) {
                 document.body.classList.add('menu-open');
                 menuOpenIcon.classList.add('hidden');
