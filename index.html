@@ -79,7 +79,6 @@
             color: white;
             font-weight: 600;
         }
-        /* MODIFIED: Correct colors for weekend days */
         .schedule-table .sexta-day { background-color: #dcfce7; } /* green-100 */
         .schedule-table .sabado-day { background-color: #fef9c3; } /* yellow-100 */
         .schedule-table .domingo-day { background-color: #fee2e2; } /* red-100 */
@@ -175,12 +174,11 @@
     </style>
 </head>
 <body class="group">
-    <!-- MODIFIED: Loading Screen with new image path and style -->
+    <!-- MODIFIED: Loading Screen image with fullscreen classes -->
     <div id="loading-screen">
-        <img src="images/logo.png" alt="Carregando..." class="w-1/2 max-w-sm h-auto">
+        <img src="images/logo.png" alt="Carregando..." class="w-full h-full object-cover">
     </div>
 
-    <!-- MODIFIED: Section Loading Screen with new image path -->
     <div id="section-loading-screen" class="hidden">
         <img src="images/logo.png" alt="Carregando..." class="pulsing-image w-32 h-32">
     </div>
@@ -198,7 +196,6 @@
     <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
 
     <nav id="navbar" class="fixed top-0 left-0 h-full w-60 bg-blue-900 text-white shadow-xl z-30 flex flex-col items-center py-8 no-print transform -translate-x-full group-[.menu-open]:translate-x-0 transition-transform duration-300 ease-in-out">
-        <!-- MODIFIED: Logo with new image path and size -->
         <div class="mb-10">
             <img src="images/logo.png" alt="Logo" class="h-20 w-auto">
         </div>
