@@ -79,7 +79,7 @@
             color: white;
             font-weight: 600;
         }
-        .schedule-table .sexta-day { background-color: #dcfce7; } /* green-100 */
+        /* MODIFIED: Removed Friday color, kept Sat and Sun */
         .schedule-table .sabado-day { background-color: #fef9c3; } /* yellow-100 */
         .schedule-table .domingo-day { background-color: #fee2e2; } /* red-100 */
         
@@ -174,7 +174,6 @@
     </style>
 </head>
 <body class="group">
-    <!-- MODIFIED: Loading Screen image with fullscreen classes -->
     <div id="loading-screen">
         <img src="images/logo.png" alt="Carregando..." class="w-full h-full object-cover">
     </div>
@@ -1167,6 +1166,36 @@
             scheduleYearInput.value = new Date().getFullYear();
         }
 
+        // --- MODIFIED: New helper function to assign couples ---
+        function assignCouples(availablePeople, workCount, maxAssignments) {
+            const attendants = [];
+            const watchmen = [];
+            
+            let availableCoupleMen = availablePeople
+                .filter(p => p.gender === 'Masculino' && p.status === 'Casal' && p.spouseName)
+                .sort((a, b) => workCount[a.name] - workCount[b.name]);
+            
+            for (let i = 0; i < maxAssignments && availableCoupleMen.length > 0; i++) {
+                const man = availableCoupleMen.shift();
+                const spouse = availablePeople.find(p => p.name === man.spouseName);
+
+                if (man && spouse) {
+                    watchmen.push(man.name);
+                    attendants.push(spouse.name);
+                    workCount[man.name]++;
+                    workCount[spouse.name]++;
+                    // Remove both from the general pool for this day to avoid re-assigning
+                    availablePeople = availablePeople.filter(p => p.name !== man.name && p.name !== spouse.name);
+                }
+            }
+            
+            if (watchmen.length === 0) watchmen.push('VAGO');
+            if (attendants.length === 0) attendants.push('VAGO');
+
+            return { attendants, watchmen };
+        }
+
+        // --- MODIFIED: generateSchedule function with new logic ---
         function generateSchedule() {
             if (peopleData.length === 0) {
                 showMessage('Não há publicadores cadastrados para gerar a escala.', 'error');
@@ -1196,35 +1225,17 @@
                 const dayName = dayNamesShort[date.getDay()];
                 const formattedDate = flatpickr.formatDate(date, "Y-m-d");
 
-                const isSpecialWeekend = monthType === 'sem_evento' && ['sexta', 'sabado', 'domingo'].includes(dayName);
-                
-                let availablePeople = getAvailableForDay(dayName, formattedDate);
                 let attendants = [];
                 let watchmen = [];
+                let availablePeople = getAvailableForDay(dayName, formattedDate);
 
-                if (isSpecialWeekend) {
-                    const MAX_COUPLES = 3;
-                    let availableCoupleMen = availablePeople
-                        .filter(p => p.gender === 'Masculino' && p.status === 'Casal' && p.spouseName)
-                        .sort((a, b) => workCount[a.name] - workCount[b.name]);
-
-                    for (let i = 0; i < MAX_COUPLES && availableCoupleMen.length > 0; i++) {
-                        const man = availableCoupleMen.shift();
-                        const spouse = availablePeople.find(p => p.name === man.spouseName);
-
-                        if (man && spouse) {
-                            watchmen.push(man.name);
-                            attendants.push(spouse.name);
-                            workCount[man.name]++;
-                            workCount[spouse.name]++;
-                            availablePeople = availablePeople.filter(p => p.name !== man.name && p.name !== spouse.name);
-                            availableCoupleMen = availableCoupleMen.filter(p => p.name !== man.name);
-                        }
-                    }
-                    if (watchmen.length === 0) watchmen.push('VAGO');
-                    if (attendants.length === 0) attendants.push('VAGO');
-
-                } else {
+                if (monthType === 'sem_evento') {
+                    const isWeekend = (dayName === 'sabado' || dayName === 'domingo');
+                    const maxCouples = isWeekend ? 3 : 1;
+                    const result = assignCouples([...availablePeople], workCount, maxCouples);
+                    attendants = result.attendants;
+                    watchmen = result.watchmen;
+                } else { // This is the 'com_evento' logic (original behavior)
                     let availableMen = availablePeople.filter(p => p.gender === 'Masculino').sort((a, b) => workCount[a.name] - workCount[b.name]);
                     let availableWomen = availablePeople.filter(p => p.gender === 'Feminino').sort((a, b) => workCount[a.name] - workCount[b.name]);
                     let coupleAssigned = false;
@@ -1249,11 +1260,11 @@
                     if (!coupleAssigned) {
                         const assignedWoman = availableWomen.shift();
                         attendants.push(assignedWoman ? assignedWoman.name : 'VAGO');
-                        if(assignedWoman) workCount[assignedWoman.name]++;
+                        if (assignedWoman) workCount[assignedWoman.name]++;
 
                         const assignedMan = availableMen.shift();
                         watchmen.push(assignedMan ? assignedMan.name : 'VAGO');
-                        if(assignedMan) workCount[assignedMan.name]++;
+                        if (assignedMan) workCount[assignedMan.name]++;
                     }
                 }
                 
@@ -1265,6 +1276,7 @@
             printScheduleBtn.classList.remove('hidden');
         }
 
+        // --- MODIFIED: renderScheduleTable with updated colors ---
         function renderScheduleTable() {
             const month = parseInt(scheduleMonthSelect.value);
             const year = parseInt(scheduleYearInput.value);
@@ -1285,8 +1297,7 @@
                 const dateObj = new Date(entry.date + 'T00:00:00');
                 
                 let rowClass = '';
-                if (entry.dayOfWeek === 'sexta') rowClass = 'sexta-day';
-                else if (entry.dayOfWeek === 'sabado') rowClass = 'sabado-day';
+                if (entry.dayOfWeek === 'sabado') rowClass = 'sabado-day';
                 else if (entry.dayOfWeek === 'domingo') rowClass = 'domingo-day';
 
                 const attendantsHtml = entry.attendant.map((name, personIndex) => 
@@ -1509,4 +1520,4 @@
         });
     </script>
 </body>
-</html>
+</html>```
