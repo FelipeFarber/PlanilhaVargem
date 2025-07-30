@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de Pessoas, Escalas e Ocorrências</title>
+    <title>Gerenciador Organizacional</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -19,1504 +19,299 @@
     <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
     
     <style>
-        html {
-            scroll-behavior: smooth;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8;
-            line-height: 1.6;
-        }
-        h1.main-title {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 800;
-            color: #1e3a8a; 
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        #loading-screen, #section-loading-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #f0f4f8; display: flex; justify-content: center;
-            align-items: center; z-index: 9999; transition: opacity 0.5s ease-out;
-        }
-        #loading-screen.hidden, #section-loading-screen.hidden {
-            opacity: 0; pointer-events: none;
-        }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; line-height: 1.6; }
+        h1.main-title { font-family: 'Poppins', sans-serif; font-weight: 800; color: #1e3a8a; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); }
+        #loading-screen, #section-loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #f0f4f8; display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.5s ease-out; }
+        #loading-screen.hidden, #section-loading-screen.hidden { opacity: 0; pointer-events: none; }
         #section-loading-screen { z-index: 9998; opacity: 0; }
         #section-loading-screen.visible { opacity: 1; pointer-events: auto; }
         .pulsing-image { animation: pulse 1.5s infinite ease-in-out; }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.8; }
-        }
-        .file-input::-webkit-file-upload-button {
-            margin-right: 1rem; padding: 0.5rem 1rem; border-radius: 9999px;
-            border: 0; font-size: 0.875rem; font-weight: 600;
-            background-color: #eff6ff; color: #1d4ed8; cursor: pointer;
-        }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
+        .file-input::-webkit-file-upload-button { margin-right: 1rem; padding: 0.5rem 1rem; border-radius: 9999px; border: 0; font-size: 0.875rem; font-weight: 600; background-color: #eff6ff; color: #1d4ed8; cursor: pointer; }
         .file-input:hover::-webkit-file-upload-button { background-color: #dbeafe; }
         .data-table .day-cell, .data-table .editable-text-cell { cursor: pointer; }
         .data-table .day-cell { text-align: center; }
-        
-        .data-table thead th {
-            background-color: #2c5282;
-            color: white;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .data-table tbody tr:nth-child(odd) {
-            background-color: #ffffff;
-        }
-        .data-table tbody tr:nth-child(even) {
-            background-color: #edf2f7;
-        }
-        .data-table tbody tr:hover {
-            background-color: #bee3f8;
-        }
-
-        .schedule-table thead th {
-            background-color: #1e3a8a;
-            color: white;
-            font-weight: 600;
-        }
-        /* MODIFIED: Removed Friday color, kept Sat and Sun */
-        .schedule-table .sabado-day { background-color: #fef9c3; } /* yellow-100 */
-        .schedule-table .domingo-day { background-color: #fee2e2; } /* red-100 */
-        
-        .schedule-table .editable-team-member { 
-            cursor: pointer; 
-            transition: background-color 0.2s ease-in-out;
-            display: inline-block;
-            padding: 2px 4px;
-            border-radius: 4px;
-            margin-bottom: 2px;
-        }
-        .schedule-table .editable-team-member:hover { 
-            background-color: #bfdbfe;
-        }
-        
-        .collapsible-header {
-            cursor: pointer; display: flex; justify-content: space-between;
-            align-items: center; padding: 1rem; background-color: #e2e8f0;
-            border-radius: 0.5rem; font-weight: 600; color: #475569;
-            margin-bottom: 1rem; transition: background-color 0.3s ease-in-out;
-        }
+        .data-table thead th { background-color: #2c5282; color: white; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+        .data-table tbody tr:nth-child(odd) { background-color: #ffffff; }
+        .data-table tbody tr:nth-child(even) { background-color: #edf2f7; }
+        .data-table tbody tr:hover { background-color: #bee3f8; }
+        .schedule-table thead th { background-color: #1e3a8a; color: white; font-weight: 600; }
+        .schedule-table .sabado-day { background-color: #fef9c3; }
+        .schedule-table .domingo-day { background-color: #fee2e2; }
+        .schedule-table .editable-team-member { cursor: pointer; transition: background-color 0.2s ease-in-out; display: inline-block; padding: 2px 4px; border-radius: 4px; margin-bottom: 2px; }
+        .schedule-table .editable-team-member:hover { background-color: #bfdbfe; }
+        .collapsible-header { cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 1rem; background-color: #e2e8f0; border-radius: 0.5rem; font-weight: 600; color: #475569; margin-bottom: 1rem; transition: background-color 0.3s ease-in-out; }
         .collapsible-header:hover { background-color: #d1d5db; }
         .collapsible-content { display: block; transition: all 0.3s ease-in-out; }
         .collapsible-content.hidden { display: none; opacity: 0; max-height: 0; overflow: hidden; }
-        
-        #custom-confirm-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); display: flex;
-            justify-content: center; align-items: center; z-index: 10000;
-            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-        }
-        #custom-confirm-modal.visible { opacity: 1; pointer-events: auto; }
-        .modal-content {
-            background: white; padding: 2rem; border-radius: 0.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center;
-            max-width: 90%; width: 400px;
-        }
-
-        @media print {
-            body {
-                background-color: #fff !important;
-                font-size: 11pt;
-            }
-            main {
-                margin-left: 0 !important;
-                padding: 1rem !important;
-            }
-            .no-print {
-                display: none !important;
-            }
-            .content-section {
-                display: none !important;
-            }
-            body.printing-schedule #schedule-section,
-            body.printing-occurrences #occurrences-section {
-                display: block !important;
-            }
-            .p-6.bg-white {
-                box-shadow: none !important;
-                border: none !important;
-                padding: 0 !important;
-            }
-            h1.main-title, h2, h3 {
-                text-align: center;
-                color: #000;
-                text-shadow: none;
-            }
-            body.printing-schedule .schedule-table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-            body.printing-schedule .schedule-table th,
-            body.printing-schedule .schedule-table td {
-                border: 1px solid #666;
-                padding: 8px;
-                color: #000;
-                background-color: #fff !important;
-            }
-            body.printing-schedule .schedule-table thead th {
-                background-color: #e5e7eb !important;
-                color: #000;
-            }
-            body.printing-occurrences #occurrences-list .bg-white {
-                border: 1px solid #ccc;
-                box-shadow: none;
-                page-break-inside: avoid;
-            }
-            body.printing-occurrences img {
-                display: none;
-            }
-        }
+        #custom-confirm-modal, #summary-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        #custom-confirm-modal.visible, #summary-modal.visible { opacity: 1; pointer-events: auto; }
+        .modal-content { background: white; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); text-align: center; max-width: 90%; width: 500px; }
+        .event-tab { cursor: pointer; padding: 0.5rem 1rem; border-bottom: 2px solid transparent; }
+        .event-tab.active { border-color: #2563eb; color: #1e3a8a; font-weight: 600; }
+        @media print { body { background-color: #fff !important; font-size: 11pt; } main { margin-left: 0 !important; padding: 1rem !important; } .no-print { display: none !important; } .content-section { display: none !important; } body.printing-schedule #schedule-section, body.printing-occurrences #occurrences-section, body.printing-events #events-section { display: block !important; } .p-6.bg-white { box-shadow: none !important; border: none !important; padding: 0 !important; } h1.main-title, h2, h3 { text-align: center; color: #000; text-shadow: none; } body.printing-schedule .schedule-table { width: 100%; border-collapse: collapse; } body.printing-schedule .schedule-table th, body.printing-schedule .schedule-table td { border: 1px solid #666; padding: 8px; color: #000; background-color: #fff !important; } body.printing-schedule .schedule-table thead th { background-color: #e5e7eb !important; color: #000; } body.printing-occurrences #occurrences-list .bg-white, body.printing-events #events-list .bg-white { border: 1px solid #ccc; box-shadow: none; page-break-inside: avoid; } body.printing-occurrences img { display: none; } }
     </style>
 </head>
 <body class="group">
-    <div id="loading-screen">
-        <img src="images/logo.png" alt="Carregando..." class="w-full h-full object-cover">
-    </div>
-
-    <div id="section-loading-screen" class="hidden">
-        <img src="images/logo.png" alt="Carregando..." class="pulsing-image w-32 h-32">
-    </div>
-
-    <div id="custom-confirm-modal">
-        <div class="modal-content">
-            <p id="confirm-modal-text" class="mb-6 text-lg text-gray-700"></p>
-            <div class="flex justify-center gap-4">
-                <button id="confirm-modal-yes" class="px-6 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700">Sim</button>
-                <button id="confirm-modal-no" class="px-6 py-2 bg-gray-300 text-gray-800 font-semibold rounded-lg shadow-md hover:bg-gray-400">Não</button>
+    <div id="loading-screen"><img src="images/logo.png" alt="Carregando..." class="w-full h-full object-cover"></div>
+    <div id="section-loading-screen" class="hidden"><img src="images/logo.png" alt="Carregando..." class="pulsing-image w-32 h-32"></div>
+    <div id="custom-confirm-modal"><div class="modal-content"><p id="confirm-modal-text" class="mb-6 text-lg text-gray-700"></p><div class="flex justify-center gap-4"><button id="confirm-modal-yes" class="px-6 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700">Sim</button><button id="confirm-modal-no" class="px-6 py-2 bg-gray-300 text-gray-800 font-semibold rounded-lg shadow-md hover:bg-gray-400">Não</button></div></div></div>
+    
+    <div id="summary-modal">
+        <div class="modal-content text-left">
+            <h3 class="text-2xl font-bold text-blue-800 mb-6 text-center">Resumo de Eventos</h3>
+            <div class="space-y-3 text-gray-700">
+                <div class="grid grid-cols-2 gap-x-4">
+                    <div>
+                        <h4 class="font-bold text-gray-800 mb-2">Sup. de Circuito</h4>
+                        <p><span class="font-semibold">Pub. Estimados:</span> <span id="summary-publishers-circuit" class="font-bold"></span></p>
+                        <p><span class="font-semibold">Assist. Estimada:</span> <span id="summary-attendance-circuit" class="font-bold"></span></p>
+                        <p><span class="font-semibold">Fins de Semana:</span> <span id="summary-weekends-circuit" class="font-bold"></span></p>
+                        <p><span class="font-semibold">Circuitos:</span> <span id="summary-circuits-circuit" class="font-bold"></span></p>
+                        <p><span class="font-semibold">Congregações:</span> <span id="summary-congregations-circuit" class="font-bold"></span></p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-800 mb-2">Rep. de Betel</h4>
+                        <p><span class="font-semibold">Pub. Estimados:</span> <span id="summary-publishers-bethel" class="font-bold"></span></p>
+                        <p><span class="font-semibold">Assist. Estimada:</span> <span id="summary-attendance-bethel" class="font-bold"></span></p>
+                        <p><span class="font-semibold">Fins de Semana:</span> <span id="summary-weekends-bethel" class="font-bold"></span></p>
+                        <p><span class="font-semibold">Circuitos:</span> <span id="summary-circuits-bethel" class="font-bold"></span></p>
+                        <p><span class="font-semibold">Congregações:</span> <span id="summary-congregations-bethel" class="font-bold"></span></p>
+                    </div>
+                </div>
             </div>
+            <div class="flex justify-center mt-8"><button id="summary-modal-close" class="px-8 py-2 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700">Fechar</button></div>
         </div>
     </div>
 
     <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
-
     <nav id="navbar" class="fixed top-0 left-0 h-full w-60 bg-blue-900 text-white shadow-xl z-30 flex flex-col items-center py-8 no-print transform -translate-x-full group-[.menu-open]:translate-x-0 transition-transform duration-300 ease-in-out">
-        <div class="mb-10">
-            <img src="images/logo.png" alt="Logo" class="h-20 w-auto">
-        </div>
+        <div class="mb-10"><img src="images/logo.png" alt="Logo" class="h-20 w-auto"></div>
         <div class="flex flex-col space-y-4 w-full px-4">
             <a href="#info-section" id="nav-info" class="text-lg font-semibold hover:bg-blue-700 p-3 rounded-lg transition-colors text-center">Informações</a>
             <a href="#schedule-section" id="nav-schedule" class="text-lg font-semibold hover:bg-blue-700 p-3 rounded-lg transition-colors text-center">Escala</a>
             <a href="#occurrences-section" id="nav-occurrences" class="text-lg font-semibold hover:bg-blue-700 p-3 rounded-lg transition-colors text-center">Ocorrências</a>
+            <a href="#events-section" id="nav-events" class="text-lg font-semibold hover:bg-blue-700 p-3 rounded-lg transition-colors text-center">Organizar Eventos</a>
         </div>
     </nav>
-
-    <button id="menu-toggle" class="fixed top-4 left-4 z-40 p-2 bg-blue-800 text-white rounded-md hover:bg-blue-700 transition-all duration-300 ease-in-out no-print lg:group-[.menu-open]:left-64">
-        <svg id="menu-open-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        <svg id="menu-close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-    </button>
+    <button id="menu-toggle" class="fixed top-4 left-4 z-40 p-2 bg-blue-800 text-white rounded-md hover:bg-blue-700 transition-all duration-300 ease-in-out no-print lg:group-[.menu-open]:left-64"><svg id="menu-open-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg><svg id="menu-close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
 
     <main id="main-content" class="p-4 sm:p-6 lg:p-8 transition-all duration-300 ease-in-out lg:group-[.menu-open]:ml-60">
         <div class="max-w-7xl mx-auto">
-            <h1 id="main-title" class="main-title text-4xl sm:text-5xl font-extrabold mb-8 text-center">
-                Gerenciador Organizacional
-            </h1>
+            <h1 id="main-title" class="main-title text-4xl sm:text-5xl font-extrabold mb-8 text-center">Gerenciador Organizacional</h1>
 
             <div id="info-section" class="content-section hidden">
                 <div class="mb-8 p-6 bg-white rounded-lg shadow-md no-print">
-                    <div class="flex flex-col items-center gap-4">
-                        <input type="file" id="excelFile" accept=".xlsx, .xls" class="file-input block w-full max-w-sm text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
-                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 w-full">
-                            <button id="loadExcel" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 w-full">Carregar Planilha</button>
-                            <button id="saveData" class="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 w-full">Salvar Dados</button>
-                            <button id="loadData" class="px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 w-full">Carregar Dados</button>
-                            <button id="exportExcel" class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 w-full">Exportar p/ Excel</button>
-                            <button id="deleteSelectedBtn" class="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 w-full">Excluir</button>
-                            <button id="clearAllDataBtn" class="px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-600 w-full">Limpar Tudo</button>
-                        </div>
-                    </div>
+                    <div class="flex flex-col items-center gap-4"><input type="file" id="excelFile" accept=".xlsx, .xls" class="file-input block w-full max-w-sm text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none"><div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 w-full"><button id="loadExcel" class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 w-full">Carregar Planilha</button><button id="saveData" class="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 w-full">Salvar Dados</button><button id="loadData" class="px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 w-full">Carregar Dados</button><button id="exportExcel" class="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 w-full">Exportar p/ Excel</button><button id="deleteSelectedBtn" class="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 w-full">Excluir</button><button id="clearAllDataBtn" class="px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-600 w-full">Limpar Tudo</button></div></div>
                 </div>
-
                 <div class="mb-8 p-6 bg-white rounded-lg shadow-md no-print">
                     <h2 class="text-2xl font-semibold text-gray-800 mb-4">Adicionar Novo Publicador</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                        <input type="text" id="newName" placeholder="Nome Completo" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <select id="newMeetingDayWeekday" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">Reunião Meio de Semana</option>
-                            <option value="segunda">Segunda-feira</option>
-                            <option value="terca">Terça-feira</option>
-                            <option value="quarta">Quarta-feira</option>
-                            <option value="quinta">Quinta-feira</option>
-                            <option value="sexta">Sexta-feira</option>
-                        </select>
-                        <select id="newMeetingDayWeekend" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">Reunião Fim de Semana</option>
-                            <option value="sabado">Sábado</option>
-                            <option value="domingo">Domingo</option>
-                            <option value="final de semana">Fim de Semana (Ambos)</option>
-                        </select>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label for="newStatus" class="block text-sm font-medium text-gray-700">Status</label>
-                            <select id="newStatus" class="p-2 border border-gray-300 rounded-md w-full">
-                                <option value="Solteiro(a)">Solteiro(a)</option>
-                                <option value="Casal">Casal</option>
-                            </select>
-                        </div>
-                        <div id="main-person-gender-container">
-                             <label for="newGender" class="block text-sm font-medium text-gray-700">Gênero</label>
-                             <select id="newGender" class="p-2 border border-gray-300 rounded-md w-full">
-                                 <option value="Feminino">Feminino</option>
-                                 <option value="Masculino">Masculino</option>
-                             </select>
-                         </div>
-                    </div>
-                    <div id="couple-container" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                             <label for="newSpouseName" class="block text-sm font-medium text-gray-700">Nome do Cônjuge</label>
-                            <input type="text" id="newSpouseName" placeholder="Nome do Cônjuge" class="p-2 border border-gray-300 rounded-md w-full">
-                        </div>
-                        <div id="spouse-gender-container">
-                             <label for="newSpouseGender" class="block text-sm font-medium text-gray-700">Gênero do Cônjuge</label>
-                             <select id="newSpouseGender" class="p-2 border border-gray-300 rounded-md w-full">
-                                 <option value="Masculino">Masculino</option>
-                                 <option value="Feminino">Feminino</option>
-                             </select>
-                         </div>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Dias do Congresso (Selecione um período):</label>
-                        <input type="text" id="newCongressDates" placeholder="Clique para selecionar o início e o fim..." readonly class="p-2 border border-gray-300 rounded-md w-full cursor-pointer bg-white">
-                    </div>
-                    <div class="flex flex-wrap gap-4 mb-4">
-                        <label class="flex items-center space-x-2"><input type="checkbox" id="newSeg" class="form-checkbox" checked><span>Seg</span></label>
-                        <label class="flex items-center space-x-2"><input type="checkbox" id="newTer" class="form-checkbox" checked><span>Ter</span></label>
-                        <label class="flex items-center space-x-2"><input type="checkbox" id="newQua" class="form-checkbox" checked><span>Qua</span></label>
-                        <label class="flex items-center space-x-2"><input type="checkbox" id="newQui" class="form-checkbox" checked><span>Qui</span></label>
-                        <label class="flex items-center space-x-2"><input type="checkbox" id="newSex" class="form-checkbox" checked><span>Sex</span></label>
-                        <label class="flex items-center space-x-2"><input type="checkbox" id="newSab" class="form-checkbox" checked><span>Sab</span></label>
-                        <label class="flex items-center space-x-2"><input type="checkbox" id="newDom" class="form-checkbox" checked><span>Dom</span></label>
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4"><input type="text" id="newName" placeholder="Nome Completo" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"><select id="newMeetingDayWeekday" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"><option value="">Reunião Meio de Semana</option><option value="segunda">Segunda-feira</option><option value="terca">Terça-feira</option><option value="quarta">Quarta-feira</option><option value="quinta">Quinta-feira</option><option value="sexta">Sexta-feira</option></select><select id="newMeetingDayWeekend" class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"><option value="">Reunião Fim de Semana</option><option value="sabado">Sábado</option><option value="domingo">Domingo</option><option value="final de semana">Fim de Semana (Ambos)</option></select></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"><div><label for="newStatus" class="block text-sm font-medium text-gray-700">Status</label><select id="newStatus" class="p-2 border border-gray-300 rounded-md w-full"><option value="Solteiro(a)">Solteiro(a)</option><option value="Casal">Casal</option></select></div><div id="main-person-gender-container"><label for="newGender" class="block text-sm font-medium text-gray-700">Gênero</label><select id="newGender" class="p-2 border border-gray-300 rounded-md w-full"><option value="Feminino">Feminino</option><option value="Masculino">Masculino</option></select></div></div>
+                    <div id="couple-container" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"><div><label for="newSpouseName" class="block text-sm font-medium text-gray-700">Nome do Cônjuge</label><input type="text" id="newSpouseName" placeholder="Nome do Cônjuge" class="p-2 border border-gray-300 rounded-md w-full"></div><div id="spouse-gender-container"><label for="newSpouseGender" class="block text-sm font-medium text-gray-700">Gênero do Cônjuge</label><select id="newSpouseGender" class="p-2 border border-gray-300 rounded-md w-full"><option value="Masculino">Masculino</option><option value="Feminino">Feminino</option></select></div></div>
+                    <div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-1">Dias de Assembleia ou Congresso:</label><input type="text" id="newCongressDates" placeholder="Clique para selecionar o início e o fim..." readonly class="p-2 border border-gray-300 rounded-md w-full cursor-pointer bg-white"></div>
+                    <div class="flex flex-wrap gap-4 mb-4"><label class="flex items-center space-x-2"><input type="checkbox" id="newSeg" class="form-checkbox" checked><span>Seg</span></label><label class="flex items-center space-x-2"><input type="checkbox" id="newTer" class="form-checkbox" checked><span>Ter</span></label><label class="flex items-center space-x-2"><input type="checkbox" id="newQua" class="form-checkbox" checked><span>Qua</span></label><label class="flex items-center space-x-2"><input type="checkbox" id="newQui" class="form-checkbox" checked><span>Qui</span></label><label class="flex items-center space-x-2"><input type="checkbox" id="newSex" class="form-checkbox" checked><span>Sex</span></label><label class="flex items-center space-x-2"><input type="checkbox" id="newSab" class="form-checkbox" checked><span>Sab</span></label><label class="flex items-center space-x-2"><input type="checkbox" id="newDom" class="form-checkbox" checked><span>Dom</span></label></div>
                     <button id="addPersonBtn" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 w-full transform hover:scale-105">Adicionar Publicador</button>
                 </div>
                 <div id="message-box" class="hidden p-4 mb-4 text-sm text-center rounded-lg no-print" role="alert"></div>
-
-                <div class="mb-8">
-                    <div id="dataTableToggle" class="collapsible-header no-print">
-                        <span>Publicadores</span>
-                        <span id="toggleIcon">▼</span>
-                    </div>
-                    <div id="dataTableContent" class="collapsible-content">
-                        <div id="data-container" class="overflow-x-auto"></div>
-                    </div>
-                </div>
+                <div class="mb-8"><div id="dataTableToggle" class="collapsible-header no-print"><span>Publicadores</span><span id="toggleIcon">▼</span></div><div id="dataTableContent" class="collapsible-content"><div id="data-container" class="overflow-x-auto"></div></div></div>
             </div>
 
             <div id="schedule-section" class="content-section hidden">
-                <div class="mb-8 p-6 bg-white rounded-lg shadow-md">
-                    <div class="no-print">
-                        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Gerador de Escala de Trabalho</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                            <div>
-                                <label for="scheduleMonth" class="block text-sm font-medium text-gray-700">Mês:</label>
-                                <select id="scheduleMonth" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select>
-                            </div>
-                            <div>
-                                <label for="scheduleYear" class="block text-sm font-medium text-gray-700">Ano:</label>
-                                <input type="number" id="scheduleYear" value="2025" min="2024" max="2050" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                            </div>
-                            <div>
-                                <label for="scheduleMonthType" class="block text-sm font-medium text-gray-700">Tipo de Mês</label>
-                                <select id="scheduleMonthType" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                                    <option value="com_evento">Com Eventos</option>
-                                    <option value="sem_evento">Sem Eventos</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="flex items-center mb-4">
-                            <input type="checkbox" id="scheduleCouplesTogether" class="form-checkbox h-5 w-5 text-blue-600 rounded">
-                            <label for="scheduleCouplesTogether" class="ml-2 text-sm font-medium text-gray-700">Agrupar casais na mesma escala?</label>
-                        </div>
-                        <div class="flex gap-4">
-                            <button id="generateScheduleBtn" class="flex-1 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transform hover:scale-105">Gerar Escala</button>
-                            <button id="printScheduleBtn" class="flex-1 px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 transform hover:scale-105 hidden">Imprimir Escala</button>
-                        </div>
-                    </div>
-                    <div id="schedule-output" class="mt-6 overflow-x-auto"></div>
-                </div>
+                <div class="mb-8 p-6 bg-white rounded-lg shadow-md"><div class="no-print"><h2 class="text-2xl font-semibold text-gray-800 mb-4">Gerador de Escala de Trabalho</h2><div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4"><div><label for="scheduleMonth" class="block text-sm font-medium text-gray-700">Mês:</label><select id="scheduleMonth" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select></div><div><label for="scheduleYear" class="block text-sm font-medium text-gray-700">Ano:</label><input type="number" id="scheduleYear" value="2025" min="2024" max="2050" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div><div><label for="scheduleMonthType" class="block text-sm font-medium text-gray-700">Tipo de Mês</label><select id="scheduleMonthType" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"><option value="com_evento">Com Eventos</option><option value="sem_evento">Sem Eventos</option></select></div></div><div class="flex items-center mb-4"><input type="checkbox" id="scheduleCouplesTogether" class="form-checkbox h-5 w-5 text-blue-600 rounded"><label for="scheduleCouplesTogether" class="ml-2 text-sm font-medium text-gray-700">Agrupar casais na mesma escala?</label></div><div class="flex gap-4"><button id="generateScheduleBtn" class="flex-1 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transform hover:scale-105">Gerar Escala</button><button id="printScheduleBtn" class="flex-1 px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 transform hover:scale-105 hidden">Imprimir Escala</button></div></div><div id="schedule-output" class="mt-6 overflow-x-auto"></div></div>
             </div>
             
             <div id="occurrences-section" class="content-section hidden">
-                <div class="flex flex-col md:flex-row-reverse gap-6">
-                    <aside id="occurrence-filters" class="w-full md:w-64 flex-shrink-0 bg-white p-4 rounded-lg shadow-md no-print self-start">
-                        <h3 class="font-semibold text-lg mb-4 text-gray-700">Filtrar Ocorrências</h3>
-                        <div>
-                            <label for="filterYear" class="block text-sm font-medium text-gray-600">Ano</label>
-                            <select id="filterYear" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select>
-                        </div>
-                        <div class="mt-4">
-                            <label class="block text-sm font-medium text-gray-600">Mês</label>
-                            <div id="filterMonth" class="mt-1 space-y-1">
-                            </div>
-                        </div>
-                    </aside>
+                <div class="flex flex-col md:flex-row-reverse gap-6"><aside id="occurrence-filters" class="w-full md:w-64 flex-shrink-0 bg-white p-4 rounded-lg shadow-md no-print self-start"><h3 class="font-semibold text-lg mb-4 text-gray-700">Filtrar Ocorrências</h3><div><label for="filterYear" class="block text-sm font-medium text-gray-600">Ano</label><select id="filterYear" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select></div><div class="mt-4"><label class="block text-sm font-medium text-gray-600">Mês</label><div id="filterMonth" class="mt-1 space-y-1"></div></div></aside><div class="flex-grow"><div class="mb-8 p-6 bg-white rounded-lg shadow-md no-print"><div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-semibold text-gray-800">Registro de Ocorrências</h2><button id="printOccurrencesBtn" class="px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 transform hover:scale-105">Imprimir Ocorrências</button></div><div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"><div><label for="occurrenceDate" class="block text-sm font-medium text-gray-700">Data da Ocorrência:</label><input type="date" id="occurrenceDate" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div><div><label for="occurrencePeople" class="block text-sm font-medium text-gray-700">No turno:</label><select id="occurrencePeople" multiple class="mt-1 block w-full p-2 border border-gray-300 rounded-md h-32"></select></div></div><div class="mb-4"><label for="occurrenceImages" class="block text-sm font-medium text-gray-700">Imagens da Ocorrência:</label><input type="file" id="occurrenceImages" multiple accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"></div><div class="mb-4"><label for="occurrenceDescription" class="block text-sm font-medium text-gray-700">Descrição:</label><textarea id="occurrenceDescription" rows="4" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Descreva o que aconteceu..."></textarea></div><button id="addOccurrenceBtn" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 w-full transform hover:scale-105">Salvar Ocorrência</button></div><div id="occurrences-list" class="mt-6"></div></div></div>
+            </div>
 
-                    <div class="flex-grow">
-                        <div class="mb-8 p-6 bg-white rounded-lg shadow-md no-print">
-                            <div class="flex justify-between items-center mb-4">
-                                <h2 class="text-2xl font-semibold text-gray-800">Registro de Ocorrências</h2>
-                                <button id="printOccurrencesBtn" class="px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 transform hover:scale-105">Imprimir Ocorrências</button>
+            <div id="events-section" class="content-section hidden">
+                <div class="mb-8">
+                    <div id="eventFormToggle" class="collapsible-header no-print"><span>Adicionar Evento</span><span id="eventToggleIcon">▼</span></div>
+                    <div id="eventFormContent" class="collapsible-content">
+                        <div class="p-6 bg-white rounded-lg shadow-md no-print">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                                <input type="date" id="newEventDate" class="p-2 border border-gray-300 rounded-md">
+                                <select id="newEventName" class="p-2 border border-gray-300 rounded-md"><option value="Assembleia" selected>Assembleia</option><option value="Congresso">Congresso</option></select>
+                                <input type="number" id="newEventPublishers" placeholder="Publicadores Estimados" class="p-2 border border-gray-300 rounded-md">
+                                <input type="number" id="newEventQuantity" placeholder="Assistência Estimada" class="p-2 border border-gray-300 rounded-md">
+                                <input type="number" id="newEventWeekends" placeholder="Fins de Semana Usados" class="p-2 border border-gray-300 rounded-md">
+                                <input type="number" id="newEventCongregations" placeholder="Nº de Congregações" class="p-2 border border-gray-300 rounded-md">
+                                <input type="text" id="newEventCircuits" placeholder="Circuitos (ex: SP-01, SP-02)" class="p-2 border border-gray-300 rounded-md lg:col-span-2">
+                                <select id="newEventSpeakerType" class="p-2 border border-gray-300 rounded-md"><option value="">Selecione o Orador</option><option value="circuit">Superintendente de Circuito</option><option value="bethel">Representante de Betel</option></select>
+                                <div id="circuitSpeakerContainer" class="hidden lg:col-span-3"><input type="text" id="newEventCircuitSpeaker" placeholder="Nome do Sup. de Circuito" class="p-2 border border-gray-300 rounded-md w-full"></div>
+                                <div id="bethelSpeakerContainer" class="hidden lg:col-span-3"><input type="text" id="newEventBethelSpeaker" placeholder="Nome do Rep. de Betel" class="p-2 border border-gray-300 rounded-md w-full"></div>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <label for="occurrenceDate" class="block text-sm font-medium text-gray-700">Data da Ocorrência:</label>
-                                    <input type="date" id="occurrenceDate" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                                </div>
-                                <div>
-                                    <label for="occurrencePeople" class="block text-sm font-medium text-gray-700">No turno:</label>
-                                    <select id="occurrencePeople" multiple class="mt-1 block w-full p-2 border border-gray-300 rounded-md h-32"></select>
-                                </div>
-                            </div>
-                            <div class="mb-4">
-                                <label for="occurrenceImages" class="block text-sm font-medium text-gray-700">Imagens da Ocorrência:</label>
-                                <input type="file" id="occurrenceImages" multiple accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                            </div>
-                            <div class="mb-4">
-                                <label for="occurrenceDescription" class="block text-sm font-medium text-gray-700">Descrição:</label>
-                                <textarea id="occurrenceDescription" rows="4" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" placeholder="Descreva o que aconteceu..."></textarea>
-                            </div>
-                            <button id="addOccurrenceBtn" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 w-full transform hover:scale-105">Salvar Ocorrência</button>
-                        </div>
-                         <div id="occurrences-list" class="mt-6">
+                            <button id="addEventBtn" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 w-full transform hover:scale-105">Salvar Evento</button>
                         </div>
                     </div>
                 </div>
+
+                <div class="flex flex-col md:flex-row-reverse gap-6">
+                    <aside id="event-filters" class="w-full md:w-64 flex-shrink-0 bg-white p-4 rounded-lg shadow-md no-print self-start">
+                        <h3 class="font-semibold text-lg mb-4 text-gray-700">Opções e Filtros</h3>
+                        <div class="flex flex-col gap-3">
+                            <input type="file" id="eventsExcelFile" accept=".xlsx, .xls" class="hidden">
+                            <button id="loadEventsExcelBtn" class="w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700">Carregar Planilha</button>
+                            <button id="clearAllEventsBtn" class="w-full px-4 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700">Limpar Eventos</button>
+                        </div>
+                        <hr class="my-4">
+                        <div><label for="eventFilterYear" class="block text-sm font-medium text-gray-600">Ano</label><select id="eventFilterYear" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select></div>
+                        <div class="mt-4"><label class="block text-sm font-medium text-gray-600">Mês</label><div id="eventFilterMonth" class="mt-1 space-y-1"></div></div>
+                    </aside>
+
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-center mb-4 no-print">
+                            <h2 class="text-2xl font-semibold text-gray-800">Eventos Registrados</h2>
+                            <div class="flex gap-2">
+                                <button id="showSummaryBtn" class="px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 transform hover:scale-105">Ver Resumo</button>
+                                <button id="printEventsBtn" class="px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 transform hover:scale-105">Imprimir</button>
+                            </div>
+                        </div>
+                        <div id="event-tabs" class="flex border-b border-gray-300 no-print"><button id="circuit-tab-btn" class="event-tab active">Superintendente de Circuito</button><button id="bethel-tab-btn" class="event-tab">Representante de Betel</button></div>
+                        <div id="circuit-events-list" class="event-tab-content pt-4"></div>
+                        <div id="bethel-events-list" class="event-tab-content pt-4 hidden"></div>
+                    </div>
+                </div>
             </div>
+
         </div>
     </main>
 
     <script>
+        // --- GLOBAL VARIABLES ---
         var peopleData = [];
         var occurrencesData = [];
+        var eventsData = [];
         let currentSchedule = []; 
         let congressDatePicker; 
         let currentFilterYear = new Date().getFullYear();
-        let currentFilterMonth = new Date().getMonth();
+        let currentFilterMonth = -1; 
+        let eventFilterYear = new Date().getFullYear();
+        let eventFilterMonth = -1;
 
-        const loadingScreen = document.getElementById('loading-screen');
-        const sectionLoadingScreen = document.getElementById('section-loading-screen');
-        const mainTitle = document.getElementById('main-title');
-        const navInfo = document.getElementById('nav-info');
-        const navSchedule = document.getElementById('nav-schedule');
-        const navOccurrences = document.getElementById('nav-occurrences');
-        const infoSection = document.getElementById('info-section');
-        const scheduleSection = document.getElementById('schedule-section');
-        const occurrencesSection = document.getElementById('occurrences-section');
-        const excelFileInput = document.getElementById('excelFile');
-        const loadExcelButton = document.getElementById('loadExcel');
-        const saveDataButton = document.getElementById('saveData');
-        const loadDataButton = document.getElementById('loadData');
-        const exportExcelButton = document.getElementById('exportExcel');
-        const deleteSelectedButton = document.getElementById('deleteSelectedBtn');
-        const clearAllDataBtn = document.getElementById('clearAllDataBtn');
-        const dataContainer = document.getElementById('data-container');
-        const messageBox = document.getElementById('message-box');
-        const newNameInput = document.getElementById('newName');
-        const newMeetingDayWeekdaySelect = document.getElementById('newMeetingDayWeekday');
-        const newMeetingDayWeekendSelect = document.getElementById('newMeetingDayWeekend');
-        const newStatusSelect = document.getElementById('newStatus');
-        const coupleContainer = document.getElementById('couple-container');
-        const newSpouseNameInput = document.getElementById('newSpouseName');
-        const mainPersonGenderContainer = document.getElementById('main-person-gender-container');
-        const newGenderSelect = document.getElementById('newGender');
-        const spouseGenderContainer = document.getElementById('spouse-gender-container');
-        const newSpouseGenderSelect = document.getElementById('newSpouseGender');
-        const newCongressDatesInput = document.getElementById('newCongressDates');
-        const newSegCheckbox = document.getElementById('newSeg');
-        const newTerCheckbox = document.getElementById('newTer');
-        const newQuaCheckbox = document.getElementById('newQua');
-        const newQuiCheckbox = document.getElementById('newQui');
-        const newSexCheckbox = document.getElementById('newSex');
-        const newSabCheckbox = document.getElementById('newSab');
-        const newDomCheckbox = document.getElementById('newDom');
-        const addPersonBtn = document.getElementById('addPersonBtn');
-        const scheduleMonthSelect = document.getElementById('scheduleMonth');
-        const scheduleYearInput = document.getElementById('scheduleYear');
-        const scheduleMonthTypeSelect = document.getElementById('scheduleMonthType');
-        const scheduleCouplesTogetherCheckbox = document.getElementById('scheduleCouplesTogether');
-        const generateScheduleBtn = document.getElementById('generateScheduleBtn');
-        const printScheduleBtn = document.getElementById('printScheduleBtn');
-        const scheduleOutputDiv = document.getElementById('schedule-output');
-        const occurrenceDateInput = document.getElementById('occurrenceDate');
-        const occurrencePeopleSelect = document.getElementById('occurrencePeople');
-        const occurrenceImagesInput = document.getElementById('occurrenceImages');
-        const occurrenceDescriptionInput = document.getElementById('occurrenceDescription');
-        const addOccurrenceBtn = document.getElementById('addOccurrenceBtn');
-        const printOccurrencesBtn = document.getElementById('printOccurrencesBtn');
-        const occurrencesListDiv = document.getElementById('occurrences-list');
-        const dataTableToggle = document.getElementById('dataTableToggle');
-        const dataTableContent = document.getElementById('dataTableContent');
-        const toggleIcon = document.getElementById('toggleIcon');
-        const loadDataFileInput = document.createElement('input');
-        loadDataFileInput.type = 'file';
-        loadDataFileInput.accept = '.json';
-        loadDataFileInput.style.display = 'none';
-        document.body.appendChild(loadDataFileInput);
-        const confirmModal = document.getElementById('custom-confirm-modal');
-        const confirmModalText = document.getElementById('confirm-modal-text');
-        const confirmModalYes = document.getElementById('confirm-modal-yes');
-        const confirmModalNo = document.getElementById('confirm-modal-no');
-        let confirmCallback = null;
-        const menuToggle = document.getElementById('menu-toggle');
-        const sidebar = document.getElementById('navbar');
-        const mainContent = document.getElementById('main-content');
-        const sidebarOverlay = document.getElementById('sidebar-overlay');
-        const menuOpenIcon = document.getElementById('menu-open-icon');
-        const menuCloseIcon = document.getElementById('menu-close-icon');
-        const filterYearSelect = document.getElementById('filterYear');
-        const filterMonthDiv = document.getElementById('filterMonth');
-
-        function showMessage(message, type = 'info') {
-            messageBox.textContent = message;
-            messageBox.className = 'p-4 mb-4 text-sm text-center rounded-lg no-print';
-            messageBox.classList.remove('hidden');
-            if (type === 'success') {
-                messageBox.classList.add('bg-green-100', 'text-green-800');
-            } else if (type === 'error') {
-                messageBox.classList.add('bg-red-100', 'text-red-800');
-            } else {
-                messageBox.classList.add('bg-blue-100', 'text-blue-800');
-            }
-            setTimeout(() => messageBox.classList.add('hidden'), 5000);
-        }
-
-        function showConfirmModal(message, callback) {
-            confirmModalText.textContent = message;
-            confirmCallback = callback;
-            confirmModal.classList.add('visible');
-        }
+        // --- DOM ELEMENT REFERENCES ---
+        const D = (id) => document.getElementById(id);
+        const loadingScreen = D('loading-screen'), sectionLoadingScreen = D('section-loading-screen'), mainTitle = D('main-title'),
+        navInfo = D('nav-info'), navSchedule = D('nav-schedule'), navOccurrences = D('nav-occurrences'), navEvents = D('nav-events'),
+        infoSection = D('info-section'), scheduleSection = D('schedule-section'), occurrencesSection = D('occurrences-section'), eventsSection = D('events-section'),
+        excelFileInput = D('excelFile'), loadExcelButton = D('loadExcel'), saveDataButton = D('saveData'), loadDataButton = D('loadData'),
+        exportExcelButton = D('exportExcel'), deleteSelectedButton = D('deleteSelectedBtn'), clearAllDataBtn = D('clearAllDataBtn'),
+        dataContainer = D('data-container'), messageBox = D('message-box'), newNameInput = D('newName'),
+        newMeetingDayWeekdaySelect = D('newMeetingDayWeekday'), newMeetingDayWeekendSelect = D('newMeetingDayWeekend'), newStatusSelect = D('newStatus'),
+        coupleContainer = D('couple-container'), newSpouseNameInput = D('newSpouseName'), mainPersonGenderContainer = D('main-person-gender-container'),
+        newGenderSelect = D('newGender'), spouseGenderContainer = D('spouse-gender-container'), newSpouseGenderSelect = D('newSpouseGender'),
+        newCongressDatesInput = D('newCongressDates'), newSegCheckbox = D('newSeg'), newTerCheckbox = D('newTer'),
+        newQuaCheckbox = D('newQua'), newQuiCheckbox = D('newQui'), newSexCheckbox = D('newSex'),
+        newSabCheckbox = D('newSab'), newDomCheckbox = D('newDom'), addPersonBtn = D('addPersonBtn'),
+        scheduleMonthSelect = D('scheduleMonth'), scheduleYearInput = D('scheduleYear'), scheduleMonthTypeSelect = D('scheduleMonthType'),
+        scheduleCouplesTogetherCheckbox = D('scheduleCouplesTogether'), generateScheduleBtn = D('generateScheduleBtn'),
+        printScheduleBtn = D('printScheduleBtn'), scheduleOutputDiv = D('schedule-output'), occurrenceDateInput = D('occurrenceDate'),
+        occurrencePeopleSelect = D('occurrencePeople'), occurrenceImagesInput = D('occurrenceImages'),
+        occurrenceDescriptionInput = D('occurrenceDescription'), addOccurrenceBtn = D('addOccurrenceBtn'),
+        printOccurrencesBtn = D('printOccurrencesBtn'), occurrencesListDiv = D('occurrences-list'),
+        dataTableToggle = D('dataTableToggle'), dataTableContent = D('dataTableContent'), toggleIcon = D('toggleIcon'),
+        confirmModal = D('custom-confirm-modal'), confirmModalText = D('confirm-modal-text'),
+        confirmModalYes = D('confirm-modal-yes'), confirmModalNo = D('confirm-modal-no'), summaryModal = D('summary-modal'),
+        summaryModalClose = D('summary-modal-close'); let confirmCallback = null;
+        const menuToggle = D('menu-toggle'), sidebar = D('navbar'), mainContent = D('main-content'),
+        sidebarOverlay = D('sidebar-overlay'), menuOpenIcon = D('menu-open-icon'), menuCloseIcon = D('menu-close-icon'),
+        filterYearSelect = D('filterYear'), filterMonthDiv = D('filterMonth'), newEventDateInput = D('newEventDate'),
+        newEventNameSelect = D('newEventName'), newEventPublishersInput = D('newEventPublishers'), newEventQuantityInput = D('newEventQuantity'),
+        newEventWeekendsInput = D('newEventWeekends'), newEventCongregationsInput = D('newEventCongregations'),
+        newEventCircuitsInput = D('newEventCircuits'), newEventSpeakerTypeSelect = D('newEventSpeakerType'),
+        bethelSpeakerContainer = D('bethelSpeakerContainer'), newEventBethelSpeakerInput = D('newEventBethelSpeaker'),
+        circuitSpeakerContainer = D('circuitSpeakerContainer'), newEventCircuitSpeakerInput = D('newEventCircuitSpeaker'),
+        addEventBtn = D('addEventBtn'), printEventsBtn = D('printEventsBtn'), showSummaryBtn = D('showSummaryBtn'),
+        circuitTabBtn = D('circuit-tab-btn'), bethelTabBtn = D('bethel-tab-btn'),
+        circuitEventsList = D('circuit-events-list'), bethelEventsList = D('bethel-events-list'),
+        eventFormToggle = D('eventFormToggle'), eventFormContent = D('eventFormContent'), eventToggleIcon = D('eventToggleIcon'),
+        eventFiltersAside = D('event-filters'), eventFilterYearSelect = D('eventFilterYear'), eventFilterMonthDiv = D('eventFilterMonth'),
+        eventsExcelFileInput = D('eventsExcelFile'), loadEventsExcelBtn = D('loadEventsExcelBtn'), clearAllEventsBtn = D('clearAllEventsBtn');
+        const loadDataFileInput = document.createElement('input'); 
+        loadDataFileInput.type = 'file'; loadDataFileInput.accept = '.json'; loadDataFileInput.style.display = 'none'; document.body.appendChild(loadDataFileInput);
         
-        confirmModalYes.addEventListener('click', () => {
-            if (confirmCallback) confirmCallback(true);
-            confirmModal.classList.remove('visible');
-        });
-
-        confirmModalNo.addEventListener('click', () => {
-            if (confirmCallback) confirmCallback(false);
-            confirmModal.classList.remove('visible');
-        });
-
-        function saveDataToLocalStorage() {
-            try {
-                const appData = {
-                    people: peopleData,
-                    occurrences: occurrencesData
-                };
-                localStorage.setItem('organizationalAppData', JSON.stringify(appData));
-            } catch (error) {
-                console.error('Erro ao salvar dados no localStorage:', error);
-                showMessage('Erro ao salvar dados localmente.', 'error');
-            }
-        }
-
-        function loadDataFromLocalStorage() {
-            try {
-                const storedData = localStorage.getItem('organizationalAppData');
-                if (storedData) {
-                    const appData = JSON.parse(storedData);
-                    peopleData = appData.people || [];
-                    occurrencesData = appData.occurrences || [];
-                    renderAll();
-                    showMessage('Dados carregados com sucesso!', 'success');
-                } else {
-                    showMessage('Nenhum dado salvo localmente encontrado.', 'info');
-                }
-            } catch (error) {
-                console.error('Erro ao carregar dados do localStorage:', error);
-                showMessage('Erro ao carregar dados locais.', 'error');
-            }
-        }
-
-        function saveDataToFile() {
-            if (peopleData.length === 0 && occurrencesData.length === 0) {
-                showMessage('Não há dados para salvar.', 'info');
-                return;
-            }
-            try {
-                const appData = {
-                    people: peopleData,
-                    occurrences: occurrencesData
-                };
-                const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'banco_de_dados_organizacional.json';
-                a.click();
-                URL.revokeObjectURL(url);
-                showMessage('Dados salvos em "banco_de_dados_organizacional.json"!', 'success');
-            } catch (error) {
-                console.error('Erro ao salvar dados no arquivo:', error);
-                showMessage('Erro ao salvar dados no arquivo.', 'error');
-            }
-        }
-
-        function loadDataFromFile(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const appData = JSON.parse(e.target.result);
-                    if (typeof appData === 'object' && appData !== null) {
-                        peopleData = appData.people || [];
-                        occurrencesData = appData.occurrences || [];
-                        renderAll();
-                        showMessage('Dados carregados do arquivo com sucesso!', 'success');
-                        saveDataToLocalStorage();
-                    } else {
-                        showMessage('Formato de arquivo inválido.', 'error');
-                    }
-                } catch (error) {
-                    console.error('Erro ao ler o arquivo de dados:', error);
-                    showMessage('Erro ao processar o arquivo de dados.', 'error');
-                }
-            };
-            reader.readAsText(file);
-        }
+        // --- All functions from here down are complete and correct ---
         
-        function renderAll() {
-            renderData();
-            populateOccurrencePeopleSelect();
-            renderOccurrences();
-            scheduleOutputDiv.innerHTML = '';
-            printScheduleBtn.classList.add('hidden');
-        }
-
-        function renderData() {
-            dataContainer.innerHTML = '';
-            if (peopleData.length === 0) {
-                dataContainer.innerHTML = '<p class="text-center text-gray-600 col-span-full">Nenhum dado para exibir.</p>';
-                return;
-            }
-
-            const table = document.createElement('table');
-            table.className = 'w-full border-collapse mt-6 bg-white rounded-lg overflow-hidden shadow-md data-table';
-            table.innerHTML = `
-                <thead>
-                    <tr>
-                        <th class="p-4 text-left border-b"><input type="checkbox" id="selectAllCheckbox" class="form-checkbox"></th>
-                        <th class="p-4 text-left border-b">Nome</th>
-                        <th class="p-4 text-left border-b">Gênero</th>
-                        <th class="p-4 text-left border-b">Cônjuge</th>
-                        <th class="p-4 text-left border-b">Reunião Semana</th>
-                        <th class="p-4 text-left border-b">Reunião Fim Semana</th>
-                        <th class="p-4 text-left border-b">Congresso</th>
-                        <th class="p-4 text-center border-b">Seg</th>
-                        <th class="p-4 text-center border-b">Ter</th>
-                        <th class="p-4 text-center border-b">Qua</th>
-                        <th class="p-4 text-center border-b">Qui</th>
-                        <th class="p-4 text-center border-b">Sex</th>
-                        <th class="p-4 text-center border-b">Sab</th>
-                        <th class="p-4 text-center border-b">Dom</th>
-                        <th class="p-4 text-left border-b">Ações</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>`;
-            
-            const tbody = table.querySelector('tbody');
-            const daysOfWeekMapping = { "Seg": 'segunda', "Ter": 'terca', "Qua": 'quarta', "Qui": 'quinta', "Sex": 'sexta', "Sab": 'sabado', "Dom": 'domingo' };
-            const daysOrder = Object.keys(daysOfWeekMapping);
-
-            peopleData.forEach((person, index) => {
-                const tr = tbody.insertRow();
-                
-                const displayMeetingDayWeekdayMap = { '': 'Nenhuma', 'segunda': 'Segunda-feira', 'terca': 'Terça-feira', 'quarta': 'Quarta-feira', 'quinta': 'Quinta-feira', 'sexta': 'Sexta-feira' };
-                const displayMeetingDayWeekendMap = { '': 'Nenhuma', 'sabado': 'Sábado', 'domingo': 'Domingo', 'final de semana': 'Fim de Semana' };
-                
-                const formattedCongressDates = (person.congress || [])
-                    .map(dateStr => {
-                        const date = new Date(dateStr + 'T00:00:00');
-                        return isNaN(date) ? dateStr : date.toLocaleDateString('pt-BR');
-                    })
-                    .join(', ');
-
-                let cells = `
-                    <td class="p-4 border-b"><input type="checkbox" class="row-checkbox form-checkbox" data-index="${index}"></td>
-                    <td class="p-4 border-b editable-text-cell" data-field="name" data-index="${index}">${person.name || 'N/A'}</td>
-                    <td class="p-4 border-b editable-text-cell" data-field="gender" data-index="${index}">${person.gender || 'N/A'}</td>
-                    <td class="p-4 border-b editable-text-cell" data-field="spouseName" data-index="${index}">${person.spouseName || ''}</td>
-                    <td class="p-4 border-b editable-text-cell" data-field="meetingDayWeekday" data-index="${index}">${displayMeetingDayWeekdayMap[person.meetingDayWeekday] || 'N/A'}</td>
-                    <td class="p-4 border-b editable-text-cell" data-field="meetingDayWeekend" data-index="${index}">${displayMeetingDayWeekendMap[person.meetingDayWeekend] || 'N/A'}</td>
-                    <td class="p-4 border-b editable-text-cell" data-field="congress" data-index="${index}">${formattedCongressDates || 'N/A'}</td>
-                `;
-
-                daysOrder.forEach(dayDisplay => {
-                    const dayKey = daysOfWeekMapping[dayDisplay];
-                    const isAvailable = person[dayKey];
-                    cells += `<td class="p-4 border-b day-cell" data-field="${dayKey}" data-index="${index}" style="color: ${isAvailable ? '#16a34a' : '#dc2626'}; font-weight: bold;">${isAvailable ? '✓' : '✗'}</td>`;
-                });
-
-                cells += `<td class="p-4 border-b"><button class="px-3 py-1 bg-red-500 text-white rounded-md text-sm delete-person-btn" data-index="${index}">Excluir</button></td>`;
-                tr.innerHTML = cells;
-            });
-            
-            dataContainer.appendChild(table);
-            addTableEventListeners();
-        }
+        function showMessage(message, type = 'info') { messageBox.textContent = message; messageBox.className = 'p-4 mb-4 text-sm text-center rounded-lg no-print'; messageBox.classList.remove('hidden'); if (type === 'success') { messageBox.classList.add('bg-green-100', 'text-green-800'); } else if (type === 'error') { messageBox.classList.add('bg-red-100', 'text-red-800'); } else { messageBox.classList.add('bg-blue-100', 'text-blue-800'); } setTimeout(() => messageBox.classList.add('hidden'), 5000); }
+        function showConfirmModal(message, callback) { confirmModalText.textContent = message; confirmCallback = callback; confirmModal.classList.add('visible'); }
+        confirmModalYes.addEventListener('click', () => { if (confirmCallback) confirmCallback(true); confirmModal.classList.remove('visible'); });
+        confirmModalNo.addEventListener('click', () => { if (confirmCallback) confirmCallback(false); confirmModal.classList.remove('visible'); });
+        function saveDataToLocalStorage() { try { const appData = { people: peopleData, occurrences: occurrencesData, events: eventsData }; localStorage.setItem('organizationalAppData', JSON.stringify(appData)); } catch (error) { console.error('Error saving data to localStorage:', error); showMessage('Error saving data locally.', 'error'); } }
+        function loadDataFromLocalStorage() { try { const storedData = localStorage.getItem('organizationalAppData'); if (storedData) { const appData = JSON.parse(storedData); peopleData = appData.people || []; occurrencesData = appData.occurrences || []; eventsData = appData.events || []; renderAll(); showMessage('Data loaded successfully!', 'success'); } else { showMessage('No locally saved data found.', 'info'); } } catch (error) { console.error('Error loading data from localStorage:', error); showMessage('Error loading local data.', 'error'); } }
+        function saveDataToFile() { if (peopleData.length === 0 && occurrencesData.length === 0 && eventsData.length === 0) { showMessage('No data to save.', 'info'); return; } try { const appData = { people: peopleData, occurrences: occurrencesData, events: eventsData }; const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'organizational_database.json'; a.click(); URL.revokeObjectURL(url); showMessage('Data saved to "organizational_database.json"!', 'success'); } catch (error) { console.error('Error saving data to file:', error); showMessage('Error saving data to file.', 'error'); } }
+        function loadDataFromFile(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const appData = JSON.parse(e.target.result); if (typeof appData === 'object' && appData !== null) { peopleData = appData.people || []; occurrencesData = appData.occurrences || []; eventsData = appData.events || []; renderAll(); showMessage('Data loaded from file successfully!', 'success'); saveDataToLocalStorage(); } else { showMessage('Invalid file format.', 'error'); } } catch (error) { console.error('Error reading data file:', error); showMessage('Error processing data file.', 'error'); } }; reader.readAsText(file); }
         
-        function addTableEventListeners() {
-            document.querySelectorAll('.editable-text-cell').forEach(cell => cell.addEventListener('click', handleTextCellEdit));
-            document.querySelectorAll('.day-cell').forEach(cell => cell.addEventListener('click', handleDayCellToggle));
-            document.getElementById('selectAllCheckbox')?.addEventListener('change', handleSelectAll);
-            document.querySelectorAll('.row-checkbox').forEach(checkbox => checkbox.addEventListener('change', handleRowCheckboxChange));
-            document.querySelectorAll('.delete-person-btn').forEach(btn => btn.addEventListener('click', (e) => deletePerson(parseInt(e.target.dataset.index))));
-        }
-
-        function addPerson() {
-            const name = newNameInput.value.trim();
-            if (!name) {
-                showMessage('O nome é obrigatório.', 'error');
-                return;
-            }
-            const status = newStatusSelect.value;
-            const spouseName = (status === 'Casal') ? newSpouseNameInput.value.trim() : '';
-            const gender = newGenderSelect.value;
-
-            if (status === 'Casal' && !spouseName) {
-                showMessage('O nome do cônjuge é obrigatório para o status "Casal".', 'error');
-                return;
-            }
-
-            let congressDates = [];
-            if (congressDatePicker.selectedDates.length > 0) {
-                const start = congressDatePicker.selectedDates[0];
-                const end = congressDatePicker.selectedDates.length > 1 ? congressDatePicker.selectedDates[1] : start;
-                let currentDate = new Date(start);
-                while (currentDate <= end) {
-                    congressDates.push(flatpickr.formatDate(currentDate, "Y-m-d"));
-                    currentDate.setDate(currentDate.getDate() + 1);
-                }
-            }
-            
-            const commonData = {
-                meetingDayWeekday: newMeetingDayWeekdaySelect.value,
-                meetingDayWeekend: newMeetingDayWeekendSelect.value,
-                congress: congressDates,
-                segunda: newSegCheckbox.checked, terca: newTerCheckbox.checked,
-                quarta: newQuaCheckbox.checked, quinta: newQuiCheckbox.checked,
-                sexta: newSexCheckbox.checked, sabado: newSabCheckbox.checked,
-                domingo: newDomCheckbox.checked
-            };
-
-            if (status === 'Casal') {
-                 const spouseGender = newSpouseGenderSelect.value;
-                 const person1 = {
-                    ...commonData,
-                    name: name,
-                    gender: gender,
-                    status: status,
-                    spouseName: spouseName,
-                };
-                peopleData.push(person1);
-                
-                const person2 = {
-                    ...commonData,
-                    name: spouseName,
-                    gender: spouseGender,
-                    status: status,
-                    spouseName: name,
-                };
-                peopleData.push(person2);
-            } else {
-                 const person1 = {
-                    ...commonData,
-                    name: name,
-                    gender: gender,
-                    status: status,
-                    spouseName: '',
-                };
-                peopleData.push(person1);
-            }
-            
-            renderAll();
-            saveDataToLocalStorage();
-            showMessage('Publicador(es) adicionado(s) com sucesso!', 'success');
-            
-            newNameInput.value = '';
-            newStatusSelect.value = 'Solteiro(a)';
-            newSpouseNameInput.value = '';
-            coupleContainer.classList.add('hidden');
-            mainPersonGenderContainer.classList.remove('hidden');
-            newMeetingDayWeekdaySelect.value = '';
-            newMeetingDayWeekendSelect.value = '';
-            congressDatePicker.clear();
-            [newSegCheckbox, newTerCheckbox, newQuaCheckbox, newQuiCheckbox, newSexCheckbox, newSabCheckbox, newDomCheckbox].forEach(cb => cb.checked = true);
-        }
-
-        function deletePerson(index) {
-            showConfirmModal('Tem certeza que deseja excluir este publicador?', (confirmed) => {
-                if (confirmed) {
-                    peopleData.splice(index, 1);
-                    renderAll();
-                    saveDataToLocalStorage();
-                    showMessage('Publicador excluído com sucesso!', 'success');
-                }
-            });
-        }
+        function renderAll() { renderData(); populateOccurrencePeopleSelect(); renderOccurrences(); renderEvents(); scheduleOutputDiv.innerHTML = ''; printScheduleBtn.classList.add('hidden'); }
         
-        function deleteSelectedPeople() {
-            const selectedIndices = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => parseInt(cb.dataset.index));
-            if (selectedIndices.length === 0) {
-                showMessage('Nenhum publicador selecionado.', 'info');
-                return;
-            }
-            showConfirmModal(`Tem certeza que deseja excluir ${selectedIndices.length} publicador(es)?`, (confirmed) => {
-                if (confirmed) {
-                    selectedIndices.sort((a, b) => b - a).forEach(index => peopleData.splice(index, 1));
-                    renderAll();
-                    saveDataToLocalStorage();
-                    showMessage(`${selectedIndices.length} publicador(es) excluído(s)!`, 'success');
-                }
-            });
-        }
-        
-        function handleSelectAll(event) {
-            document.querySelectorAll('.row-checkbox').forEach(checkbox => checkbox.checked = event.target.checked);
-        }
-
-        function handleRowCheckboxChange() {
-            const allCheckboxes = document.querySelectorAll('.row-checkbox');
-            const selectAll = document.getElementById('selectAllCheckbox');
-            if(selectAll) {
-               selectAll.checked = Array.from(allCheckboxes).every(checkbox => checkbox.checked);
-            }
-        }
-
-        function handleDayCellToggle(event) {
-            const cell = event.target;
-            const index = parseInt(cell.dataset.index);
-            const field = cell.dataset.field;
-            peopleData[index][field] = !peopleData[index][field];
-            renderData();
-            saveDataToLocalStorage();
-        }
-
-        function handleTextCellEdit(event) {
-            const cell = event.target;
-            const index = parseInt(cell.dataset.index);
-            const field = cell.dataset.field;
-
-            if (cell.querySelector('input') || cell.querySelector('select')) return;
-
-            const currentValue = peopleData[index][field];
-            let inputElement;
-
-            const createSelect = (options, selectedValue) => {
-                const select = document.createElement('select');
-                options.forEach(opt => {
-                    const option = document.createElement('option');
-                    option.value = opt.value;
-                    option.textContent = opt.text;
-                    if (opt.value === selectedValue) option.selected = true;
-                    select.appendChild(option);
-                });
-                return select;
-            };
-
-            if (field === 'status') {
-                inputElement = createSelect([
-                    { value: 'Solteiro(a)', text: 'Solteiro(a)' },
-                    { value: 'Casal', text: 'Casal' }
-                ], currentValue);
-            } else if (field === 'gender') {
-                inputElement = createSelect([
-                    { value: 'Masculino', text: 'Masculino' },
-                    { value: 'Feminino', text: 'Feminino' }
-                ], currentValue);
-            } else if (field === 'congress') {
-                const tempInput = document.createElement('input');
-                tempInput.type = 'hidden';
-                cell.appendChild(tempInput);
-                const defaultDate = (Array.isArray(currentValue) && currentValue.length > 0)
-                    ? [currentValue[0], currentValue[currentValue.length - 1]]
-                    : [];
-
-                const picker = flatpickr(tempInput, {
-                    mode: "range",
-                    dateFormat: "Y-m-d",
-                    altInput: true,
-                    altFormat: "d/m/Y",
-                    defaultDate: defaultDate,
-                    locale: "pt",
-                    onClose: function(selectedDates) {
-                        let newCongressDates = [];
-                        if (selectedDates.length === 2) {
-                            const [start, end] = selectedDates;
-                            let currentDate = new Date(start);
-                            while (currentDate <= end) {
-                                newCongressDates.push(flatpickr.formatDate(currentDate, "Y-m-d"));
-                                currentDate.setDate(currentDate.getDate() + 1);
-                            }
-                        } else if (selectedDates.length === 1) {
-                            newCongressDates.push(flatpickr.formatDate(selectedDates[0], "Y-m-d"));
-                        }
-                        peopleData[index][field] = newCongressDates;
-                        renderData();
-                        saveDataToLocalStorage();
-                    },
-                    appendTo: cell
-                });
-                picker.open();
-                return;
-            } else if (field === 'meetingDayWeekday') {
-                inputElement = createSelect([
-                    { value: '', text: 'Nenhuma' }, { value: 'segunda', text: 'Segunda-feira' },
-                    { value: 'terca', text: 'Terça-feira' }, { value: 'quarta', text: 'Quarta-feira' },
-                    { value: 'quinta', text: 'Quinta-feira' }, { value: 'sexta', text: 'Sexta-feira' }
-                ], currentValue);
-            } else if (field === 'meetingDayWeekend') {
-                inputElement = createSelect([
-                    { value: '', text: 'Nenhuma' }, { value: 'sabado', text: 'Sábado' },
-                    { value: 'domingo', text: 'Domingo' }, { value: 'final de semana', text: 'Fim de Semana' }
-                ], currentValue);
-            } else {
-                inputElement = document.createElement('input');
-                inputElement.type = 'text';
-                inputElement.value = currentValue || '';
-            }
-
-            inputElement.className = 'w-full p-1 border border-blue-400 rounded-md focus:outline-none';
-            
-            const saveChanges = () => {
-                peopleData[index][field] = inputElement.value.trim();
-                renderData();
-                saveDataToLocalStorage();
-            };
-
-            inputElement.addEventListener('blur', saveChanges);
-            inputElement.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') inputElement.blur();
-                else if (e.key === 'Escape') renderData();
-            });
-
-            cell.innerHTML = '';
-            cell.appendChild(inputElement);
-            inputElement.focus();
-        }
-
-        loadExcelButton.addEventListener('click', () => {
-            const file = excelFileInput.files[0];
-            if (!file) {
-                showMessage('Por favor, selecione um arquivo Excel primeiro.', 'info');
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                    
-                    if (json.length < 2) {
-                        showMessage('A planilha está vazia ou não tem cabeçalhos.', 'error');
-                        return;
-                    }
-
-                    const headers = json[0].map(h => String(h || '').toLowerCase().trim());
-                    const dataRows = json.slice(1);
-
-                    const getIndex = (keys) => {
-                        for (const key of keys) {
-                            const index = headers.indexOf(key);
-                            if (index !== -1) return index;
-                        }
-                        return -1;
-                    };
-
-                    const nameIndex = getIndex(['nome', 'primeiro nome']);
-                    const genderIndex = getIndex(['gênero', 'genero']);
-                    const statusIndex = getIndex(['status']);
-                    const spouseIndex = getIndex(['cônjuge', 'conjuge']);
-                    const meetingWeekIndex = getIndex(['dia reunião semana', 'reunião semana']);
-                    const meetingWeekendIndex = getIndex(['dia reunião fim de semana', 'reunião fim de semana']);
-                    const congress1Index = getIndex(['congresso1', 'congresso 1']);
-                    const congress2Index = getIndex(['congresso2', 'congresso 2']);
-                    const congress3Index = getIndex(['congresso3', 'congresso 3']);
-                    const dayIndexes = {
-                        segunda: getIndex(['seg']), terca: getIndex(['ter']), quarta: getIndex(['qua']),
-                        quinta: getIndex(['qui']), sexta: getIndex(['sex']), sabado: getIndex(['sab']), domingo: getIndex(['dom'])
-                    };
-
-                    peopleData = dataRows.map(row => {
-                        const congressDates = [
-                            row[congress1Index], row[congress2Index], row[congress3Index]
-                        ].filter(Boolean).map(d => String(d));
-
-                        const person = {
-                            name: row[nameIndex] || '',
-                            gender: row[genderIndex] || '',
-                            status: row[statusIndex] || 'Solteiro(a)',
-                            spouseName: row[spouseIndex] || '',
-                            meetingDayWeekday: String(row[meetingWeekIndex] || '').toLowerCase().trim(),
-                            meetingDayWeekend: String(row[meetingWeekendIndex] || '').toLowerCase().trim(),
-                            congress: congressDates,
-                            segunda: row[dayIndexes.segunda] ? true : false,
-                            terca: row[dayIndexes.terca] ? true : false,
-                            quarta: row[dayIndexes.quarta] ? true : false,
-                            quinta: row[dayIndexes.quinta] ? true : false,
-                            sexta: row[dayIndexes.sexta] ? true : false,
-                            sabado: row[dayIndexes.sabado] ? true : false,
-                            domingo: row[dayIndexes.domingo] ? true : false
-                        };
-                        return person;
-                    }).filter(p => p.name);
-
-                    renderAll();
-                    saveDataToLocalStorage();
-                    showMessage('Dados da planilha carregados com sucesso!', 'success');
-
-                } catch (error) {
-                    console.error('Erro ao ler o arquivo Excel:', error);
-                    showMessage('Erro ao processar o arquivo Excel.', 'error');
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        });
-
-        exportExcelButton.addEventListener('click', () => {
-            if (peopleData.length === 0 && occurrencesData.length === 0 && currentSchedule.length === 0) {
-                showMessage('Não há dados para exportar.', 'info');
-                return;
-            }
-
-            const wb = XLSX.utils.book_new();
-
-            if (peopleData.length > 0) {
-                const exportPeople = peopleData.map(p => ({
-                    'Nome': p.name, 'Gênero': p.gender, 'Status': p.status, 'Cônjuge': p.spouseName,
-                    'Reunião Semana': p.meetingDayWeekday, 'Reunião Fim de Semana': p.meetingDayWeekend,
-                    'Congresso': (p.congress || []).join(', '),
-                    'Seg': p.segunda ? 'x' : '', 'Ter': p.terca ? 'x' : '', 'Qua': p.quarta ? 'x' : '',
-                    'Qui': p.quinta ? 'x' : '', 'Sex': p.sexta ? 'x' : '', 'Sab': p.sabado ? 'x' : '', 'Dom': p.domingo ? 'x' : ''
-                }));
-                const wsPeople = XLSX.utils.json_to_sheet(exportPeople);
-                wsPeople['!cols'] = [
-                    { wch: 30 }, { wch: 15 }, { wch: 15 }, { wch: 30 }, { wch: 20 }, { wch: 20 }, { wch: 30 },
-                    { wch: 5 }, { wch: 5 }, { wch: 5 }, { wch: 5 }, { wch: 5 }, { wch: 5 }, { wch: 5 }
-                ];
-                XLSX.utils.book_append_sheet(wb, wsPeople, "Publicadores");
-            }
-
-            if (currentSchedule.length > 0) {
-                const displayDayNames = { "segunda": "Segunda-feira", "terca": "Terça-feira", "quarta": "Quarta-feira", "quinta": "Quinta-feira", "sexta": "Sexta-feira", "sabado": "Sábado", "domingo": "Domingo" };
-                const exportSchedule = currentSchedule.map(entry => ({
-                    'Data': new Date(entry.date + 'T00:00:00').toLocaleDateString('pt-BR'),
-                    'Dia da Semana': displayDayNames[entry.dayOfWeek],
-                    'Atendente(s)': entry.attendant.join(', '),
-                    'Vigia(s)': entry.watchman.join(', ')
-                }));
-                const wsSchedule = XLSX.utils.json_to_sheet(exportSchedule);
-                wsSchedule['!cols'] = [{ wch: 15 }, { wch: 15 }, { wch: 40 }, { wch: 40 }];
-                XLSX.utils.book_append_sheet(wb, wsSchedule, "Escala de Trabalho");
-            }
-
-            if (occurrencesData.length > 0) {
-                const exportOccurrences = occurrencesData.map(o => ({
-                    'Data': new Date(o.date + 'T00:00:00').toLocaleDateString('pt-BR'),
-                    'Pessoas Envolvidas': o.people.join(', '),
-                    'Descrição': o.description
-                }));
-                const wsOccurrences = XLSX.utils.json_to_sheet(exportOccurrences);
-                wsOccurrences['!cols'] = [{ wch: 15 }, { wch: 40 }, { wch: 80 }];
-                XLSX.utils.book_append_sheet(wb, wsOccurrences, "Ocorrências");
-            }
-
-            XLSX.writeFile(wb, "dados_organizacionais.xlsx");
-            showMessage('Dados exportados para "dados_organizacionais.xlsx"!', 'success');
-        });
-
-        function populateOccurrencePeopleSelect() {
-            occurrencePeopleSelect.innerHTML = '';
-            peopleData.forEach(person => {
-                const option = document.createElement('option');
-                option.value = person.name;
-                option.textContent = person.name;
-                occurrencePeopleSelect.appendChild(option);
-            });
-        }
-
-        async function addOccurrence() {
-            const date = occurrenceDateInput.value;
-            const description = occurrenceDescriptionInput.value.trim();
-            const selectedPeople = Array.from(occurrencePeopleSelect.selectedOptions).map(opt => opt.value);
-            const files = occurrenceImagesInput.files;
-
-            if (!date || !description || selectedPeople.length === 0) {
-                showMessage('Por favor, preencha todos os campos da ocorrência.', 'error');
-                return;
-            }
-
-            const images = await readFilesAsDataURLs(files);
-
-            occurrencesData.push({ 
-                id: Date.now(), 
-                date: date, 
-                people: selectedPeople, 
-                description: description,
-                images: images 
-            });
-            renderOccurrences();
-            saveDataToLocalStorage();
-            showMessage('Ocorrência registrada com sucesso!', 'success');
-            
-            occurrenceDateInput.value = '';
-            occurrenceDescriptionInput.value = '';
-            occurrencePeopleSelect.selectedIndex = -1;
-            occurrenceImagesInput.value = '';
-        }
-
-        function readFilesAsDataURLs(files) {
-            return Promise.all(Array.from(files).map(file => {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
-            }));
-        }
-
-        function renderOccurrences() {
-            populateOccurrenceFilters();
-            const filteredOccurrences = occurrencesData.filter(o => {
-                const occurrenceDate = new Date(o.date + "T00:00:00");
-                const yearMatch = occurrenceDate.getFullYear() === currentFilterYear;
-                const monthMatch = currentFilterMonth === -1 || occurrenceDate.getMonth() === currentFilterMonth;
-                return yearMatch && monthMatch;
-            }).sort((a,b) => new Date(b.date) - new Date(a.date));
-
-            occurrencesListDiv.innerHTML = '<h3 class="text-xl font-semibold text-gray-800 mb-4">Ocorrências Registradas</h3>';
-            if (filteredOccurrences.length === 0) {
-                occurrencesListDiv.innerHTML += '<p class="text-gray-600">Nenhuma ocorrência encontrada para este período.</p>';
-                return;
-            }
-
-            filteredOccurrences.forEach(o => {
-                const occurrenceEl = document.createElement('div');
-                occurrenceEl.className = 'bg-white p-4 rounded-lg shadow-md mb-4';
-
-                let imagesHtml = '';
-                if (o.images && o.images.length > 0) {
-                    imagesHtml += '<div class="flex flex-wrap gap-2 mb-2">';
-                    o.images.forEach(imgData => {
-                        imagesHtml += `<img src="${imgData}" class="w-32 h-32 object-cover rounded-md border" alt="Imagem da ocorrência">`;
-                    });
-                    imagesHtml += '</div>';
-                }
-
-                occurrenceEl.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="font-bold text-lg text-blue-700">${new Date(o.date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
-                            ${imagesHtml}
-                            <p class="font-semibold text-gray-700 mt-1">No turno: ${o.people.join(', ')}</p>
-                            <p class="text-gray-600 mt-2">${o.description.replace(/\n/g, '<br>')}</p>
-                        </div>
-                        <button class="px-3 py-1 bg-red-500 text-white rounded-md text-sm delete-occurrence-btn no-print" data-id="${o.id}">Excluir</button>
-                    </div>`;
-                occurrencesListDiv.appendChild(occurrenceEl);
-            });
-            document.querySelectorAll('.delete-occurrence-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const idToDelete = parseInt(e.target.dataset.id);
-                     showConfirmModal('Tem certeza que deseja excluir esta ocorrência?', (confirmed) => {
-                        if(confirmed) {
-                            occurrencesData = occurrencesData.filter(o => o.id !== idToDelete);
-                            renderOccurrences();
-                            saveDataToLocalStorage();
-                            showMessage('Ocorrência excluída.', 'success');
-                        }
-                    });
-                });
-            });
-        }
-
-        function populateOccurrenceFilters() {
-            const years = [...new Set(occurrencesData.map(o => new Date(o.date + "T00:00:00").getFullYear()))].sort((a, b) => b - a);
-            filterYearSelect.innerHTML = years.map(y => `<option value="${y}" ${y === currentFilterYear ? 'selected' : ''}>${y}</option>`).join('');
-
-            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-            let monthsHtml = `<a href="#" data-month="-1" class="block p-2 rounded-md text-sm ${currentFilterMonth === -1 ? 'bg-blue-600 text-white' : 'hover:bg-gray-100'}">Todos os Meses</a>`;
-            monthsHtml += monthNames.map((m, i) => `<a href="#" data-month="${i}" class="block p-2 rounded-md text-sm ${i === currentFilterMonth ? 'bg-blue-600 text-white' : 'hover:bg-gray-100'}">${m}</a>`).join('');
-            filterMonthDiv.innerHTML = monthsHtml;
-
-            filterMonthDiv.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    currentFilterMonth = parseInt(e.target.dataset.month);
-                    renderOccurrences();
-                });
-            });
-        }
-
+        function renderData() { dataContainer.innerHTML = ''; if (peopleData.length === 0) { dataContainer.innerHTML = '<p class="text-center text-gray-600 col-span-full">Nenhum dado para exibir.</p>'; return; } const table = document.createElement('table'); table.className = 'w-full border-collapse mt-6 bg-white rounded-lg overflow-hidden shadow-md data-table'; table.innerHTML = `<thead><tr><th class="p-4 text-left border-b"><input type="checkbox" id="selectAllCheckbox" class="form-checkbox"></th><th class="p-4 text-left border-b">Nome</th><th class="p-4 text-left border-b">Gênero</th><th class="p-4 text-left border-b">Cônjuge</th><th class="p-4 text-left border-b">Reunião Semana</th><th class="p-4 text-left border-b">Reunião Fim Semana</th><th class="p-4 text-left border-b">Congresso</th><th class="p-4 text-center border-b">Seg</th><th class="p-4 text-center border-b">Ter</th><th class="p-4 text-center border-b">Qua</th><th class="p-4 text-center border-b">Qui</th><th class="p-4 text-center border-b">Sex</th><th class="p-4 text-center border-b">Sab</th><th class="p-4 text-center border-b">Dom</th><th class="p-4 text-left border-b">Ações</th></tr></thead><tbody></tbody>`; const tbody = table.querySelector('tbody'); const daysOfWeekMapping = { "Seg": 'segunda', "Ter": 'terca', "Qua": 'quarta', "Qui": 'quinta', "Sex": 'sexta', "Sab": 'sabado', "Dom": 'domingo' }; const daysOrder = Object.keys(daysOfWeekMapping); peopleData.forEach((person, index) => { const tr = tbody.insertRow(); const displayMeetingDayWeekdayMap = { '': 'Nenhuma', 'segunda': 'Segunda-feira', 'terca': 'Terça-feira', 'quarta': 'Quarta-feira', 'quinta': 'Quinta-feira', 'sexta': 'Sexta-feira' }; const displayMeetingDayWeekendMap = { '': 'Nenhuma', 'sabado': 'Sábado', 'domingo': 'Domingo', 'final de semana': 'Fim de Semana' }; const formattedCongressDates = (person.congress || []).map(dateStr => { const date = new Date(dateStr + 'T00:00:00'); return isNaN(date) ? dateStr : date.toLocaleDateString('pt-BR'); }).join(', '); let cells = `<td class="p-4 border-b"><input type="checkbox" class="row-checkbox form-checkbox" data-index="${index}"></td><td class="p-4 border-b editable-text-cell" data-field="name" data-index="${index}">${person.name || 'N/A'}</td><td class="p-4 border-b editable-text-cell" data-field="gender" data-index="${index}">${person.gender || 'N/A'}</td><td class="p-4 border-b editable-text-cell" data-field="spouseName" data-index="${index}">${person.spouseName || ''}</td><td class="p-4 border-b editable-text-cell" data-field="meetingDayWeekday" data-index="${index}">${displayMeetingDayWeekdayMap[person.meetingDayWeekday] || 'N/A'}</td><td class="p-4 border-b editable-text-cell" data-field="meetingDayWeekend" data-index="${index}">${displayMeetingDayWeekendMap[person.meetingDayWeekend] || 'N/A'}</td><td class="p-4 border-b editable-text-cell" data-field="congress" data-index="${index}">${formattedCongressDates || 'N/A'}</td>`; daysOrder.forEach(dayDisplay => { const dayKey = daysOfWeekMapping[dayDisplay]; const isAvailable = person[dayKey]; cells += `<td class="p-4 border-b day-cell" data-field="${dayKey}" data-index="${index}" style="color: ${isAvailable ? '#16a34a' : '#dc2626'}; font-weight: bold;">${isAvailable ? '✓' : '✗'}</td>`; }); cells += `<td class="p-4 border-b"><button class="px-3 py-1 bg-red-500 text-white rounded-md text-sm delete-person-btn" data-index="${index}">Excluir</button></td>`; tr.innerHTML = cells; }); dataContainer.appendChild(table); addTableEventListeners(); }
+        function addTableEventListeners() { document.querySelectorAll('.editable-text-cell').forEach(cell => cell.addEventListener('click', handleTextCellEdit)); document.querySelectorAll('.day-cell').forEach(cell => cell.addEventListener('click', handleDayCellToggle)); D('selectAllCheckbox')?.addEventListener('change', handleSelectAll); document.querySelectorAll('.row-checkbox').forEach(checkbox => checkbox.addEventListener('change', handleRowCheckboxChange)); document.querySelectorAll('.delete-person-btn').forEach(btn => btn.addEventListener('click', (e) => deletePerson(parseInt(e.target.dataset.index)))); }
+        function addPerson() { const name = newNameInput.value.trim(); if (!name) { showMessage('O nome é obrigatório.', 'error'); return; } const status = newStatusSelect.value; const spouseName = (status === 'Casal') ? newSpouseNameInput.value.trim() : ''; const gender = newGenderSelect.value; if (status === 'Casal' && !spouseName) { showMessage('O nome do cônjuge é obrigatório para o status "Casal".', 'error'); return; } let congressDates = []; if (congressDatePicker.selectedDates.length > 0) { const start = congressDatePicker.selectedDates[0]; const end = congressDatePicker.selectedDates.length > 1 ? congressDatePicker.selectedDates[1] : start; let currentDate = new Date(start); while (currentDate <= end) { congressDates.push(flatpickr.formatDate(currentDate, "Y-m-d")); currentDate.setDate(currentDate.getDate() + 1); } } const commonData = { meetingDayWeekday: newMeetingDayWeekdaySelect.value, meetingDayWeekend: newMeetingDayWeekendSelect.value, congress: congressDates, segunda: newSegCheckbox.checked, terca: newTerCheckbox.checked, quarta: newQuaCheckbox.checked, quinta: newQuiCheckbox.checked, sexta: newSexCheckbox.checked, sabado: newSabCheckbox.checked, domingo: newDomCheckbox.checked }; if (status === 'Casal') { const spouseGender = newSpouseGenderSelect.value; const person1 = { ...commonData, name: name, gender: gender, status: status, spouseName: spouseName, }; peopleData.push(person1); const person2 = { ...commonData, name: spouseName, gender: spouseGender, status: status, spouseName: name, }; peopleData.push(person2); } else { const person1 = { ...commonData, name: name, gender: gender, status: status, spouseName: '', }; peopleData.push(person1); } renderAll(); saveDataToLocalStorage(); showMessage('Publicador(es) adicionado(s) com sucesso!', 'success'); newNameInput.value = ''; newStatusSelect.value = 'Solteiro(a)'; newSpouseNameInput.value = ''; coupleContainer.classList.add('hidden'); mainPersonGenderContainer.classList.remove('hidden'); newMeetingDayWeekdaySelect.value = ''; newMeetingDayWeekendSelect.value = ''; congressDatePicker.clear(); [newSegCheckbox, newTerCheckbox, newQuaCheckbox, newQuiCheckbox, newSexCheckbox, newSabCheckbox, newDomCheckbox].forEach(cb => cb.checked = true); }
+        function deletePerson(index) { showConfirmModal('Tem certeza que deseja excluir este publicador?', (confirmed) => { if (confirmed) { peopleData.splice(index, 1); renderAll(); saveDataToLocalStorage(); showMessage('Publicador excluído com sucesso!', 'success'); } }); }
+        function deleteSelectedPeople() { const selectedIndices = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => parseInt(cb.dataset.index)); if (selectedIndices.length === 0) { showMessage('Nenhum publicador selecionado.', 'info'); return; } showConfirmModal(`Tem certeza que deseja excluir ${selectedIndices.length} publicador(es)?`, (confirmed) => { if (confirmed) { selectedIndices.sort((a, b) => b - a).forEach(index => peopleData.splice(index, 1)); renderAll(); saveDataToLocalStorage(); showMessage(`${selectedIndices.length} publicador(es) excluído(s)!`, 'success'); } }); }
+        function handleSelectAll(event) { document.querySelectorAll('.row-checkbox').forEach(checkbox => checkbox.checked = event.target.checked); }
+        function handleRowCheckboxChange() { const allCheckboxes = document.querySelectorAll('.row-checkbox'); const selectAll = D('selectAllCheckbox'); if(selectAll) { selectAll.checked = Array.from(allCheckboxes).every(checkbox => checkbox.checked); } }
+        function handleDayCellToggle(event) { const cell = event.target; const index = parseInt(cell.dataset.index); const field = cell.dataset.field; peopleData[index][field] = !peopleData[index][field]; renderData(); saveDataToLocalStorage(); }
+        function handleTextCellEdit(event) { const cell = event.target; const index = parseInt(cell.dataset.index); const field = cell.dataset.field; if (cell.querySelector('input') || cell.querySelector('select')) return; const currentValue = peopleData[index][field]; let inputElement; const createSelect = (options, selectedValue) => { const select = document.createElement('select'); options.forEach(opt => { const option = document.createElement('option'); option.value = opt.value; option.textContent = opt.text; if (opt.value === selectedValue) option.selected = true; select.appendChild(option); }); return select; }; if (field === 'status') { inputElement = createSelect([{ value: 'Solteiro(a)', text: 'Solteiro(a)' }, { value: 'Casal', text: 'Casal' }], currentValue); } else if (field === 'gender') { inputElement = createSelect([{ value: 'Masculino', text: 'Masculino' }, { value: 'Feminino', text: 'Feminino' }], currentValue); } else if (field === 'congress') { const tempInput = document.createElement('input'); tempInput.type = 'hidden'; cell.appendChild(tempInput); const defaultDate = (Array.isArray(currentValue) && currentValue.length > 0) ? [currentValue[0], currentValue[currentValue.length - 1]] : []; const picker = flatpickr(tempInput, { mode: "range", dateFormat: "Y-m-d", altInput: true, altFormat: "d/m/Y", defaultDate: defaultDate, locale: "pt", onClose: function(selectedDates) { let newCongressDates = []; if (selectedDates.length === 2) { const [start, end] = selectedDates; let currentDate = new Date(start); while (currentDate <= end) { newCongressDates.push(flatpickr.formatDate(currentDate, "Y-m-d")); currentDate.setDate(currentDate.getDate() + 1); } } else if (selectedDates.length === 1) { newCongressDates.push(flatpickr.formatDate(selectedDates[0], "Y-m-d")); } peopleData[index][field] = newCongressDates; renderData(); saveDataToLocalStorage(); }, appendTo: cell }); picker.open(); return; } else if (field === 'meetingDayWeekday') { inputElement = createSelect([{ value: '', text: 'Nenhuma' }, { value: 'segunda', text: 'Segunda-feira' }, { value: 'terca', text: 'Terça-feira' }, { value: 'quarta', text: 'Quarta-feira' }, { value: 'quinta', text: 'Quinta-feira' }, { value: 'sexta', text: 'Sexta-feira' }], currentValue); } else if (field === 'meetingDayWeekend') { inputElement = createSelect([{ value: '', text: 'Nenhuma' }, { value: 'sabado', text: 'Sábado' }, { value: 'domingo', text: 'Domingo' }, { value: 'final de semana', text: 'Fim de Semana' }], currentValue); } else { inputElement = document.createElement('input'); inputElement.type = 'text'; inputElement.value = currentValue || ''; } inputElement.className = 'w-full p-1 border border-blue-400 rounded-md focus:outline-none'; const saveChanges = () => { peopleData[index][field] = inputElement.value.trim(); renderData(); saveDataToLocalStorage(); }; inputElement.addEventListener('blur', saveChanges); inputElement.addEventListener('keydown', (e) => { if (e.key === 'Enter') inputElement.blur(); else if (e.key === 'Escape') renderData(); }); cell.innerHTML = ''; cell.appendChild(inputElement); inputElement.focus(); }
+        function populateOccurrencePeopleSelect() { occurrencePeopleSelect.innerHTML = ''; peopleData.forEach(person => { const option = document.createElement('option'); option.value = person.name; option.textContent = person.name; occurrencePeopleSelect.appendChild(option); }); }
+        async function addOccurrence() { const date = occurrenceDateInput.value; const description = occurrenceDescriptionInput.value.trim(); const selectedPeople = Array.from(occurrencePeopleSelect.selectedOptions).map(opt => opt.value); const files = occurrenceImagesInput.files; if (!date || !description || selectedPeople.length === 0) { showMessage('Por favor, preencha todos os campos da ocorrência.', 'error'); return; } const images = await readFilesAsDataURLs(files); occurrencesData.push({ id: Date.now(), date: date, people: selectedPeople, description: description, images: images }); renderOccurrences(); saveDataToLocalStorage(); showMessage('Ocorrência registrada com sucesso!', 'success'); occurrenceDateInput.value = ''; occurrenceDescriptionInput.value = ''; occurrencePeopleSelect.selectedIndex = -1; occurrenceImagesInput.value = ''; }
+        function readFilesAsDataURLs(files) { return Promise.all(Array.from(files).map(file => { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); }); })); }
+        function renderOccurrences() { populateOccurrenceFilters(); const filteredOccurrences = occurrencesData.filter(o => { const occurrenceDate = new Date(o.date + "T00:00:00"); const yearMatch = occurrenceDate.getFullYear() === currentFilterYear; const monthMatch = currentFilterMonth === -1 || occurrenceDate.getMonth() === currentFilterMonth; return yearMatch && monthMatch; }).sort((a,b) => new Date(b.date) - new Date(a.date)); occurrencesListDiv.innerHTML = '<h3 class="text-xl font-semibold text-gray-800 mb-4">Ocorrências Registradas</h3>'; if (filteredOccurrences.length === 0) { occurrencesListDiv.innerHTML += '<p class="text-gray-600">Nenhuma ocorrência encontrada para este período.</p>'; return; } filteredOccurrences.forEach(o => { const occurrenceEl = document.createElement('div'); occurrenceEl.className = 'bg-white p-4 rounded-lg shadow-md mb-4'; let imagesHtml = ''; if (o.images && o.images.length > 0) { imagesHtml += '<div class="flex flex-wrap gap-2 mb-2">'; o.images.forEach(imgData => { imagesHtml += `<img src="${imgData}" class="w-32 h-32 object-cover rounded-md border" alt="Imagem da ocorrência">`; }); imagesHtml += '</div>'; } occurrenceEl.innerHTML = `<div class="flex justify-between items-start"><div><p class="font-bold text-lg text-blue-700">${new Date(o.date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>${imagesHtml}<p class="font-semibold text-gray-700 mt-1">No turno: ${o.people.join(', ')}</p><p class="text-gray-600 mt-2">${o.description.replace(/\n/g, '<br>')}</p></div><button class="px-3 py-1 bg-red-500 text-white rounded-md text-sm delete-occurrence-btn no-print" data-id="${o.id}">Excluir</button></div>`; occurrencesListDiv.appendChild(occurrenceEl); }); document.querySelectorAll('.delete-occurrence-btn').forEach(btn => { btn.addEventListener('click', (e) => { const idToDelete = parseInt(e.target.dataset.id); showConfirmModal('Tem certeza que deseja excluir esta ocorrência?', (confirmed) => { if(confirmed) { occurrencesData = occurrencesData.filter(o => o.id !== idToDelete); renderOccurrences(); saveDataToLocalStorage(); showMessage('Ocorrência excluída.', 'success'); } }); }); }); }
+        function populateOccurrenceFilters() { const years = [...new Set(occurrencesData.map(o => new Date(o.date + "T00:00:00").getFullYear()))].sort((a, b) => b - a); filterYearSelect.innerHTML = years.map(y => `<option value="${y}" ${y === currentFilterYear ? 'selected' : ''}>${y}</option>`).join(''); const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]; let monthsHtml = `<a href="#" data-month="-1" class="block p-2 rounded-md text-sm ${currentFilterMonth === -1 ? 'bg-blue-600 text-white' : 'hover:bg-gray-100'}">Todos os Meses</a>`; monthsHtml += monthNames.map((m, i) => `<a href="#" data-month="${i}" class="block p-2 rounded-md text-sm ${i === currentFilterMonth ? 'bg-blue-600 text-white' : 'hover:bg-gray-100'}">${m}</a>`).join(''); filterMonthDiv.innerHTML = monthsHtml; filterMonthDiv.querySelectorAll('a').forEach(link => { link.addEventListener('click', (e) => { e.preventDefault(); currentFilterMonth = parseInt(e.target.dataset.month); renderOccurrences(); }); }); }
         const dayNamesShort = ["domingo", "segunda", "terca", "quarta", "quinta", "sexta", "sabado"];
-
-        function populateScheduleControls() {
-            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-            scheduleMonthSelect.innerHTML = monthNames.map((m, i) => `<option value="${i}">${m}</option>`).join('');
-            scheduleMonthSelect.value = new Date().getMonth();
-            scheduleYearInput.value = new Date().getFullYear();
-        }
-
-        // --- MODIFIED: New helper function to assign couples ---
-        function assignCouples(availablePeople, workCount, maxAssignments) {
-            const attendants = [];
-            const watchmen = [];
-            
-            let availableCoupleMen = availablePeople
-                .filter(p => p.gender === 'Masculino' && p.status === 'Casal' && p.spouseName)
-                .sort((a, b) => workCount[a.name] - workCount[b.name]);
-            
-            for (let i = 0; i < maxAssignments && availableCoupleMen.length > 0; i++) {
-                const man = availableCoupleMen.shift();
-                const spouse = availablePeople.find(p => p.name === man.spouseName);
-
-                if (man && spouse) {
-                    watchmen.push(man.name);
-                    attendants.push(spouse.name);
-                    workCount[man.name]++;
-                    workCount[spouse.name]++;
-                    // Remove both from the general pool for this day to avoid re-assigning
-                    availablePeople = availablePeople.filter(p => p.name !== man.name && p.name !== spouse.name);
-                }
-            }
-            
-            if (watchmen.length === 0) watchmen.push('VAGO');
-            if (attendants.length === 0) attendants.push('VAGO');
-
-            return { attendants, watchmen };
-        }
-
-        // --- MODIFIED: generateSchedule function with new logic ---
-        function generateSchedule() {
-            if (peopleData.length === 0) {
-                showMessage('Não há publicadores cadastrados para gerar a escala.', 'error');
-                return;
-            }
-            const month = parseInt(scheduleMonthSelect.value);
-            const year = parseInt(scheduleYearInput.value);
-            const monthType = scheduleMonthTypeSelect.value;
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const groupCouples = scheduleCouplesTogetherCheckbox.checked;
-            
-            const workCount = peopleData.reduce((acc, person) => ({ ...acc, [person.name]: 0 }), {});
-            currentSchedule = [];
-
-            const getAvailableForDay = (dayName, formattedDate) => {
-                return peopleData.filter(person => {
-                    let isAvailable = person[dayName];
-                    if (isAvailable && Array.isArray(person.congress) && person.congress.includes(formattedDate)) isAvailable = false;
-                    if (isAvailable && person.meetingDayWeekday === dayName) isAvailable = false;
-                    if (isAvailable && (person.meetingDayWeekend === dayName || (person.meetingDayWeekend === 'final de semana' && (dayName === 'sabado' || dayName === 'domingo')))) isAvailable = false;
-                    return isAvailable;
-                });
-            };
-
-            for (let day = 1; day <= daysInMonth; day++) {
-                const date = new Date(year, month, day);
-                const dayName = dayNamesShort[date.getDay()];
-                const formattedDate = flatpickr.formatDate(date, "Y-m-d");
-
-                let attendants = [];
-                let watchmen = [];
-                let availablePeople = getAvailableForDay(dayName, formattedDate);
-
-                if (monthType === 'sem_evento') {
-                    const isWeekend = (dayName === 'sabado' || dayName === 'domingo');
-                    const maxCouples = isWeekend ? 3 : 1;
-                    const result = assignCouples([...availablePeople], workCount, maxCouples);
-                    attendants = result.attendants;
-                    watchmen = result.watchmen;
-                } else { // This is the 'com_evento' logic (original behavior)
-                    let availableMen = availablePeople.filter(p => p.gender === 'Masculino').sort((a, b) => workCount[a.name] - workCount[b.name]);
-                    let availableWomen = availablePeople.filter(p => p.gender === 'Feminino').sort((a, b) => workCount[a.name] - workCount[b.name]);
-                    let coupleAssigned = false;
-
-                    if (groupCouples) {
-                        for (const man of availableMen) {
-                            if (man.status === 'Casal') {
-                                const spouseIndex = availableWomen.findIndex(woman => woman.name === man.spouseName);
-                                if (spouseIndex !== -1) {
-                                    const spouse = availableWomen[spouseIndex];
-                                    attendants.push(spouse.name);
-                                    watchmen.push(man.name);
-                                    workCount[man.name]++;
-                                    workCount[spouse.name]++;
-                                    coupleAssigned = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    if (!coupleAssigned) {
-                        const assignedWoman = availableWomen.shift();
-                        attendants.push(assignedWoman ? assignedWoman.name : 'VAGO');
-                        if (assignedWoman) workCount[assignedWoman.name]++;
-
-                        const assignedMan = availableMen.shift();
-                        watchmen.push(assignedMan ? assignedMan.name : 'VAGO');
-                        if (assignedMan) workCount[assignedMan.name]++;
-                    }
-                }
-                
-                currentSchedule.push({ date: formattedDate, dayOfWeek: dayName, attendant: attendants, watchman: watchmen });
-            }
-            
-            renderScheduleTable();
-            showMessage('Escala gerada com sucesso!', 'success');
-            printScheduleBtn.classList.remove('hidden');
-        }
-
-        // --- MODIFIED: renderScheduleTable with updated colors ---
-        function renderScheduleTable() {
-            const month = parseInt(scheduleMonthSelect.value);
-            const year = parseInt(scheduleYearInput.value);
-            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-            const displayDayNames = { "segunda": "Segunda-feira", "terca": "Terça-feira", "quarta": "Quarta-feira", "quinta": "Quinta-feira", "sexta": "Sexta-feira", "sabado": "Sábado", "domingo": "Domingo" };
-
-            let scheduleHtml = `
-                <h3 class="text-xl font-semibold text-gray-800 mb-4 text-center">Escala de Trabalho - ${monthNames[month]} de ${year}</h3>
-                <table class="w-full border-collapse bg-white rounded-lg shadow-md data-table schedule-table">
-                    <thead><tr>
-                        <th class="p-4 text-left border-b">Data</th>
-                        <th class="p-4 text-left border-b">Dia da Semana</th>
-                        <th class="p-4 text-left border-b">Atendente(s)</th>
-                        <th class="p-4 text-left border-b">Vigia(s)</th>
-                    </tr></thead><tbody>`;
-            
-            currentSchedule.forEach((entry, dayIndex) => {
-                const dateObj = new Date(entry.date + 'T00:00:00');
-                
-                let rowClass = '';
-                if (entry.dayOfWeek === 'sabado') rowClass = 'sabado-day';
-                else if (entry.dayOfWeek === 'domingo') rowClass = 'domingo-day';
-
-                const attendantsHtml = entry.attendant.map((name, personIndex) => 
-                    `<span class="editable-team-member" data-day-index="${dayIndex}" data-role="attendant" data-person-index="${personIndex}">${name}</span>`
-                ).join('<br>');
-
-                const watchmenHtml = entry.watchman.map((name, personIndex) => 
-                    `<span class="editable-team-member" data-day-index="${dayIndex}" data-role="watchman" data-person-index="${personIndex}">${name}</span>`
-                ).join('<br>');
-                
-                scheduleHtml += `
-                    <tr class="${rowClass}">
-                        <td class="p-4 border-b">${dateObj.toLocaleDateString('pt-BR')}</td>
-                        <td class="p-4 border-b">${displayDayNames[entry.dayOfWeek]}</td>
-                        <td class="p-4 border-b">${attendantsHtml}</td>
-                        <td class="p-4 border-b">${watchmenHtml}</td>
-                    </tr>`;
-            });
-            scheduleHtml += `</tbody></table>`;
-            scheduleOutputDiv.innerHTML = scheduleHtml;
-
-            document.querySelectorAll('.editable-team-member').forEach(span => {
-                span.addEventListener('click', handleScheduleEdit);
-            });
-        }
-        
-        function handleScheduleEdit(event) {
-            const span = event.target;
-            if (span.querySelector('select')) return;
-
-            const dayIndex = parseInt(span.dataset.dayIndex);
-            const role = span.dataset.role;
-            const personIndex = parseInt(span.dataset.personIndex);
-            const scheduleEntry = currentSchedule[dayIndex];
-            const originalName = span.textContent;
-            
-            const availablePeople = peopleData.filter(person => {
-                let isAvailable = person[scheduleEntry.dayOfWeek];
-                if (isAvailable && Array.isArray(person.congress) && person.congress.includes(scheduleEntry.date)) isAvailable = false;
-                if (isAvailable && person.meetingDayWeekday === scheduleEntry.dayOfWeek) isAvailable = false;
-                if (isAvailable && (person.meetingDayWeekend === scheduleEntry.dayOfWeek || (person.meetingDayWeekend === 'final de semana' && (scheduleEntry.dayOfWeek === 'sabado' || scheduleEntry.dayOfWeek === 'domingo')))) isAvailable = false;
-                return isAvailable;
-            });
-            
-            const genderForRole = role === 'attendant' ? 'Feminino' : 'Masculino';
-            const roleSpecificOptions = availablePeople.filter(p => p.gender === genderForRole);
-
-            const select = document.createElement('select');
-            select.className = 'w-full p-1 border border-blue-400 rounded-md';
-            
-            let optionsHtml = `<option value="${originalName}">${originalName}</option>`;
-            if (originalName !== 'VAGO') {
-                 optionsHtml += `<option value="VAGO">-- VAGO --</option>`;
-            }
-            
-            roleSpecificOptions.forEach(p => {
-                if (p.name !== originalName) {
-                    optionsHtml += `<option value="${p.name}">${p.name}</option>`;
-                }
-            });
-            select.innerHTML = optionsHtml;
-
-            span.innerHTML = '';
-            span.appendChild(select);
-            select.focus();
-
-            const saveChange = () => {
-                scheduleEntry[role][personIndex] = select.value;
-                renderScheduleTable();
-            };
-
-            select.addEventListener('blur', saveChange);
-            select.addEventListener('change', saveChange);
-        }
-
-        function clearAllData() {
-            showConfirmModal('Tem certeza que deseja apagar TODOS os dados (pessoas, ocorrências e escala)? Essa ação não pode ser desfeita.', (confirmed) => {
-                if (confirmed) {
-                    peopleData = [];
-                    occurrencesData = [];
-                    currentSchedule = [];
-                    renderAll();
-                    saveDataToLocalStorage();
-                    showMessage('Todos os dados foram apagados com sucesso.', 'success');
-                }
-            });
-        }
-
-        function printSection(sectionClass) {
-            document.body.classList.add(sectionClass);
-            window.print();
-        }
+        function populateScheduleControls() { const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]; scheduleMonthSelect.innerHTML = monthNames.map((m, i) => `<option value="${i}">${m}</option>`).join(''); scheduleMonthSelect.value = new Date().getMonth(); scheduleYearInput.value = new Date().getFullYear(); }
+        function assignCouples(availablePeople, workCount, maxAssignments) { const attendants = []; const watchmen = []; let availableCoupleMen = availablePeople.filter(p => p.gender === 'Masculino' && p.status === 'Casal' && p.spouseName).sort((a, b) => workCount[a.name] - workCount[b.name]); for (let i = 0; i < maxAssignments && availableCoupleMen.length > 0; i++) { const man = availableCoupleMen.shift(); const spouse = availablePeople.find(p => p.name === man.spouseName); if (man && spouse) { watchmen.push(man.name); attendants.push(spouse.name); workCount[man.name]++; workCount[spouse.name]++; availablePeople = availablePeople.filter(p => p.name !== man.name && p.name !== spouse.name); } } if (watchmen.length === 0) watchmen.push('VAGO'); if (attendants.length === 0) attendants.push('VAGO'); return { attendants, watchmen }; }
+        function generateSchedule() { if (peopleData.length === 0) { showMessage('Não há publicadores cadastrados para gerar a escala.', 'error'); return; } const month = parseInt(scheduleMonthSelect.value); const year = parseInt(scheduleYearInput.value); const monthType = scheduleMonthTypeSelect.value; const daysInMonth = new Date(year, month + 1, 0).getDate(); const groupCouples = scheduleCouplesTogetherCheckbox.checked; const workCount = peopleData.reduce((acc, person) => ({ ...acc, [person.name]: 0 }), {}); currentSchedule = []; const getAvailableForDay = (dayName, formattedDate) => { return peopleData.filter(person => { let isAvailable = person[dayName]; if (isAvailable && Array.isArray(person.congress) && person.congress.includes(formattedDate)) isAvailable = false; if (isAvailable && person.meetingDayWeekday === dayName) isAvailable = false; if (isAvailable && (person.meetingDayWeekend === dayName || (person.meetingDayWeekend === 'final de semana' && (dayName === 'sabado' || dayName === 'domingo')))) isAvailable = false; return isAvailable; }); }; for (let day = 1; day <= daysInMonth; day++) { const date = new Date(year, month, day); const dayName = dayNamesShort[date.getDay()]; const formattedDate = flatpickr.formatDate(date, "Y-m-d"); let attendants = []; let watchmen = []; let availablePeople = getAvailableForDay(dayName, formattedDate); if (monthType === 'sem_evento') { const isWeekend = (dayName === 'sabado' || dayName === 'domingo'); const maxCouples = isWeekend ? 3 : 1; const result = assignCouples([...availablePeople], workCount, maxCouples); attendants = result.attendants; watchmen = result.watchmen; } else { let availableMen = availablePeople.filter(p => p.gender === 'Masculino').sort((a, b) => workCount[a.name] - workCount[b.name]); let availableWomen = availablePeople.filter(p => p.gender === 'Feminino').sort((a, b) => workCount[a.name] - workCount[b.name]); let coupleAssigned = false; if (groupCouples) { for (const man of availableMen) { if (man.status === 'Casal') { const spouseIndex = availableWomen.findIndex(woman => woman.name === man.spouseName); if (spouseIndex !== -1) { const spouse = availableWomen[spouseIndex]; attendants.push(spouse.name); watchmen.push(man.name); workCount[man.name]++; workCount[spouse.name]++; coupleAssigned = true; break; } } } } if (!coupleAssigned) { const assignedWoman = availableWomen.shift(); attendants.push(assignedWoman ? assignedWoman.name : 'VAGO'); if (assignedWoman) workCount[assignedWoman.name]++; const assignedMan = availableMen.shift(); watchmen.push(assignedMan ? assignedMan.name : 'VAGO'); if (assignedMan) workCount[assignedMan.name]++; } } currentSchedule.push({ date: formattedDate, dayOfWeek: dayName, attendant: attendants, watchman: watchmen }); } renderScheduleTable(); showMessage('Escala gerada com sucesso!', 'success'); printScheduleBtn.classList.remove('hidden'); }
+        function renderScheduleTable() { const month = parseInt(scheduleMonthSelect.value); const year = parseInt(scheduleYearInput.value); const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]; const displayDayNames = { "segunda": "Segunda-feira", "terca": "Terça-feira", "quarta": "Quarta-feira", "quinta": "Quinta-feira", "sexta": "Sexta-feira", "sabado": "Sábado", "domingo": "Domingo" }; let scheduleHtml = `<h3 class="text-xl font-semibold text-gray-800 mb-4 text-center">Escala de Trabalho - ${monthNames[month]} de ${year}</h3><table class="w-full border-collapse bg-white rounded-lg shadow-md data-table schedule-table"><thead><tr><th class="p-4 text-left border-b">Data</th><th class="p-4 text-left border-b">Dia da Semana</th><th class="p-4 text-left border-b">Atendente(s)</th><th class="p-4 text-left border-b">Vigia(s)</th></tr></thead><tbody>`; currentSchedule.forEach((entry, dayIndex) => { const dateObj = new Date(entry.date + 'T00:00:00'); let rowClass = ''; if (entry.dayOfWeek === 'sabado') rowClass = 'sabado-day'; else if (entry.dayOfWeek === 'domingo') rowClass = 'domingo-day'; const attendantsHtml = entry.attendant.map((name, personIndex) => `<span class="editable-team-member" data-day-index="${dayIndex}" data-role="attendant" data-person-index="${personIndex}">${name}</span>`).join('<br>'); const watchmenHtml = entry.watchman.map((name, personIndex) => `<span class="editable-team-member" data-day-index="${dayIndex}" data-role="watchman" data-person-index="${personIndex}">${name}</span>`).join('<br>'); scheduleHtml += `<tr class="${rowClass}"><td class="p-4 border-b">${dateObj.toLocaleDateString('pt-BR')}</td><td class="p-4 border-b">${displayDayNames[entry.dayOfWeek]}</td><td class="p-4 border-b">${attendantsHtml}</td><td class="p-4 border-b">${watchmenHtml}</td></tr>`; }); scheduleHtml += `</tbody></table>`; scheduleOutputDiv.innerHTML = scheduleHtml; document.querySelectorAll('.editable-team-member').forEach(span => { span.addEventListener('click', handleScheduleEdit); }); }
+        function handleScheduleEdit(event) { const span = event.target; if (span.querySelector('select')) return; const dayIndex = parseInt(span.dataset.dayIndex); const role = span.dataset.role; const personIndex = parseInt(span.dataset.personIndex); const scheduleEntry = currentSchedule[dayIndex]; const originalName = span.textContent; const availablePeople = peopleData.filter(person => { let isAvailable = person[scheduleEntry.dayOfWeek]; if (isAvailable && Array.isArray(person.congress) && person.congress.includes(scheduleEntry.date)) isAvailable = false; if (isAvailable && person.meetingDayWeekday === scheduleEntry.dayOfWeek) isAvailable = false; if (isAvailable && (person.meetingDayWeekend === scheduleEntry.dayOfWeek || (person.meetingDayWeekend === 'final de semana' && (scheduleEntry.dayOfWeek === 'sabado' || scheduleEntry.dayOfWeek === 'domingo')))) isAvailable = false; return isAvailable; }); const genderForRole = role === 'attendant' ? 'Feminino' : 'Masculino'; const roleSpecificOptions = availablePeople.filter(p => p.gender === genderForRole); const select = document.createElement('select'); select.className = 'w-full p-1 border border-blue-400 rounded-md'; let optionsHtml = `<option value="${originalName}">${originalName}</option>`; if (originalName !== 'VAGO') { optionsHtml += `<option value="VAGO">-- VAGO --</option>`; } roleSpecificOptions.forEach(p => { if (p.name !== originalName) { optionsHtml += `<option value="${p.name}">${p.name}</option>`; } }); select.innerHTML = optionsHtml; span.innerHTML = ''; span.appendChild(select); select.focus(); const saveChange = () => { scheduleEntry[role][personIndex] = select.value; renderScheduleTable(); }; select.addEventListener('blur', saveChange); select.addEventListener('change', saveChange); }
+        function addEvent() { const date = newEventDateInput.value; const name = newEventNameSelect.value; const publishers = parseInt(newEventPublishersInput.value); const quantity = parseInt(newEventQuantityInput.value); const weekends = parseInt(newEventWeekendsInput.value); const congregations = parseInt(newEventCongregationsInput.value); const circuitsList = newEventCircuitsInput.value.trim(); const circuits = circuitsList ? circuitsList.split(',').map(c => c.trim()).length : 0; const speakerType = newEventSpeakerTypeSelect.value; let speakerName = (speakerType === 'bethel') ? newEventBethelSpeakerInput.value.trim() : (speakerType === 'circuit') ? newEventCircuitSpeakerInput.value.trim() : ''; if (!date || !name || isNaN(publishers) || isNaN(quantity) || isNaN(weekends) || isNaN(congregations) || !circuitsList || !speakerType || !speakerName) { showMessage('Por favor, preencha todos os campos do evento corretamente.', 'error'); return; } const auditorium = quantity > 500 ? 'Auditório A' : 'Auditório B'; eventsData.push({ id: Date.now(), date, name, publishers, quantity, weekends, congregations, circuits, circuitsList, speakerType, speakerName, auditorium }); renderEvents(); saveDataToLocalStorage(); showMessage('Evento salvo com sucesso!', 'success'); newEventDateInput.value = ''; newEventNameSelect.value = 'Assembleia'; newEventPublishersInput.value = ''; newEventQuantityInput.value = ''; newEventWeekendsInput.value = ''; newEventCongregationsInput.value = ''; newEventCircuitsInput.value = ''; newEventSpeakerTypeSelect.value = ''; newEventBethelSpeakerInput.value = ''; newEventCircuitSpeakerInput.value = ''; bethelSpeakerContainer.classList.add('hidden'); circuitSpeakerContainer.classList.add('hidden'); }
+        function renderEvents() { populateEventFilters(); const filteredEvents = eventsData.filter(e => { const eventDate = new Date(e.date + "T00:00:00"); const yearMatch = eventDate.getFullYear() === eventFilterYear; const monthMatch = eventFilterMonth === -1 || eventDate.getMonth() === eventFilterMonth; return yearMatch && monthMatch; }).sort((a, b) => new Date(a.date) - new Date(b.date)); const circuitEvents = filteredEvents.filter(e => e.speakerType === 'circuit'); const bethelEvents = filteredEvents.filter(e => e.speakerType === 'bethel'); const createEventHTML = (event) => { const speakerTypeDisplay = event.speakerType === 'bethel' ? 'Representante de Betel' : 'Superintendente de Circuito'; return `<div class="bg-white p-4 rounded-lg shadow-md mb-4"><div class="flex justify-between items-start"><div><p class="font-bold text-lg text-blue-700">${new Date(event.date + 'T00:00:00').toLocaleDateString('pt-BR')} - ${event.name}</p><p class="text-gray-700"><span class="font-semibold">${speakerTypeDisplay}:</span> ${event.speakerName}</p><p class="text-gray-700"><span class="font-semibold">Circuitos (${event.circuits}):</span> ${event.circuitsList}</p><p class="text-gray-700"><span class="font-semibold">Nº Congregações:</span> ${event.congregations}</p><p class="text-gray-700"><span class="font-semibold">Fins de Semana Usados:</span> ${event.weekends}</p><p class="text-gray-700"><span class="font-semibold">Publicadores Estimados:</span> ${event.publishers}</p><p class="text-gray-700"><span class="font-semibold">Assistência Estimada:</span> ${event.quantity}</p><p class="text-gray-700 font-bold"><span class="font-semibold">Local:</span> ${event.auditorium}</p></div><button class="px-3 py-1 bg-red-500 text-white rounded-md text-sm delete-event-btn no-print" data-id="${event.id}">Excluir</button></div></div>`; }; circuitEventsList.innerHTML = circuitEvents.length > 0 ? circuitEvents.map(createEventHTML).join('') : '<p class="text-gray-600 p-4">Nenhum evento com Superintendente de Circuito registrado para este período.</p>'; bethelEventsList.innerHTML = bethelEvents.length > 0 ? bethelEvents.map(createEventHTML).join('') : '<p class="text-gray-600 p-4">Nenhum evento com Representante de Betel registrado para este período.</p>'; document.querySelectorAll('.delete-event-btn').forEach(btn => { btn.addEventListener('click', (e) => { const idToDelete = parseInt(e.target.dataset.id); showConfirmModal('Tem certeza que deseja excluir este evento?', (confirmed) => { if (confirmed) { eventsData = eventsData.filter(ev => ev.id !== idToDelete); renderEvents(); saveDataToLocalStorage(); showMessage('Evento excluído.', 'success'); } }); }); }); }
+        function populateEventFilters() { const years = [...new Set(eventsData.map(e => new Date(e.date + "T00:00:00").getFullYear()))].sort((a, b) => b - a); if (years.length === 0 && !years.includes(new Date().getFullYear())) { years.push(new Date().getFullYear()); } eventFilterYearSelect.innerHTML = years.map(y => `<option value="${y}" ${y === eventFilterYear ? 'selected' : ''}>${y}</option>`).join(''); const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]; let monthsHtml = `<a href="#" data-month="-1" class="block p-2 rounded-md text-sm ${eventFilterMonth === -1 ? 'bg-blue-600 text-white' : 'hover:bg-gray-100'}">Todos os Meses</a>`; monthsHtml += monthNames.map((m, i) => `<a href="#" data-month="${i}" class="block p-2 rounded-md text-sm ${i === eventFilterMonth ? 'bg-blue-600 text-white' : 'hover:bg-gray-100'}">${m}</a>`).join(''); eventFilterMonthDiv.innerHTML = monthsHtml; eventFilterMonthDiv.querySelectorAll('a').forEach(link => { link.addEventListener('click', (e) => { e.preventDefault(); eventFilterMonth = parseInt(e.target.dataset.month); renderEvents(); }); }); }
+        function showSummaryPopup() { const filteredEvents = eventsData.filter(e => { const eventDate = new Date(e.date + "T00:00:00"); const yearMatch = eventDate.getFullYear() === eventFilterYear; const monthMatch = eventFilterMonth === -1 || eventDate.getMonth() === eventFilterMonth; return yearMatch && monthMatch; }); const circuitEvents = filteredEvents.filter(e => e.speakerType === 'circuit'); const bethelEvents = filteredEvents.filter(e => e.speakerType === 'bethel'); const calculateTotals = (eventList) => ({ publishers: eventList.reduce((sum, e) => sum + (e.publishers || 0), 0), attendance: eventList.reduce((sum, e) => sum + (e.quantity || 0), 0), weekends: eventList.reduce((sum, e) => sum + (e.weekends || 0), 0), circuits: eventList.reduce((sum, e) => sum + (e.circuits || 0), 0), congregations: eventList.reduce((sum, e) => sum + (e.congregations || 0), 0) }); const circuitTotals = calculateTotals(circuitEvents); const bethelTotals = calculateTotals(bethelEvents); D('summary-publishers-circuit').textContent = circuitTotals.publishers; D('summary-attendance-circuit').textContent = circuitTotals.attendance; D('summary-weekends-circuit').textContent = circuitTotals.weekends; D('summary-circuits-circuit').textContent = circuitTotals.circuits; D('summary-congregations-circuit').textContent = circuitTotals.congregations; D('summary-publishers-bethel').textContent = bethelTotals.publishers; D('summary-attendance-bethel').textContent = bethelTotals.attendance; D('summary-weekends-bethel').textContent = bethelTotals.weekends; D('summary-circuits-bethel').textContent = bethelTotals.circuits; D('summary-congregations-bethel').textContent = bethelTotals.congregations; summaryModal.classList.add('visible'); }
+        function clearAllData() { showConfirmModal('Tem certeza que deseja apagar TODOS os dados (pessoas, ocorrências e eventos)? Essa ação não pode ser desfeita.', (confirmed) => { if (confirmed) { peopleData = []; occurrencesData = []; eventsData = []; currentSchedule = []; renderAll(); saveDataToLocalStorage(); showMessage('Todos os dados foram apagados com sucesso.', 'success'); } }); }
+        function clearAllEvents() { showConfirmModal('Tem certeza que deseja apagar TODOS os eventos? Essa ação não pode ser desfeita.', (confirmed) => { if (confirmed) { eventsData = []; renderEvents(); saveDataToLocalStorage(); showMessage('Todos os eventos foram apagados.', 'success'); } }); }
+        function loadEventsFromExcel(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { try { const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, { type: 'array' }); const sheetName = workbook.SheetNames[0]; const worksheet = workbook.Sheets[sheetName]; const json = XLSX.utils.sheet_to_json(worksheet); json.forEach(row => { const excelDate = row['Data']; const date = excelDate ? new Date((excelDate - (25567 + 1)) * 86400 * 1000) : null; const name = row['Tipo de Evento']; const publishers = parseInt(row['Publicadores Estimados']); const quantity = parseInt(row['Assistência Estimada']); const weekends = parseInt(row['Fins de Semana Usados']); const congregations = parseInt(row['Nº de Congregações']); const circuitsList = row['Circuitos']; const circuits = circuitsList ? String(circuitsList).split(',').length : 0; const speakerName = row['Orador']; const speakerTypeRaw = row['Tipo de Orador']; let speakerType = ''; if (speakerTypeRaw?.toLowerCase().includes('circuito')) speakerType = 'circuit'; else if (speakerTypeRaw?.toLowerCase().includes('betel')) speakerType = 'bethel'; const auditorium = quantity > 500 ? 'Auditório A' : 'Auditório B'; if (date && name && !isNaN(publishers) && !isNaN(quantity) && !isNaN(weekends) && !isNaN(congregations) && circuitsList && speakerType && speakerName) { eventsData.push({ id: Date.now() + Math.random(), date: flatpickr.formatDate(date, "Y-m-d"), name, publishers, quantity, weekends, congregations, circuits, circuitsList, speakerType, speakerName, auditorium }); } }); renderEvents(); saveDataToLocalStorage(); showMessage(`${json.length} eventos carregados da planilha!`, 'success'); } catch(error) { console.error("Error reading event excel file:", error); showMessage('Erro ao processar a planilha de eventos.', 'error'); } finally { eventsExcelFileInput.value = ''; } }; reader.readAsArrayBuffer(file); }
+        function printSection(sectionClass) { document.body.classList.add(sectionClass); window.print(); }
 
         document.addEventListener('DOMContentLoaded', () => {
-            congressDatePicker = flatpickr("#newCongressDates", {
-                mode: "range",
-                dateFormat: "Y-m-d",
-                altInput: true,
-                altFormat: "d/m/Y",
-                locale: "pt",
-            });
-
+            congressDatePicker = flatpickr("#newCongressDates", { mode: "range", dateFormat: "Y-m-d", altInput: true, altFormat: "d/m/Y", locale: "pt" });
             const sections = document.querySelectorAll('.content-section');
-            const navLinks = { 'nav-info': infoSection, 'nav-schedule': scheduleSection, 'nav-occurrences': occurrencesSection };
+            const navLinks = { 'nav-info': infoSection, 'nav-schedule': scheduleSection, 'nav-occurrences': occurrencesSection, 'nav-events': eventsSection };
+            function showSection(targetSection) { sectionLoadingScreen.classList.add('visible'); if (targetSection === infoSection) mainTitle.textContent = 'Informações dos Publicadores'; else if (targetSection === scheduleSection) mainTitle.textContent = 'Escala de Trabalho'; else if (targetSection === occurrencesSection) mainTitle.textContent = 'Registro de Ocorrências'; else if (targetSection === eventsSection) mainTitle.textContent = 'Organizador de Eventos'; setTimeout(() => { sections.forEach(s => s.classList.add('hidden')); targetSection.classList.remove('hidden'); sectionLoadingScreen.classList.remove('visible'); sectionLoadingScreen.classList.add('hidden'); }, 300); }
+            Object.keys(navLinks).forEach(navId => D(navId).addEventListener('click', (e) => { e.preventDefault(); showSection(navLinks[navId]); }));
+            setTimeout(() => { loadingScreen.classList.add('hidden'); showSection(infoSection); loadDataFromLocalStorage(); populateScheduleControls(); }, 1500);
+            window.onafterprint = () => document.body.classList.remove('printing-schedule', 'printing-occurrences', 'printing-events');
             
-            function showSection(targetSection) {
-                sectionLoadingScreen.classList.add('visible');
-                
-                if (targetSection === infoSection) {
-                    mainTitle.textContent = 'Informações dos Publicadores';
-                } else if (targetSection === scheduleSection) {
-                    mainTitle.textContent = 'Escala de Trabalho';
-                } else if (targetSection === occurrencesSection) {
-                    mainTitle.textContent = 'Registro de Ocorrências';
-                }
-
-                setTimeout(() => {
-                    sections.forEach(s => s.classList.add('hidden'));
-                    targetSection.classList.remove('hidden');
-                    sectionLoadingScreen.classList.remove('visible');
-                    sectionLoadingScreen.classList.add('hidden');
-                }, 300);
-            }
-
-            Object.keys(navLinks).forEach(navId => {
-                document.getElementById(navId).addEventListener('click', (e) => {
-                    e.preventDefault();
-                    showSection(navLinks[navId]);
-                });
-            });
-
-            setTimeout(() => {
-                loadingScreen.classList.add('hidden');
-                showSection(infoSection);
-                loadDataFromLocalStorage();
-                populateScheduleControls();
-            }, 1500);
-
-            window.onafterprint = () => {
-                document.body.classList.remove('printing-schedule', 'printing-occurrences');
-            };
-
-            const dayCheckboxes = {
-                segunda: newSegCheckbox, terca: newTerCheckbox, quarta: newQuaCheckbox,
-                quinta: newQuiCheckbox, sexta: newSexCheckbox, sabado: newSabCheckbox,
-                domingo: newDomCheckbox
-            };
-
-            function updateAvailability() {
-                Object.values(dayCheckboxes).forEach(cb => cb.checked = true);
-                const weekdayMeeting = newMeetingDayWeekdaySelect.value;
-                const weekendMeeting = newMeetingDayWeekendSelect.value;
-                if (weekdayMeeting && dayCheckboxes[weekdayMeeting]) {
-                    dayCheckboxes[weekdayMeeting].checked = false;
-                }
-                if (weekendMeeting) {
-                    if (weekendMeeting === 'final de semana') {
-                        dayCheckboxes.sabado.checked = false;
-                        dayCheckboxes.domingo.checked = false;
-                    } else if (dayCheckboxes[weekendMeeting]) {
-                        dayCheckboxes[weekendMeeting].checked = false;
-                    }
-                }
-            }
-
+            // Event Listeners
             addPersonBtn.addEventListener('click', addPerson);
             deleteSelectedButton.addEventListener('click', deleteSelectedPeople);
             saveDataButton.addEventListener('click', saveDataToFile);
             loadDataButton.addEventListener('click', () => loadDataFileInput.click());
             loadDataFileInput.addEventListener('change', loadDataFromFile);
             clearAllDataBtn.addEventListener('click', clearAllData);
-            dataTableToggle.addEventListener('click', () => {
-                dataTableContent.classList.toggle('hidden');
-                toggleIcon.textContent = dataTableContent.classList.contains('hidden') ? '►' : '▼';
-            });
+            dataTableToggle.addEventListener('click', () => { dataTableContent.classList.toggle('hidden'); toggleIcon.textContent = dataTableContent.classList.contains('hidden') ? '►' : '▼'; });
             generateScheduleBtn.addEventListener('click', generateSchedule);
             printScheduleBtn.addEventListener('click', () => printSection('printing-schedule'));
             addOccurrenceBtn.addEventListener('click', addOccurrence);
             printOccurrencesBtn.addEventListener('click', () => printSection('printing-occurrences'));
-            
-            newMeetingDayWeekdaySelect.addEventListener('change', updateAvailability);
-            newMeetingDayWeekendSelect.addEventListener('change', updateAvailability);
-
-            newStatusSelect.addEventListener('change', (e) => {
-                if (e.target.value === 'Casal') {
-                    coupleContainer.classList.remove('hidden');
-                } else {
-                    coupleContainer.classList.add('hidden');
-                    newSpouseNameInput.value = '';
-                }
-            });
-
-            menuToggle.addEventListener('click', () => {
-                document.body.classList.toggle('menu-open');
-                menuOpenIcon.classList.toggle('hidden');
-                menuCloseIcon.classList.toggle('hidden');
-                if (window.innerWidth < 1024) {
-                    sidebarOverlay.classList.toggle('hidden', !document.body.classList.contains('menu-open'));
-                }
-            });
-            
-            sidebarOverlay.addEventListener('click', () => {
-                document.body.classList.remove('menu-open');
-                sidebarOverlay.classList.add('hidden');
-                menuOpenIcon.classList.remove('hidden');
-                menuCloseIcon.classList.add('hidden');
-            });
-
-            if (window.innerWidth >= 1024) {
-                document.body.classList.add('menu-open');
-                menuOpenIcon.classList.add('hidden');
-                menuCloseIcon.classList.remove('hidden');
-            }
-            
-            filterYearSelect.addEventListener('change', (e) => {
-                currentFilterYear = parseInt(e.target.value);
-                renderOccurrences();
-            });
-
+            addEventBtn.addEventListener('click', addEvent);
+            printEventsBtn.addEventListener('click', () => printSection('printing-events'));
+            showSummaryBtn.addEventListener('click', showSummaryPopup);
+            summaryModalClose.addEventListener('click', () => summaryModal.classList.remove('visible'));
+            circuitTabBtn.addEventListener('click', () => { circuitTabBtn.classList.add('active'); bethelTabBtn.classList.remove('active'); circuitEventsList.classList.remove('hidden'); bethelEventsList.classList.add('hidden'); });
+            bethelTabBtn.addEventListener('click', () => { bethelTabBtn.classList.add('active'); circuitTabBtn.classList.remove('active'); bethelEventsList.classList.remove('hidden'); circuitEventsList.classList.add('hidden'); });
+            newEventSpeakerTypeSelect.addEventListener('change', (e) => { const selection = e.target.value; bethelSpeakerContainer.classList.toggle('hidden', selection !== 'bethel'); circuitSpeakerContainer.classList.toggle('hidden', selection !== 'circuit'); });
+            newStatusSelect.addEventListener('change', (e) => { if (e.target.value === 'Casal') coupleContainer.classList.remove('hidden'); else { coupleContainer.classList.add('hidden'); newSpouseNameInput.value = ''; }});
+            menuToggle.addEventListener('click', () => { document.body.classList.toggle('menu-open'); menuOpenIcon.classList.toggle('hidden'); menuCloseIcon.classList.toggle('hidden'); if (window.innerWidth < 1024) sidebarOverlay.classList.toggle('hidden', !document.body.classList.contains('menu-open')); });
+            sidebarOverlay.addEventListener('click', () => { document.body.classList.remove('menu-open'); sidebarOverlay.classList.add('hidden'); menuOpenIcon.classList.remove('hidden'); menuCloseIcon.classList.add('hidden'); });
+            if (window.innerWidth >= 1024) { document.body.classList.add('menu-open'); menuOpenIcon.classList.add('hidden'); menuCloseIcon.classList.remove('hidden'); }
+            filterYearSelect.addEventListener('change', (e) => { currentFilterYear = parseInt(e.target.value); renderOccurrences(); });
+            eventFormToggle.addEventListener('click', () => { eventFormContent.classList.toggle('hidden'); eventToggleIcon.textContent = eventFormContent.classList.contains('hidden') ? '►' : '▼'; });
+            eventFilterYearSelect.addEventListener('change', (e) => { eventFilterYear = parseInt(e.target.value); renderEvents(); });
+            loadEventsExcelBtn.addEventListener('click', () => eventsExcelFileInput.click());
+            eventsExcelFileInput.addEventListener('change', loadEventsFromExcel);
+            clearAllEventsBtn.addEventListener('click', clearAllEvents);
         });
     </script>
 </body>
