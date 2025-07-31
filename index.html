@@ -20,6 +20,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <!-- Flatpickr Portuguese Locale -->
     <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+    <style id="print-styles"></style>
 
     <style>
         html {
@@ -127,17 +128,15 @@
             letter-spacing: 0.05em;
         }
 
-        .data-table tbody tr:nth-child(odd) {
-            background-color: #ffffff;
+        .data-table tbody tr.main-row:nth-child(4n-1),
+        .data-table tbody tr.main-row:nth-child(4n) {
+             background-color: #edf2f7;
+        }
+        
+        .data-table tbody tr.main-row:hover {
+             background-color: #bee3f8;
         }
 
-        .data-table tbody tr:nth-child(even) {
-            background-color: #edf2f7;
-        }
-
-        .data-table tbody tr:hover {
-            background-color: #bee3f8;
-        }
 
         .schedule-table thead th {
             background-color: #1e3a8a;
@@ -244,12 +243,14 @@
         @media print {
             body {
                 background-color: #fff !important;
-                font-size: 11pt;
+                font-size: 10pt;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
 
             main {
                 margin-left: 0 !important;
-                padding: 1rem !important;
+                padding: 0 !important;
             }
 
             .no-print {
@@ -259,7 +260,8 @@
             .content-section {
                 display: none !important;
             }
-
+            
+            body.printing-info #info-section,
             body.printing-schedule #schedule-section,
             body.printing-occurrences #occurrences-section,
             body.printing-events #events-section {
@@ -278,35 +280,78 @@
                 text-align: center;
                 color: #000;
                 text-shadow: none;
+                margin-bottom: 1rem;
             }
-
-            body.printing-schedule .schedule-table {
-                width: 100%;
-                border-collapse: collapse;
+            
+            #data-container .data-table { display: none; }
+            #data-container .print-only-table { display: table !important; width: 100%; border-collapse: collapse; }
+            #data-container .print-only-table th,
+            #data-container .print-only-table td {
+                border: 1px solid #ccc;
+                padding: 6px;
+                text-align: left;
             }
-
-            body.printing-schedule .schedule-table th,
-            body.printing-schedule .schedule-table td {
-                border: 1px solid #666;
-                padding: 8px;
-                color: #000;
-                background-color: #fff !important;
-            }
-
-            body.printing-schedule .schedule-table thead th {
+            #data-container .print-only-table th {
                 background-color: #e5e7eb !important;
                 color: #000;
             }
 
-            body.printing-occurrences #occurrences-list .bg-white,
-            body.printing-events #events-list .bg-white {
+            body.printing-schedule #schedule-output .no-print-view {
+                display: block !important;
+            }
+            body.printing-schedule .grid {
+                display: grid !important;
+            }
+            body.printing-schedule .grid-cols-7 {
+                grid-template-columns: repeat(7, minmax(0, 1fr));
+            }
+            body.printing-schedule .gap-2 {
+                gap: 0.25rem;
+            }
+            body.printing-schedule .rounded-lg {
+                border-radius: 0.25rem !important;
+                border: 1px solid #ccc !important;
+            }
+            body.printing-schedule .min-h-\[120px\] {
+                min-height: 0 !important;
+                height: 14vh; 
+            }
+             body.printing-schedule .text-xs {
+                font-size: 7pt !important;
+                line-height: 1.2;
+             }
+             body.printing-schedule .font-bold {
+                font-size: 8pt !important;
+             }
+             body.printing-schedule .p-2 {
+                padding: 0.25rem !important;
+             }
+             body.printing-schedule svg {
+                display: none;
+             }
+             body.printing-schedule .assignment-group strong {
+                margin-bottom: 2px;
+             }
+             body.printing-schedule .truncate {
+                white-space: normal;
+                overflow: visible;
+                text-overflow: clip;
+            }
+
+            #occurrences-list > div,
+            #circuit-events-list > div,
+            #bethel-events-list > div {
                 border: 1px solid #ccc;
                 box-shadow: none;
                 page-break-inside: avoid;
+                margin-bottom: 1rem;
             }
-
-            body.printing-occurrences img {
-                display: none;
+            
+            #occurrences-list img { display: none; }
+            
+            .alert-print {
+                background-color: #fef9c3 !important;
+                border-left: 4px solid #facc15 !important;
             }
         }
     </style>
@@ -417,69 +462,76 @@
                                 Tudo</button></div>
                     </div>
                 </div>
-                <div class="mb-8 p-6 bg-white rounded-lg shadow-md no-print">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Adicionar Novo Publicador</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4"><input type="text"
-                            id="newName" placeholder="Nome Completo"
-                            class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"><select
-                            id="newMeetingDayWeekday"
-                            class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">Reunião Meio de Semana</option>
-                            <option value="segunda">Segunda-feira</option>
-                            <option value="terca">Terça-feira</option>
-                            <option value="quarta">Quarta-feira</option>
-                            <option value="quinta">Quinta-feira</option>
-                            <option value="sexta">Sexta-feira</option>
-                        </select><select id="newMeetingDayWeekend"
-                            class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">Reunião Fim de Semana</option>
-                            <option value="sabado">Sábado</option>
-                            <option value="domingo">Domingo</option>
-                            <option value="final de semana">Fim de Semana (Ambos)</option>
-                        </select></div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div><label for="newStatus"
-                                class="block text-sm font-medium text-gray-700">Status</label><select id="newStatus"
-                                class="p-2 border border-gray-300 rounded-md w-full">
-                                <option value="Solteiro(a)">Solteiro(a)</option>
-                                <option value="Casal">Casal</option>
-                            </select></div>
-                        <div id="main-person-gender-container"><label for="newGender"
-                                class="block text-sm font-medium text-gray-700">Gênero</label><select id="newGender"
-                                class="p-2 border border-gray-300 rounded-md w-full">
-                                <option value="Feminino">Feminino</option>
-                                <option value="Masculino">Masculino</option>
-                            </select></div>
+                <div class="mb-8">
+                    <div id="addPersonFormToggle" class="collapsible-header no-print">
+                        <span>Adicionar Novo Publicador</span>
+                        <span id="addPersonToggleIcon">►</span>
                     </div>
-                    <div id="couple-container" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div><label for="newSpouseName" class="block text-sm font-medium text-gray-700">Nome do
-                                Cônjuge</label><input type="text" id="newSpouseName" placeholder="Nome do Cônjuge"
-                                class="p-2 border border-gray-300 rounded-md w-full"></div>
-                        <div id="spouse-gender-container"><label for="newSpouseGender"
-                                class="block text-sm font-medium text-gray-700">Gênero do Cônjuge</label><select
-                                id="newSpouseGender" class="p-2 border border-gray-300 rounded-md w-full">
-                                <option value="Masculino">Masculino</option>
-                                <option value="Feminino">Feminino</option>
-                            </select></div>
+                    <div id="addPersonFormContent" class="collapsible-content hidden">
+                        <div class="p-6 bg-white rounded-lg shadow-md no-print">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4"><input type="text"
+                                    id="newName" placeholder="Nome Completo"
+                                    class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"><select
+                                    id="newMeetingDayWeekday"
+                                    class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Reunião Meio de Semana</option>
+                                    <option value="segunda">Segunda-feira</option>
+                                    <option value="terca">Terça-feira</option>
+                                    <option value="quarta">Quarta-feira</option>
+                                    <option value="quinta">Quinta-feira</option>
+                                    <option value="sexta">Sexta-feira</option>
+                                </select><select id="newMeetingDayWeekend"
+                                    class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Reunião Fim de Semana</option>
+                                    <option value="sabado">Sábado</option>
+                                    <option value="domingo">Domingo</option>
+                                    <option value="final de semana">Fim de Semana (Ambos)</option>
+                                </select></div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div><label for="newStatus"
+                                        class="block text-sm font-medium text-gray-700">Status</label><select id="newStatus"
+                                        class="p-2 border border-gray-300 rounded-md w-full">
+                                        <option value="Solteiro(a)">Solteiro(a)</option>
+                                        <option value="Casal">Casal</option>
+                                    </select></div>
+                                <div id="main-person-gender-container"><label for="newGender"
+                                        class="block text-sm font-medium text-gray-700">Gênero</label><select id="newGender"
+                                        class="p-2 border border-gray-300 rounded-md w-full">
+                                        <option value="Feminino">Feminino</option>
+                                        <option value="Masculino">Masculino</option>
+                                    </select></div>
+                            </div>
+                            <div id="couple-container" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div><label for="newSpouseName" class="block text-sm font-medium text-gray-700">Nome do
+                                        Cônjuge</label><input type="text" id="newSpouseName" placeholder="Nome do Cônjuge"
+                                        class="p-2 border border-gray-300 rounded-md w-full"></div>
+                                <div id="spouse-gender-container"><label for="newSpouseGender"
+                                        class="block text-sm font-medium text-gray-700">Gênero do Cônjuge</label><select
+                                        id="newSpouseGender" class="p-2 border border-gray-300 rounded-md w-full">
+                                        <option value="Masculino">Masculino</option>
+                                        <option value="Feminino">Feminino</option>
+                                    </select></div>
+                            </div>
+                            <div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-1">Dias de Assembleia ou
+                                    Congresso:</label><input type="text" id="newCongressDates"
+                                    placeholder="Clique para selecionar o início e o fim..." readonly
+                                    class="p-2 border border-gray-300 rounded-md w-full cursor-pointer bg-white"></div>
+                            <div class="flex flex-wrap gap-4 mb-4"><label class="flex items-center space-x-2"><input
+                                        type="checkbox" id="newSeg" class="form-checkbox" checked><span>Seg</span></label><label
+                                    class="flex items-center space-x-2"><input type="checkbox" id="newTer" class="form-checkbox"
+                                        checked><span>Ter</span></label><label class="flex items-center space-x-2"><input
+                                        type="checkbox" id="newQua" class="form-checkbox" checked><span>Qua</span></label><label
+                                    class="flex items-center space-x-2"><input type="checkbox" id="newQui" class="form-checkbox"
+                                        checked><span>Qui</span></label><label class="flex items-center space-x-2"><input
+                                        type="checkbox" id="newSex" class="form-checkbox" checked><span>Sex</span></label><label
+                                    class="flex items-center space-x-2"><input type="checkbox" id="newSab" class="form-checkbox"
+                                        checked><span>Sab</span></label><label class="flex items-center space-x-2"><input
+                                        type="checkbox" id="newDom" class="form-checkbox" checked><span>Dom</span></label></div>
+                            <button id="addPersonBtn"
+                                class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 w-full transform hover:scale-105">Adicionar
+                                Publicador</button>
+                        </div>
                     </div>
-                    <div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-1">Dias de Assembleia ou
-                            Congresso:</label><input type="text" id="newCongressDates"
-                            placeholder="Clique para selecionar o início e o fim..." readonly
-                            class="p-2 border border-gray-300 rounded-md w-full cursor-pointer bg-white"></div>
-                    <div class="flex flex-wrap gap-4 mb-4"><label class="flex items-center space-x-2"><input
-                                type="checkbox" id="newSeg" class="form-checkbox" checked><span>Seg</span></label><label
-                            class="flex items-center space-x-2"><input type="checkbox" id="newTer" class="form-checkbox"
-                                checked><span>Ter</span></label><label class="flex items-center space-x-2"><input
-                                type="checkbox" id="newQua" class="form-checkbox" checked><span>Qua</span></label><label
-                            class="flex items-center space-x-2"><input type="checkbox" id="newQui" class="form-checkbox"
-                                checked><span>Qui</span></label><label class="flex items-center space-x-2"><input
-                                type="checkbox" id="newSex" class="form-checkbox" checked><span>Sex</span></label><label
-                            class="flex items-center space-x-2"><input type="checkbox" id="newSab" class="form-checkbox"
-                                checked><span>Sab</span></label><label class="flex items-center space-x-2"><input
-                                type="checkbox" id="newDom" class="form-checkbox" checked><span>Dom</span></label></div>
-                    <button id="addPersonBtn"
-                        class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 w-full transform hover:scale-105">Adicionar
-                        Publicador</button>
                 </div>
                 <div id="message-box" class="hidden p-4 mb-4 text-sm text-center rounded-lg no-print" role="alert">
                 </div>
@@ -495,7 +547,7 @@
             <div id="schedule-section" class="content-section hidden">
                 <div class="mb-8 p-6 bg-white rounded-lg shadow-md">
                     <div class="no-print">
-                        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Gerador de Escala de Trabalho</h2>
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Gerador de Escala</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                             <div>
                                 <label for="scheduleMonth" class="block text-sm font-medium text-gray-700">Mês:</label>
@@ -508,18 +560,18 @@
                                     class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
                             </div>
                         </div>
-                        <div id="week-type-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-                        </div>
-                        <div class="flex gap-4">
+                        <div class="flex flex-wrap gap-4">
                             <button id="generateScheduleBtn"
                                 class="flex-1 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transform hover:scale-105">Gerar
                                 Escala</button>
+                            <button id="saveScheduleBtn"
+                                class="flex-1 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transform hover:scale-105 hidden">Salvar Escala</button>
                             <button id="printScheduleBtn"
                                 class="flex-1 px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 transform hover:scale-105 hidden">Imprimir
                                 Escala</button>
                         </div>
                     </div>
-                    <div id="schedule-output" class="mt-6 overflow-x-auto"></div>
+                    <div id="schedule-output" class="mt-6"></div>
                 </div>
             </div>
 
@@ -685,11 +737,12 @@
             newSabCheckbox = D('newSab'), newDomCheckbox = D('newDom'), addPersonBtn = D('addPersonBtn'),
             scheduleMonthSelect = D('scheduleMonth'), scheduleYearInput = D('scheduleYear'), weekTypeContainer = D('week-type-container'),
             generateScheduleBtn = D('generateScheduleBtn'),
-            printScheduleBtn = D('printScheduleBtn'), scheduleOutputDiv = D('schedule-output'), occurrenceDateInput = D('occurrenceDate'),
+            printScheduleBtn = D('printScheduleBtn'), saveScheduleBtn = D('saveScheduleBtn'), scheduleOutputDiv = D('schedule-output'), occurrenceDateInput = D('occurrenceDate'),
             occurrencePeopleSelect = D('occurrencePeople'), occurrenceImagesInput = D('occurrenceImages'),
             occurrenceDescriptionInput = D('occurrenceDescription'), addOccurrenceBtn = D('addOccurrenceBtn'),
             printOccurrencesBtn = D('printOccurrencesBtn'), occurrencesListDiv = D('occurrences-list'),
             dataTableToggle = D('dataTableToggle'), dataTableContent = D('dataTableContent'), toggleIcon = D('toggleIcon'),
+            addPersonFormToggle = D('addPersonFormToggle'), addPersonFormContent = D('addPersonFormContent'), addPersonToggleIcon = D('addPersonToggleIcon'),
             confirmModal = D('custom-confirm-modal'), confirmModalText = D('confirm-modal-text'),
             confirmModalYes = D('confirm-modal-yes'), confirmModalNo = D('confirm-modal-no'), summaryModal = D('summary-modal'),
             summaryModalClose = D('summary-modal-close'); let confirmCallback = null;
@@ -725,6 +778,7 @@
             renderEvents();
             scheduleOutputDiv.innerHTML = '';
             printScheduleBtn.classList.add('hidden');
+            saveScheduleBtn.classList.add('hidden');
         }
         
         // --- PEOPLE MANAGEMENT FUNCTIONS ---
@@ -736,28 +790,81 @@
             }
             const table = document.createElement('table');
             table.className = 'w-full border-collapse mt-6 bg-white rounded-lg overflow-hidden shadow-md data-table';
-            table.innerHTML = `<thead><tr><th class="p-4 text-left border-b"><input type="checkbox" id="selectAllCheckbox" class="form-checkbox"></th><th class="p-4 text-left border-b">Nome</th><th class="p-4 text-left border-b">Gênero</th><th class="p-4 text-left border-b">Cônjuge</th><th class="p-4 text-left border-b">Reunião Semana</th><th class="p-4 text-left border-b">Reunião Fim Semana</th><th class="p-4 text-left border-b">Assembleia/Congresso</th><th class="p-4 text-center border-b">Seg</th><th class="p-4 text-center border-b">Ter</th><th class="p-4 text-center border-b">Qua</th><th class="p-4 text-center border-b">Qui</th><th class="p-4 text-center border-b">Sex</th><th class="p-4 text-center border-b">Sab</th><th class="p-4 text-center border-b">Dom</th><th class="p-4 text-left border-b">Ações</th></tr></thead><tbody></tbody>`;
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th class="p-4 w-12 text-center border-b"><input type="checkbox" id="selectAllCheckbox" class="form-checkbox"></th>
+                        <th class="p-4 text-left border-b">Publicador</th>
+                        <th class="p-4 text-left border-b">Reuniões</th>
+                        <th class="p-4 text-left border-b">Disponibilidade Semanal</th>
+                        <th class="p-4 w-24 text-center border-b">Ações</th>
+                        <th class="p-4 w-12 text-center border-b"></th> <!-- Expander column -->
+                    </tr>
+                </thead>
+                <tbody></tbody>`;
             const tbody = table.querySelector('tbody');
-            const daysOfWeekMapping = { "Seg": 'segunda', "Ter": 'terca', "Qua": 'quarta', "Qui": 'quinta', "Sex": 'sexta', "Sab": 'sabado', "Dom": 'domingo' };
-            const daysOrder = Object.keys(daysOfWeekMapping);
+            const daysOfWeekMapping = { 'segunda': 'S', 'terca': 'T', 'quarta': 'Q', 'quinta': 'Q', 'sexta': 'S', 'sabado': 'S', 'domingo': 'D' };
+            const dayKeys = Object.keys(daysOfWeekMapping);
 
             peopleData.forEach((person, index) => {
                 const tr = tbody.insertRow();
-                const displayMeetingDayWeekdayMap = { '': 'Nenhuma', 'segunda': 'Segunda-feira', 'terca': 'Terça-feira', 'quarta': 'Quarta-feira', 'quinta': 'Quinta-feira', 'sexta': 'Sexta-feira' };
-                const displayMeetingDayWeekendMap = { '': 'Nenhuma', 'sabado': 'Sábado', 'domingo': 'Domingo', 'final de semana': 'Fim de Semana' };
+                tr.className = 'main-row';
+                tr.dataset.index = index;
+
+                let checkboxCell = tr.insertCell();
+                checkboxCell.className = 'p-4 border-b text-center align-middle';
+                checkboxCell.innerHTML = `<input type="checkbox" class="row-checkbox form-checkbox" data-index="${index}">`;
+
+                let nameCell = tr.insertCell();
+                nameCell.className = 'p-4 border-b align-middle editable-text-cell';
+                nameCell.dataset.field = 'name';
+                nameCell.dataset.index = index;
+                nameCell.textContent = person.name || 'N/A';
+
+                let meetingsCell = tr.insertCell();
+                meetingsCell.className = 'p-4 border-b align-middle text-sm';
+                const meetingWeekday = person.meetingDayWeekday ? person.meetingDayWeekday.charAt(0).toUpperCase() + person.meetingDayWeekday.slice(1) : 'Nenhuma';
+                const meetingWeekend = person.meetingDayWeekend ? person.meetingDayWeekend.charAt(0).toUpperCase() + person.meetingDayWeekend.slice(1) : 'Nenhuma';
+                meetingsCell.innerHTML = `<div>Semana: <span class="font-semibold editable-text-cell p-1" data-field="meetingDayWeekday" data-index="${index}">${meetingWeekday}</span></div><div>FDS: <span class="font-semibold editable-text-cell p-1" data-field="meetingDayWeekend" data-index="${index}">${meetingWeekend}</span></div>`;
+
+                let availabilityCell = tr.insertCell();
+                availabilityCell.className = 'p-4 border-b align-middle';
+                let availabilityHtml = '<div class="flex flex-wrap gap-1">';
+                dayKeys.forEach(dayKey => {
+                    const isAvailable = person[dayKey];
+                    const bgColor = isAvailable ? 'bg-green-500' : 'bg-red-500';
+                    const dayInitial = daysOfWeekMapping[dayKey];
+                    availabilityHtml += `<span class="day-cell w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ${bgColor} text-white" data-field="${dayKey}" data-index="${index}">${dayInitial}</span>`;
+                });
+                availabilityHtml += '</div>';
+                availabilityCell.innerHTML = availabilityHtml;
+
+                let actionsCell = tr.insertCell();
+                actionsCell.className = 'p-4 border-b text-center align-middle';
+                actionsCell.innerHTML = `<button class="px-3 py-1 bg-red-500 text-white rounded-md text-sm delete-person-btn" data-index="${index}">Excluir</button>`;
+
+                let expanderCell = tr.insertCell();
+                expanderCell.className = 'p-4 border-b text-center align-middle';
+                expanderCell.innerHTML = `<button class="expand-btn text-blue-600 text-xl transform transition-transform duration-200">▼</button>`;
+
+                const trDetails = tbody.insertRow();
+                trDetails.className = 'hidden';
+                const detailsCell = trDetails.insertCell();
+                detailsCell.colSpan = 6;
+                detailsCell.className = 'p-4 bg-gray-50';
+                
                 const formattedCongressDates = (person.congress || []).map(dateStr => {
                     const date = new Date(dateStr + 'T00:00:00');
                     return isNaN(date) ? dateStr : date.toLocaleDateString('pt-BR');
                 }).join(', ');
 
-                let cells = `<td class="p-4 border-b"><input type="checkbox" class="row-checkbox form-checkbox" data-index="${index}"></td><td class="p-4 border-b editable-text-cell" data-field="name" data-index="${index}">${person.name || 'N/A'}</td><td class="p-4 border-b editable-text-cell" data-field="gender" data-index="${index}">${person.gender || 'N/A'}</td><td class="p-4 border-b editable-text-cell" data-field="spouseName" data-index="${index}">${person.spouseName || ''}</td><td class="p-4 border-b editable-text-cell" data-field="meetingDayWeekday" data-index="${index}">${displayMeetingDayWeekdayMap[person.meetingDayWeekday] || 'N/A'}</td><td class="p-4 border-b editable-text-cell" data-field="meetingDayWeekend" data-index="${index}">${displayMeetingDayWeekendMap[person.meetingDayWeekend] || 'N/A'}</td><td class="p-4 border-b editable-text-cell" data-field="congress" data-index="${index}">${formattedCongressDates || 'N/A'}</td>`;
-                daysOrder.forEach(dayDisplay => {
-                    const dayKey = daysOfWeekMapping[dayDisplay];
-                    const isAvailable = person[dayKey];
-                    cells += `<td class="p-4 border-b day-cell" data-field="${dayKey}" data-index="${index}" style="color: ${isAvailable ? '#16a34a' : '#dc2626'}; font-weight: bold;">${isAvailable ? '✓' : '✗'}</td>`;
-                });
-                cells += `<td class="p-4 border-b"><button class="px-3 py-1 bg-red-500 text-white rounded-md text-sm delete-person-btn" data-index="${index}">Excluir</button></td>`;
-                tr.innerHTML = cells;
+                detailsCell.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div><strong>Gênero:</strong> <span class="editable-text-cell p-1" data-field="gender" data-index="${index}">${person.gender || 'N/A'}</span></div>
+                        <div><strong>Cônjuge:</strong> <span class="editable-text-cell p-1" data-field="spouseName" data-index="${index}">${person.spouseName || 'N/A'}</span></div>
+                        <div><strong>Congresso:</strong> <span class="editable-text-cell p-1" data-field="congress" data-index="${index}">${formattedCongressDates || 'N/A'}</span></div>
+                    </div>
+                `;
             });
 
             dataContainer.appendChild(table);
@@ -769,7 +876,19 @@
             document.querySelectorAll('.day-cell').forEach(cell => cell.addEventListener('click', handleDayCellToggle));
             D('selectAllCheckbox')?.addEventListener('change', handleSelectAll);
             document.querySelectorAll('.row-checkbox').forEach(checkbox => checkbox.addEventListener('change', handleRowCheckboxChange));
-            document.querySelectorAll('.delete-person-btn').forEach(btn => btn.addEventListener('click', (e) => deletePerson(parseInt(e.target.dataset.index))));
+            document.querySelectorAll('.delete-person-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deletePerson(parseInt(e.target.dataset.index));
+                });
+            });
+            document.querySelectorAll('.expand-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const detailsRow = e.target.closest('tr').nextElementSibling;
+                    detailsRow.classList.toggle('hidden');
+                    e.target.classList.toggle('rotate-180');
+                });
+            });
         }
 
         function addPerson() {
@@ -934,7 +1053,26 @@
 
             inputElement.className = 'w-full p-1 border border-blue-400 rounded-md focus:outline-none';
             const saveChanges = () => {
-                peopleData[index][field] = inputElement.value.trim();
+                const oldValue = peopleData[index][field];
+                const newValue = inputElement.value;
+                peopleData[index][field] = newValue;
+                
+                // Update availability based on meeting day change
+                if (field === 'meetingDayWeekday' || field === 'meetingDayWeekend') {
+                    // Make old day available
+                    if (oldValue && oldValue !== 'final de semana') peopleData[index][oldValue] = true;
+                    if (oldValue === 'final de semana') {
+                        peopleData[index]['sabado'] = true;
+                        peopleData[index]['domingo'] = true;
+                    }
+                    // Make new day unavailable
+                    if (newValue && newValue !== 'final de semana') peopleData[index][newValue] = false;
+                    if (newValue === 'final de semana') {
+                        peopleData[index]['sabado'] = false;
+                        peopleData[index]['domingo'] = false;
+                    }
+                }
+
                 renderData();
                 saveDataToLocalStorage();
             };
@@ -1063,18 +1201,6 @@
             scheduleMonthSelect.innerHTML = monthNames.map((m, i) => `<option value="${i}">${m}</option>`).join('');
             scheduleMonthSelect.value = new Date().getMonth();
             scheduleYearInput.value = new Date().getFullYear();
-            populateWeekTypeControls();
-        }
-
-        function populateWeekTypeControls() {
-            const month = parseInt(scheduleMonthSelect.value);
-            const year = parseInt(scheduleYearInput.value);
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const numWeeks = Math.ceil(daysInMonth / 7);
-            weekTypeContainer.innerHTML = '';
-            for (let i = 1; i <= numWeeks; i++) {
-                weekTypeContainer.innerHTML += `<div class="flex flex-col"><label for="week-type-${i}" class="text-sm font-medium text-gray-700 mb-1">Semana ${i}</label><select id="week-type-${i}" class="p-2 border border-gray-300 rounded-md"><option value="com_evento">Com Eventos</option><option value="sem_evento">Sem Eventos</option></select></div>`;
-            }
         }
 
         function getWeekOfMonth(date) {
@@ -1089,8 +1215,12 @@
             let menToAssign = [];
 
             if (prioritize) {
-                let priorityMen = availableCoupleMen.filter(m => coupleWorkCount[m.name] < 2).sort(() => 0.5 - Math.random());
-                let normalMen = availableCoupleMen.filter(m => coupleWorkCount[m.name] >= 2).sort(() => 0.5 - Math.random());
+                let priorityMen = availableCoupleMen
+                    .filter(m => coupleWorkCount[m.name] < 2)
+                    .sort((a, b) => (coupleWorkCount[a.name] - coupleWorkCount[b.name]) || (workCount[a.name] - workCount[b.name]));
+                let normalMen = availableCoupleMen
+                    .filter(m => coupleWorkCount[m.name] >= 2)
+                    .sort((a, b) => (coupleWorkCount[a.name] - coupleWorkCount[b.name]) || (workCount[a.name] - workCount[b.name]));
                 menToAssign = [...priorityMen, ...normalMen];
             } else {
                 menToAssign = availableCoupleMen.sort((a, b) => workCount[a.name] - workCount[b.name]);
@@ -1121,8 +1251,9 @@
                 }
             }
 
-            if (watchmen.length === 0) watchmen.push('VAGO');
-            if (attendants.length === 0) attendants.push('VAGO');
+            while(attendants.length < maxAssignments) attendants.push('VAGO');
+            while(watchmen.length < maxAssignments) watchmen.push('VAGO');
+            
             return { attendants, watchmen };
         }
 
@@ -1141,15 +1272,16 @@
             for (let day = 1; day <= new Date(year, month + 1, 0).getDate(); day++) {
                 const date = new Date(year, month, day);
                 const dayName = dayNamesShort[date.getDay()];
-                const weekOfMonth = getWeekOfMonth(date);
-                const weekTypeSelect = D(`week-type-${weekOfMonth}`);
-                const weekType = weekTypeSelect ? weekTypeSelect.value : 'com_evento';
+                const currentDateStr = flatpickr.formatDate(date, "Y-m-d");
+                const hasEvent = eventsData.some(event => event.date === currentDateStr);
+                const weekType = hasEvent ? 'com_evento' : 'sem_evento';
+                
                 let attendants = [];
                 let watchmen = [];
 
                 let availablePeople = peopleData.filter(person => {
                     let isAvailable = person[dayName];
-                    if (isAvailable && Array.isArray(person.congress) && person.congress.includes(flatpickr.formatDate(date, "Y-m-d"))) isAvailable = false;
+                    if (isAvailable && Array.isArray(person.congress) && person.congress.includes(currentDateStr)) isAvailable = false;
                     if (isAvailable && person.meetingDayWeekday === dayName) isAvailable = false;
                     if (isAvailable && (person.meetingDayWeekend === dayName || (person.meetingDayWeekend === 'final de semana' && (dayName === 'sabado' || dayName === 'domingo')))) isAvailable = false;
                     return isAvailable;
@@ -1166,7 +1298,7 @@
                     const result = assignCouples([...availablePeople], workCount, coupleWorkCount, 1, true);
                     if (result.attendants[0] !== 'VAGO') {
                         attendants = result.attendants;
-                        watchmen = result.watchman;
+                        watchmen = result.watchmen;
                         coupleAssigned = true;
                     }
                     if (!coupleAssigned) {
@@ -1180,34 +1312,77 @@
                         if (assignedMan) workCount[assignedMan.name]++;
                     }
                 }
-                currentSchedule.push({ date: flatpickr.formatDate(date, "Y-m-d"), dayOfWeek: dayName, attendant: attendants, watchman: watchmen });
+                currentSchedule.push({ date: currentDateStr, dayOfWeek: dayName, attendant: attendants, watchman: watchmen });
             }
-            renderScheduleTable();
+            renderScheduleCalendar();
             showMessage('Escala gerada com sucesso!', 'success');
             printScheduleBtn.classList.remove('hidden');
+            saveScheduleBtn.classList.remove('hidden');
         }
 
-        function renderScheduleTable() {
+        function renderScheduleCalendar() {
             const month = parseInt(scheduleMonthSelect.value);
             const year = parseInt(scheduleYearInput.value);
             const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-            const displayDayNames = { "segunda": "Segunda-feira", "terca": "Terça-feira", "quarta": "Quarta-feira", "quinta": "Quinta-feira", "sexta": "Sexta-feira", "sabado": "Sábado", "domingo": "Domingo" };
-            let scheduleHtml = `<h3 class="text-xl font-semibold text-gray-800 mb-4 text-center">Escala de Trabalho - ${monthNames[month]} de ${year}</h3><table class="w-full border-collapse bg-white rounded-lg shadow-md data-table schedule-table"><thead><tr><th class="p-4 text-left border-b">Data</th><th class="p-4 text-left border-b">Dia da Semana</th><th class="p-4 text-left border-b">Atendente(s)</th><th class="p-4 text-left border-b">Vigia(s)</th></tr></thead><tbody>`;
+            const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
+
+            let calendarHtml = `<div class="no-print-view">
+                <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">${monthNames[month]} de ${year}</h3>
+                <div class="grid grid-cols-7 gap-2 mb-2 text-center font-semibold text-gray-600">
+                    ${dayNames.map(day => `<div>${day}</div>`).join('')}
+                </div>
+                <div class="grid grid-cols-7 gap-2">
+            `;
+
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                calendarHtml += `<div class="rounded-lg border bg-gray-50 min-h-[120px]"></div>`;
+            }
+
             currentSchedule.forEach((entry, dayIndex) => {
                 const dateObj = new Date(entry.date + 'T00:00:00');
-                let rowClass = '';
-                if (entry.dayOfWeek === 'sabado') rowClass = 'sabado-day';
-                else if (entry.dayOfWeek === 'domingo') rowClass = 'domingo-day';
-                const attendantsHtml = entry.attendant.map((name, personIndex) => `<span class="editable-team-member" data-day-index="${dayIndex}" data-role="attendant" data-person-index="${personIndex}">${name}</span>`).join('<br>');
-                const watchmenHtml = entry.watchman.map((name, personIndex) => `<span class="editable-team-member" data-day-index="${dayIndex}" data-role="watchman" data-person-index="${personIndex}">${name}</span>`).join('<br>');
-                scheduleHtml += `<tr class="${rowClass}"><td class="p-4 border-b">${dateObj.toLocaleDateString('pt-BR')}</td><td class="p-4 border-b">${displayDayNames[entry.dayOfWeek]}</td><td class="p-4 border-b">${attendantsHtml}</td><td class="p-4 border-b">${watchmenHtml}</td></tr>`;
+                const dayOfMonth = dateObj.getDate();
+                let dayClass = 'border-gray-200 bg-white';
+                if (entry.dayOfWeek === 'sabado') dayClass = 'bg-yellow-50 border-yellow-200';
+                if (entry.dayOfWeek === 'domingo') dayClass = 'bg-red-50 border-red-200';
+
+                const attendantsHtml = entry.attendant.map((name, personIndex) => `<span class="editable-team-member block truncate" data-day-index="${dayIndex}" data-role="attendant" data-person-index="${personIndex}">${name}</span>`).join('');
+                const watchmenHtml = entry.watchman.map((name, personIndex) => `<span class="editable-team-member block truncate" data-day-index="${dayIndex}" data-role="watchman" data-person-index="${personIndex}">${name}</span>`).join('');
+
+                calendarHtml += `
+                    <div class="rounded-lg border p-2 flex flex-col ${dayClass} min-h-[120px]">
+                        <div class="font-bold text-right text-gray-700">${dayOfMonth}</div>
+                        <div class="mt-1 text-xs flex-grow space-y-2">
+                            <div class="assignment-group">
+                                <strong class="flex items-center gap-1 text-blue-800">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                    Atendente(s)
+                                </strong>
+                                <div class="pl-2">${attendantsHtml}</div>
+                            </div>
+                            <div class="assignment-group">
+                                <strong class="flex items-center gap-1 text-green-800">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    Vigia(s)
+                                </strong>
+                                <div class="pl-2">${watchmenHtml}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
             });
-            scheduleHtml += `</tbody></table>`;
-            scheduleOutputDiv.innerHTML = scheduleHtml;
+            
+            calendarHtml += `</div></div>`;
+
+            scheduleOutputDiv.innerHTML = calendarHtml;
+
             document.querySelectorAll('.editable-team-member').forEach(span => {
                 span.addEventListener('click', handleScheduleEdit);
             });
         }
+
 
         function handleScheduleEdit(event) {
             const span = event.target;
@@ -1245,10 +1420,43 @@
             select.focus();
             const saveChange = () => {
                 scheduleEntry[role][personIndex] = select.value;
-                renderScheduleTable();
+                renderScheduleCalendar();
             };
             select.addEventListener('blur', saveChange);
             select.addEventListener('change', saveChange);
+        }
+
+        function saveScheduleToFile() {
+            if (currentSchedule.length === 0) {
+                showMessage('Nenhuma escala para salvar.', 'info');
+                return;
+            }
+
+            const month = parseInt(scheduleMonthSelect.value);
+            const year = parseInt(scheduleYearInput.value);
+            const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            const filename = `escala_${monthNames[month].toLowerCase()}_${year}.csv`;
+
+            let csvContent = "Data;Dia da Semana;Atendente(s);Vigia(s)\n";
+            const displayDayNames = { "segunda": "Segunda-feira", "terca": "Terça-feira", "quarta": "Quarta-feira", "quinta": "Quinta-feira", "sexta": "Sexta-feira", "sabado": "Sábado", "domingo": "Domingo" };
+
+            currentSchedule.forEach(entry => {
+                const dateObj = new Date(entry.date + 'T00:00:00');
+                const formattedDate = dateObj.toLocaleDateString('pt-BR');
+                const dayOfWeek = displayDayNames[entry.dayOfWeek];
+                const attendants = `"${entry.attendant.join(', ')}"`;
+                const watchmen = `"${entry.watchman.join(', ')}"`;
+                csvContent += `${formattedDate};${dayOfWeek};${attendants};${watchmen}\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+            showMessage('Escala salva com sucesso!', 'success');
         }
 
         // --- EVENTS FUNCTIONS ---
@@ -1668,6 +1876,12 @@
         }
 
         function printSection(sectionClass) {
+            let printStyles = D('print-styles');
+            if (sectionClass === 'printing-schedule') {
+                printStyles.innerHTML = `@page { size: landscape; margin: 1cm; }`;
+            } else {
+                printStyles.innerHTML = `@page { size: portrait; margin: 1.5cm; }`;
+            }
             document.body.classList.add(sectionClass);
             window.print();
         }
@@ -1711,7 +1925,10 @@
                 populateScheduleControls();
             }, 1000);
             
-            window.onafterprint = () => document.body.classList.remove('printing-schedule', 'printing-occurrences', 'printing-events');
+            window.onafterprint = () => {
+                document.body.className = 'group'; // Reset classes
+                D('print-styles').innerHTML = '';
+            };
             
             // Event Listeners for Buttons
             confirmModalYes.addEventListener('click', () => { if (confirmCallback) confirmCallback(true); confirmModal.classList.remove('visible'); });
@@ -1723,8 +1940,10 @@
             loadDataFileInput.addEventListener('change', loadDataFromFile);
             clearAllDataBtn.addEventListener('click', clearAllData);
             dataTableToggle.addEventListener('click', () => { dataTableContent.classList.toggle('hidden'); toggleIcon.textContent = dataTableContent.classList.contains('hidden') ? '►' : '▼'; });
+            addPersonFormToggle.addEventListener('click', () => { addPersonFormContent.classList.toggle('hidden'); addPersonToggleIcon.textContent = addPersonFormContent.classList.contains('hidden') ? '►' : '▼'; });
             generateScheduleBtn.addEventListener('click', generateSchedule);
             printScheduleBtn.addEventListener('click', () => printSection('printing-schedule'));
+            saveScheduleBtn.addEventListener('click', saveScheduleToFile);
             addOccurrenceBtn.addEventListener('click', addOccurrence);
             printOccurrencesBtn.addEventListener('click', () => printSection('printing-occurrences'));
             addEventBtn.addEventListener('click', addEvent);
