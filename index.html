@@ -1295,62 +1295,68 @@
                 showMessage('Não há publicadores cadastrados para gerar a escala.', 'error');
                 return;
             }
-            const month = parseInt(scheduleMonthSelect.value);
-            const year = parseInt(scheduleYearInput.value);
-            const workCount = peopleData.reduce((acc, person) => ({ ...acc, [person.name]: 0 }), {});
-            const coupleWorkCount = {};
-            peopleData.filter(p => p.status === 'Casal' && p.gender === 'Masculino').forEach(p => coupleWorkCount[p.name] = 0);
-            currentSchedule = [];
+            sectionLoadingScreen.classList.add('visible');
 
-            for (let day = 1; day <= new Date(year, month + 1, 0).getDate(); day++) {
-                const date = new Date(year, month, day);
-                const dayName = dayNamesShort[date.getDay()];
-                const currentDateStr = flatpickr.formatDate(date, "Y-m-d");
-                const hasEvent = eventsData.some(event => event.date === currentDateStr);
-                const weekType = hasEvent ? 'com_evento' : 'sem_evento';
-                
-                let attendants = [];
-                let watchmen = [];
+            setTimeout(() => {
+                const month = parseInt(scheduleMonthSelect.value);
+                const year = parseInt(scheduleYearInput.value);
+                const workCount = peopleData.reduce((acc, person) => ({ ...acc, [person.name]: 0 }), {});
+                const coupleWorkCount = {};
+                peopleData.filter(p => p.status === 'Casal' && p.gender === 'Masculino').forEach(p => coupleWorkCount[p.name] = 0);
+                currentSchedule = [];
 
-                let availablePeople = peopleData.filter(person => {
-                    let isAvailable = person[dayName];
-                    if (isAvailable && Array.isArray(person.congress) && person.congress.includes(currentDateStr)) isAvailable = false;
-                    if (isAvailable && person.meetingDayWeekday === dayName) isAvailable = false;
-                    if (isAvailable && (person.meetingDayWeekend === dayName || (person.meetingDayWeekend === 'final de semana' && (dayName === 'sabado' || dayName === 'domingo')))) isAvailable = false;
-                    return isAvailable;
-                });
+                for (let day = 1; day <= new Date(year, month + 1, 0).getDate(); day++) {
+                    const date = new Date(year, month, day);
+                    const dayName = dayNamesShort[date.getDay()];
+                    const currentDateStr = flatpickr.formatDate(date, "Y-m-d");
+                    const hasEvent = eventsData.some(event => event.date === currentDateStr);
+                    const weekType = hasEvent ? 'com_evento' : 'sem_evento';
+                    
+                    let attendants = [];
+                    let watchmen = [];
 
-                if (weekType === 'sem_evento') {
-                    const isWeekend = (dayName === 'sabado' || dayName === 'domingo');
-                    const maxCouples = isWeekend ? 3 : 1;
-                    const result = assignCouples([...availablePeople], workCount, coupleWorkCount, maxCouples, true);
-                    attendants = result.attendants;
-                    watchmen = result.watchmen;
-                } else {
-                    let coupleAssigned = false;
-                    const result = assignCouples([...availablePeople], workCount, coupleWorkCount, 1, true);
-                    if (result.attendants[0] !== 'VAGO') {
+                    let availablePeople = peopleData.filter(person => {
+                        let isAvailable = person[dayName];
+                        if (isAvailable && Array.isArray(person.congress) && person.congress.includes(currentDateStr)) isAvailable = false;
+                        if (isAvailable && person.meetingDayWeekday === dayName) isAvailable = false;
+                        if (isAvailable && (person.meetingDayWeekend === dayName || (person.meetingDayWeekend === 'final de semana' && (dayName === 'sabado' || dayName === 'domingo')))) isAvailable = false;
+                        return isAvailable;
+                    });
+
+                    if (weekType === 'sem_evento') {
+                        const isWeekend = (dayName === 'sabado' || dayName === 'domingo');
+                        const maxCouples = isWeekend ? 3 : 1;
+                        const result = assignCouples([...availablePeople], workCount, coupleWorkCount, maxCouples, true);
                         attendants = result.attendants;
                         watchmen = result.watchmen;
-                        coupleAssigned = true;
+                    } else {
+                        let coupleAssigned = false;
+                        const result = assignCouples([...availablePeople], workCount, coupleWorkCount, 1, true);
+                        if (result.attendants[0] !== 'VAGO') {
+                            attendants = result.attendants;
+                            watchmen = result.watchmen;
+                            coupleAssigned = true;
+                        }
+                        if (!coupleAssigned) {
+                            let availableMen = availablePeople.filter(p => p.gender === 'Masculino' && p.status !== 'Casal').sort((a, b) => workCount[a.name] - workCount[b.name]);
+                            let availableWomen = availablePeople.filter(p => p.gender === 'Feminino' && p.status !== 'Casal').sort((a, b) => workCount[a.name] - workCount[b.name]);
+                            const assignedWoman = availableWomen.shift();
+                            attendants.push(assignedWoman ? assignedWoman.name : 'VAGO');
+                            if (assignedWoman) workCount[assignedWoman.name]++;
+                            const assignedMan = availableMen.shift();
+                            watchmen.push(assignedMan ? assignedMan.name : 'VAGO');
+                            if (assignedMan) workCount[assignedMan.name]++;
+                        }
                     }
-                    if (!coupleAssigned) {
-                        let availableMen = availablePeople.filter(p => p.gender === 'Masculino' && p.status !== 'Casal').sort((a, b) => workCount[a.name] - workCount[b.name]);
-                        let availableWomen = availablePeople.filter(p => p.gender === 'Feminino' && p.status !== 'Casal').sort((a, b) => workCount[a.name] - workCount[b.name]);
-                        const assignedWoman = availableWomen.shift();
-                        attendants.push(assignedWoman ? assignedWoman.name : 'VAGO');
-                        if (assignedWoman) workCount[assignedWoman.name]++;
-                        const assignedMan = availableMen.shift();
-                        watchmen.push(assignedMan ? assignedMan.name : 'VAGO');
-                        if (assignedMan) workCount[assignedMan.name]++;
-                    }
+                    currentSchedule.push({ date: currentDateStr, dayOfWeek: dayName, attendant: attendants, watchman: watchmen });
                 }
-                currentSchedule.push({ date: currentDateStr, dayOfWeek: dayName, attendant: attendants, watchman: watchmen });
-            }
-            renderScheduleCalendar();
-            showMessage('Escala gerada com sucesso!', 'success');
-            printScheduleBtn.classList.remove('hidden');
-            saveScheduleBtn.classList.remove('hidden');
+                renderScheduleCalendar();
+                showMessage('Escala gerada com sucesso!', 'success');
+                printScheduleBtn.classList.remove('hidden');
+                saveScheduleBtn.classList.remove('hidden');
+                sectionLoadingScreen.classList.remove('visible');
+                sectionLoadingScreen.classList.add('hidden');
+            }, 100);
         }
 
         function renderScheduleCalendar() {
@@ -1359,19 +1365,27 @@
             const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
             const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
 
-            let calendarHtml = `<div class="no-print-view">
+            scheduleOutputDiv.innerHTML = ''; // Clear previous content
+
+            const container = document.createElement('div');
+            container.className = 'no-print-view';
+            
+            container.innerHTML = `
                 <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">${monthNames[month]} de ${year}</h3>
                 <div class="grid grid-cols-7 gap-2 mb-2 text-center font-semibold text-gray-600">
                     ${dayNames.map(day => `<div>${day}</div>`).join('')}
                 </div>
-                <div class="grid grid-cols-7 gap-2">
             `;
 
+            const grid = document.createElement('div');
+            grid.className = 'grid grid-cols-7 gap-2';
+            
             const firstDayOfMonth = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-
+            
             for (let i = 0; i < firstDayOfMonth; i++) {
-                calendarHtml += `<div class="rounded-lg border bg-gray-50 min-h-[120px]"></div>`;
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'rounded-lg border bg-gray-50 min-h-[120px]';
+                grid.appendChild(emptyDay);
             }
 
             currentSchedule.forEach((entry, dayIndex) => {
@@ -1383,33 +1397,35 @@
 
                 const attendantsHtml = entry.attendant.map((name, personIndex) => `<span class="editable-team-member block truncate" data-day-index="${dayIndex}" data-role="attendant" data-person-index="${personIndex}">${name}</span>`).join('');
                 const watchmenHtml = entry.watchman.map((name, personIndex) => `<span class="editable-team-member block truncate" data-day-index="${dayIndex}" data-role="watchman" data-person-index="${personIndex}">${name}</span>`).join('');
-
-                calendarHtml += `
-                    <div class="rounded-lg border p-2 flex flex-col ${dayClass} min-h-[120px]">
-                        <div class="font-bold text-right text-gray-700">${dayOfMonth}</div>
-                        <div class="mt-1 text-xs flex-grow space-y-2">
-                            <div class="assignment-group">
-                                <strong class="flex items-center gap-1 text-blue-800">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                                    Atendente(s)
-                                </strong>
-                                <div class="pl-2">${attendantsHtml}</div>
-                            </div>
-                            <div class="assignment-group">
-                                <strong class="flex items-center gap-1 text-green-800">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                    Vigia(s)
-                                </strong>
-                                <div class="pl-2">${watchmenHtml}</div>
-                            </div>
+                
+                const dayDiv = document.createElement('div');
+                dayDiv.className = `rounded-lg border p-2 flex flex-col ${dayClass} min-h-[120px] fade-in`;
+                dayDiv.style.animationDelay = `${dayIndex * 20}ms`;
+                
+                dayDiv.innerHTML = `
+                    <div class="font-bold text-right text-gray-700">${dayOfMonth}</div>
+                    <div class="mt-1 text-xs flex-grow space-y-2">
+                        <div class="assignment-group">
+                            <strong class="flex items-center gap-1 text-blue-800">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                Atendente(s)
+                            </strong>
+                            <div class="pl-2">${attendantsHtml}</div>
+                        </div>
+                        <div class="assignment-group">
+                            <strong class="flex items-center gap-1 text-green-800">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                Vigia(s)
+                            </strong>
+                            <div class="pl-2">${watchmenHtml}</div>
                         </div>
                     </div>
                 `;
+                grid.appendChild(dayDiv);
             });
             
-            calendarHtml += `</div></div>`;
-
-            scheduleOutputDiv.innerHTML = calendarHtml;
+            container.appendChild(grid);
+            scheduleOutputDiv.appendChild(container);
 
             document.querySelectorAll('.editable-team-member').forEach(span => {
                 span.addEventListener('click', handleScheduleEdit);
@@ -1598,10 +1614,8 @@
                         const hasAlert = alertCircuits.test(event.circuitsList);
                         const alertClass = hasAlert ? 'bg-yellow-50 border-l-4 border-yellow-400 pl-3' : '';
                         
-                        const speakerTypeDisplay = event.speakerType === 'bethel' ? 'Rep. de Betel' : 'Sup. de Circuito';
-
                         finalHtml += `<div class="py-2 ${alertClass}">`;
-                        finalHtml += `<p class="text-gray-700"><span class="font-semibold">${speakerTypeDisplay}:</span> <span class="editable-event" data-id="${event.id}" data-field="speakerName">${event.speakerName}</span></p>`;
+                        finalHtml += `<p class="text-gray-700"><span class="font-semibold">Responsável (Presidente):</span> <span class="editable-event" data-id="${event.id}" data-field="speakerName">${event.speakerName}</span></p>`;
                         finalHtml += `<p class="text-gray-700"><span class="font-semibold">Circuitos (${event.circuits}):</span> <span class="editable-event" data-id="${event.id}" data-field="circuitsList">${event.circuitsList}</span></p>`;
                         finalHtml += `<p class="text-gray-700"><span class="font-semibold">Nº Congs:</span> <span class="editable-event" data-id="${event.id}" data-field="congregations">${event.congregations}</span></p>`;
                         finalHtml += `<p class="text-gray-700"><span class="font-semibold">FDS Usados:</span> <span class="editable-event" data-id="${event.id}" data-field="weekends">${event.weekends}</span></p>`;
