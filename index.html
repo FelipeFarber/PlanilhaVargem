@@ -409,8 +409,16 @@
                         <p><span class="font-semibold">Circuitos:</span> <span id="summary-circuits-bethel" class="font-bold text-green-700"></span></p>
                         <p><span class="font-semibold">Congregações:</span> <span id="summary-congregations-bethel" class="font-bold text-green-700"></span></p>
                     </div>
+                     <div>
+                        <h4 class="font-bold text-gray-800 mb-2 border-b-2 border-gray-500 pb-1">Total Geral</h4>
+                        <p><span class="font-semibold">Pub. Estimados:</span> <span id="summary-publishers-total" class="font-bold text-gray-900"></span></p>
+                        <p><span class="font-semibold">Assist. Estimada:</span> <span id="summary-attendance-total" class="font-bold text-gray-900"></span></p>
+                        <p><span class="font-semibold">Fins de Semana:</span> <span id="summary-weekends-total" class="font-bold text-gray-900"></span></p>
+                        <p><span class="font-semibold">Circuitos:</span> <span id="summary-circuits-total" class="font-bold text-gray-900"></span></p>
+                        <p><span class="font-semibold">Congregações:</span> <span id="summary-congregations-total" class="font-bold text-gray-900"></span></p>
+                    </div>
                 </div>
-                <div>
+                <div class="mt-4">
                     <canvas id="summaryChart"></canvas>
                 </div>
             </div>
@@ -724,10 +732,13 @@
                                     class="px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 transform hover:scale-105">Imprimir</button>
                             </div>
                         </div>
-                        <div id="event-tabs" class="flex border-b border-gray-300 no-print"><button id="circuit-tab-btn"
-                                class="event-tab active">Superintendente de Circuito</button><button id="bethel-tab-btn"
-                                class="event-tab">Representante de Betel</button></div>
-                        <div id="circuit-events-list" class="event-tab-content pt-4"></div>
+                        <div id="event-tabs" class="flex border-b border-gray-300 no-print">
+                            <button id="all-tab-btn" class="event-tab active">Todos</button>
+                            <button id="circuit-tab-btn" class="event-tab">Superintendente de Circuito</button>
+                            <button id="bethel-tab-btn" class="event-tab">Representante de Betel</button>
+                        </div>
+                        <div id="all-events-list" class="event-tab-content pt-4"></div>
+                        <div id="circuit-events-list" class="event-tab-content pt-4 hidden"></div>
                         <div id="bethel-events-list" class="event-tab-content pt-4 hidden"></div>
                     </div>
                 </div>
@@ -777,8 +788,8 @@
             bethelSpeakerContainer = D('bethelSpeakerContainer'), newEventBethelSpeakerInput = D('newEventBethelSpeaker'),
             circuitSpeakerContainer = D('circuitSpeakerContainer'), newEventCircuitSpeakerInput = D('newEventCircuitSpeaker'),
             addEventBtn = D('addEventBtn'), printEventsBtn = D('printEventsBtn'), showSummaryBtn = D('showSummaryBtn'),
-            circuitTabBtn = D('circuit-tab-btn'), bethelTabBtn = D('bethel-tab-btn'),
-            circuitEventsList = D('circuit-events-list'), bethelEventsList = D('bethel-events-list'),
+            allTabBtn = D('all-tab-btn'), circuitTabBtn = D('circuit-tab-btn'), bethelTabBtn = D('bethel-tab-btn'),
+            allEventsList = D('all-events-list'), circuitEventsList = D('circuit-events-list'), bethelEventsList = D('bethel-events-list'),
             eventFormToggle = D('eventFormToggle'), eventFormContent = D('eventFormContent'), eventToggleIcon = D('eventToggleIcon'),
             eventFiltersAside = D('event-filters'),
             eventsExcelFileInput = D('eventsExcelFile'), loadEventsExcelBtn = D('loadEventsExcelBtn'), exportEventsExcelBtn = D('exportEventsExcelBtn'), clearAllEventsBtn = D('clearAllEventsBtn');
@@ -1607,6 +1618,7 @@
                 containerElement.innerHTML = finalHtml;
             };
 
+            renderEventList(filteredEvents, allEventsList);
             renderEventList(circuitEvents, circuitEventsList);
             renderEventList(bethelEvents, bethelEventsList);
             
@@ -1719,16 +1731,25 @@
 
             const circuitTotals = calculateTotals(circuitEvents);
             const bethelTotals = calculateTotals(bethelEvents);
+            const allTotals = calculateTotals(filteredEvents);
+
             D('summary-publishers-circuit').textContent = circuitTotals.publishers;
             D('summary-attendance-circuit').textContent = circuitTotals.attendance;
             D('summary-weekends-circuit').textContent = circuitTotals.weekends;
             D('summary-circuits-circuit').textContent = circuitTotals.circuits;
             D('summary-congregations-circuit').textContent = circuitTotals.congregations;
+            
             D('summary-publishers-bethel').textContent = bethelTotals.publishers;
             D('summary-attendance-bethel').textContent = bethelTotals.attendance;
             D('summary-weekends-bethel').textContent = bethelTotals.weekends;
             D('summary-circuits-bethel').textContent = bethelTotals.circuits;
             D('summary-congregations-bethel').textContent = bethelTotals.congregations;
+
+            D('summary-publishers-total').textContent = allTotals.publishers;
+            D('summary-attendance-total').textContent = allTotals.attendance;
+            D('summary-weekends-total').textContent = allTotals.weekends;
+            D('summary-circuits-total').textContent = allTotals.circuits;
+            D('summary-congregations-total').textContent = allTotals.congregations;
             
             const ctx = D('summaryChart').getContext('2d');
             if (summaryChartInstance) {
@@ -2097,8 +2118,32 @@
             exportEventsExcelBtn.addEventListener('click', exportEventsToExcel);
             showSummaryBtn.addEventListener('click', showSummaryPopup);
             summaryModalClose.addEventListener('click', () => summaryModal.classList.remove('visible'));
-            circuitTabBtn.addEventListener('click', () => { circuitTabBtn.classList.add('active'); bethelTabBtn.classList.remove('active'); circuitEventsList.classList.remove('hidden'); bethelEventsList.classList.add('hidden'); });
-            bethelTabBtn.addEventListener('click', () => { bethelTabBtn.classList.add('active'); circuitTabBtn.classList.remove('active'); bethelEventsList.classList.remove('hidden'); circuitEventsList.classList.add('hidden'); });
+            
+            allTabBtn.addEventListener('click', () => { 
+                allTabBtn.classList.add('active'); 
+                circuitTabBtn.classList.remove('active'); 
+                bethelTabBtn.classList.remove('active'); 
+                allEventsList.classList.remove('hidden'); 
+                circuitEventsList.classList.add('hidden'); 
+                bethelEventsList.classList.add('hidden'); 
+            });
+            circuitTabBtn.addEventListener('click', () => { 
+                allTabBtn.classList.remove('active'); 
+                circuitTabBtn.classList.add('active'); 
+                bethelTabBtn.classList.remove('active'); 
+                allEventsList.classList.add('hidden'); 
+                circuitEventsList.classList.remove('hidden'); 
+                bethelEventsList.classList.add('hidden'); 
+            });
+            bethelTabBtn.addEventListener('click', () => { 
+                allTabBtn.classList.remove('active'); 
+                circuitTabBtn.classList.remove('active'); 
+                bethelTabBtn.classList.add('active'); 
+                allEventsList.classList.add('hidden'); 
+                circuitEventsList.classList.add('hidden'); 
+                bethelEventsList.classList.remove('hidden'); 
+            });
+
             newEventSpeakerTypeSelect.addEventListener('change', (e) => { const selection = e.target.value; bethelSpeakerContainer.classList.toggle('hidden', selection !== 'bethel'); circuitSpeakerContainer.classList.toggle('hidden', selection !== 'circuit'); });
             newStatusSelect.addEventListener('change', (e) => { if (e.target.value === 'Casal') coupleContainer.classList.remove('hidden'); else { coupleContainer.classList.add('hidden'); newSpouseNameInput.value = ''; } });
             menuToggle.addEventListener('click', () => { document.body.classList.toggle('menu-open'); menuOpenIcon.classList.toggle('hidden'); menuCloseIcon.classList.toggle('hidden'); if (window.innerWidth < 1024) sidebarOverlay.classList.toggle('hidden', !document.body.classList.contains('menu-open')); });
