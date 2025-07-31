@@ -20,6 +20,8 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <!-- Flatpickr Portuguese Locale -->
     <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style id="print-styles"></style>
 
     <style>
@@ -184,15 +186,14 @@
         }
 
         .collapsible-content {
-            display: block;
-            transition: all 0.3s ease-in-out;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            max-height: 1000px; /* Adjust as needed */
         }
 
         .collapsible-content.hidden {
-            display: none;
-            opacity: 0;
             max-height: 0;
-            overflow: hidden;
+            opacity: 0;
         }
 
         #custom-confirm-modal,
@@ -225,7 +226,13 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             text-align: center;
             max-width: 90%;
-            width: 500px;
+            width: 700px;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        
+        #summary-modal.visible .modal-content {
+            transform: scale(1);
         }
 
         .event-tab {
@@ -238,6 +245,15 @@
             border-color: #2563eb;
             color: #1e3a8a;
             font-weight: 600;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @media print {
@@ -373,40 +389,33 @@
     </div>
 
     <div id="summary-modal">
-        <div class="modal-content text-left">
-            <h3 class="text-2xl font-bold text-blue-800 mb-6 text-center">Resumo de Eventos</h3>
-            <div class="space-y-3 text-gray-700">
-                <div class="grid grid-cols-2 gap-x-4">
+        <div class="modal-content">
+            <h3 class="text-2xl font-bold text-blue-800 mb-4 text-center">Resumo de Eventos</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <div class="text-left space-y-4">
                     <div>
-                        <h4 class="font-bold text-gray-800 mb-2">Sup. de Circuito</h4>
-                        <p><span class="font-semibold">Pub. Estimados:</span> <span id="summary-publishers-circuit"
-                                class="font-bold"></span></p>
-                        <p><span class="font-semibold">Assist. Estimada:</span> <span id="summary-attendance-circuit"
-                                class="font-bold"></span></p>
-                        <p><span class="font-semibold">Fins de Semana:</span> <span id="summary-weekends-circuit"
-                                class="font-bold"></span></p>
-                        <p><span class="font-semibold">Circuitos:</span> <span id="summary-circuits-circuit"
-                                class="font-bold"></span></p>
-                        <p><span class="font-semibold">Congregações:</span> <span id="summary-congregations-circuit"
-                                class="font-bold"></span></p>
+                        <h4 class="font-bold text-gray-800 mb-2 border-b pb-1">Sup. de Circuito</h4>
+                        <p><span class="font-semibold">Pub. Estimados:</span> <span id="summary-publishers-circuit" class="font-bold text-blue-700"></span></p>
+                        <p><span class="font-semibold">Assist. Estimada:</span> <span id="summary-attendance-circuit" class="font-bold text-blue-700"></span></p>
+                        <p><span class="font-semibold">Fins de Semana:</span> <span id="summary-weekends-circuit" class="font-bold text-blue-700"></span></p>
+                        <p><span class="font-semibold">Circuitos:</span> <span id="summary-circuits-circuit" class="font-bold text-blue-700"></span></p>
+                        <p><span class="font-semibold">Congregações:</span> <span id="summary-congregations-circuit" class="font-bold text-blue-700"></span></p>
                     </div>
                     <div>
-                        <h4 class="font-bold text-gray-800 mb-2">Rep. de Betel</h4>
-                        <p><span class="font-semibold">Pub. Estimados:</span> <span id="summary-publishers-bethel"
-                                class="font-bold"></span></p>
-                        <p><span class="font-semibold">Assist. Estimada:</span> <span id="summary-attendance-bethel"
-                                class="font-bold"></span></p>
-                        <p><span class="font-semibold">Fins de Semana:</span> <span id="summary-weekends-bethel"
-                                class="font-bold"></span></p>
-                        <p><span class="font-semibold">Circuitos:</span> <span id="summary-circuits-bethel"
-                                class="font-bold"></span></p>
-                        <p><span class="font-semibold">Congregações:</span> <span id="summary-congregations-bethel"
-                                class="font-bold"></span></p>
+                        <h4 class="font-bold text-gray-800 mb-2 border-b pb-1">Rep. de Betel</h4>
+                        <p><span class="font-semibold">Pub. Estimados:</span> <span id="summary-publishers-bethel" class="font-bold text-green-700"></span></p>
+                        <p><span class="font-semibold">Assist. Estimada:</span> <span id="summary-attendance-bethel" class="font-bold text-green-700"></span></p>
+                        <p><span class="font-semibold">Fins de Semana:</span> <span id="summary-weekends-bethel" class="font-bold text-green-700"></span></p>
+                        <p><span class="font-semibold">Circuitos:</span> <span id="summary-circuits-bethel" class="font-bold text-green-700"></span></p>
+                        <p><span class="font-semibold">Congregações:</span> <span id="summary-congregations-bethel" class="font-bold text-green-700"></span></p>
                     </div>
                 </div>
+                <div>
+                    <canvas id="summaryChart"></canvas>
+                </div>
             </div>
-            <div class="flex justify-center mt-8"><button id="summary-modal-close"
-                    class="px-8 py-2 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700">Fechar</button>
+            <div class="flex justify-center mt-8">
+                <button id="summary-modal-close" class="px-8 py-2 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700">Fechar</button>
             </div>
         </div>
     </div>
@@ -682,7 +691,9 @@
                         <div class="flex flex-col gap-3">
                              <input type="file" id="eventsExcelFile" accept=".xlsx, .xls, .csv" class="hidden">
                              <button id="loadEventsExcelBtn"
-                                 class="w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700">Carregar Planilha de Eventos</button>
+                                 class="w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700">Carregar Planilha</button>
+                             <button id="exportEventsExcelBtn"
+                                 class="w-full px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700">Exportar Planilha</button>
                              <button id="clearAllEventsBtn"
                                 class="w-full px-4 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700">Limpar
                                 Eventos</button>
@@ -730,7 +741,7 @@
 
         // Global state variables
         var peopleData = [], occurrencesData = [], eventsData = [];
-        let currentSchedule = [], congressDatePicker, currentFilterYear = new Date().getFullYear(), currentFilterMonth = -1, eventFilterYear = 'all', eventFilterMonth = -1;
+        let currentSchedule = [], congressDatePicker, currentFilterYear = new Date().getFullYear(), currentFilterMonth = -1, eventFilterYear = 'all', eventFilterMonth = -1, summaryChartInstance = null;
 
         // --- DOM Elements Cache ---
         const D = (id) => document.getElementById(id);
@@ -770,7 +781,7 @@
             circuitEventsList = D('circuit-events-list'), bethelEventsList = D('bethel-events-list'),
             eventFormToggle = D('eventFormToggle'), eventFormContent = D('eventFormContent'), eventToggleIcon = D('eventToggleIcon'),
             eventFiltersAside = D('event-filters'),
-            eventsExcelFileInput = D('eventsExcelFile'), loadEventsExcelBtn = D('loadEventsExcelBtn'), clearAllEventsBtn = D('clearAllEventsBtn');
+            eventsExcelFileInput = D('eventsExcelFile'), loadEventsExcelBtn = D('loadEventsExcelBtn'), exportEventsExcelBtn = D('exportEventsExcelBtn'), clearAllEventsBtn = D('clearAllEventsBtn');
         const loadDataFileInput = document.createElement('input');
         loadDataFileInput.type = 'file'; loadDataFileInput.accept = '.json'; loadDataFileInput.style.display = 'none'; document.body.appendChild(loadDataFileInput);
 
@@ -1160,7 +1171,7 @@
 
             filteredOccurrences.forEach(o => {
                 const occurrenceEl = document.createElement('div');
-                occurrenceEl.className = 'bg-white p-4 rounded-lg shadow-md mb-4';
+                occurrenceEl.className = 'bg-white p-4 rounded-lg shadow-md mb-4 fade-in';
                 let imagesHtml = '';
                 if (o.images && o.images.length > 0) {
                     imagesHtml += '<div class="flex flex-wrap gap-2 mb-2">';
@@ -1546,6 +1557,8 @@
                     const dateObj = new Date(date + 'T00:00:00');
                     
                     const totalQuantityForDay = eventsOnDay.reduce((sum, ev) => sum + ev.quantity, 0);
+                    const totalPublishersForDay = eventsOnDay.reduce((sum, ev) => sum + ev.publishers, 0);
+
                     let auditoriumForDay;
                     if (totalQuantityForDay <= 50) {
                         auditoriumForDay = 'Auditório C';
@@ -1555,8 +1568,19 @@
                         auditoriumForDay = 'Auditório B';
                     }
                     
-                    finalHtml += `<div class="bg-white p-4 rounded-lg shadow-md mb-4">`;
-                    finalHtml += `<div class="flex justify-between items-start mb-2"><p class="font-bold text-lg text-blue-700">${dateObj.toLocaleDateString('pt-BR')} - <span class="font-semibold">Local: ${auditoriumForDay}</span></p><button class="px-3 py-1 bg-red-500 text-white rounded-md text-sm delete-event-btn no-print" data-id="${eventsOnDay[0].id}">Excluir Dia</button></div>`;
+                    let summaryHtml = '';
+                    if (eventsOnDay.length > 1) {
+                        summaryHtml = `
+                            <div class="text-xs bg-blue-50 border border-blue-200 rounded-md p-2 ml-4">
+                                <p class="font-bold">Total do Dia:</p>
+                                <p><strong>Pubs:</strong> ${totalPublishersForDay}</p>
+                                <p><strong>Assist.:</strong> ${totalQuantityForDay}</p>
+                            </div>
+                        `;
+                    }
+
+                    finalHtml += `<div class="bg-white p-4 rounded-lg shadow-md mb-4 fade-in">`;
+                    finalHtml += `<div class="flex justify-between items-start mb-2"><div class="flex items-start"><p class="font-bold text-lg text-blue-700">${dateObj.toLocaleDateString('pt-BR')} - <span class="font-semibold">Local: ${auditoriumForDay}</span></p>${summaryHtml}</div><button class="px-3 py-1 bg-red-500 text-white rounded-md text-sm delete-event-btn no-print" data-id="${eventsOnDay[0].id}">Excluir Dia</button></div>`;
                     
                     eventsOnDay.forEach((event, index) => {
                         const alertCircuits = /SP-?0?26|SP-?0?28|crioulo/i;
@@ -1705,6 +1729,39 @@
             D('summary-weekends-bethel').textContent = bethelTotals.weekends;
             D('summary-circuits-bethel').textContent = bethelTotals.circuits;
             D('summary-congregations-bethel').textContent = bethelTotals.congregations;
+            
+            const ctx = D('summaryChart').getContext('2d');
+            if (summaryChartInstance) {
+                summaryChartInstance.destroy();
+            }
+            summaryChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Pub. Estimados', 'Assist. Estimada'],
+                    datasets: [{
+                        label: 'Sup. de Circuito',
+                        data: [circuitTotals.publishers, circuitTotals.attendance],
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Rep. de Betel',
+                        data: [bethelTotals.publishers, bethelTotals.attendance],
+                        backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
             summaryModal.classList.add('visible');
         }
 
@@ -1930,6 +1987,49 @@
             showMessage('Dados exportados com sucesso!', 'success');
         }
 
+        function exportEventsToExcel() {
+            if (eventsData.length === 0) {
+                showMessage('Nenhum evento para exportar.', 'info');
+                return;
+            }
+
+            const dataToExport = eventsData.map(e => {
+                const totalQuantityForDay = eventsData
+                    .filter(ev => ev.date === e.date)
+                    .reduce((sum, ev) => sum + ev.quantity, 0);
+
+                let auditoriumForDay;
+                if (totalQuantityForDay <= 50) {
+                    auditoriumForDay = 'Auditório C';
+                } else if (totalQuantityForDay > 500) {
+                    auditoriumForDay = 'Auditório A';
+                } else {
+                    auditoriumForDay = 'Auditório B';
+                }
+
+                return {
+                    'Data': new Date(e.date + 'T00:00:00').toLocaleDateString('pt-BR'),
+                    'Nome do Evento': e.name,
+                    'Tipo de Orador': e.speakerType === 'bethel' ? 'Representante de Betel' : 'Superintendente de Circuito',
+                    'Nome do Orador': e.speakerName,
+                    'Circuitos': e.circuitsList,
+                    'Nº Circuitos': e.circuits,
+                    'Nº Congregações': e.congregations,
+                    'FDS Usados': e.weekends,
+                    'Pubs. Estimados': e.publishers,
+                    'Assist. Estimada': e.quantity,
+                    'Auditório Designado': auditoriumForDay
+                };
+            }).sort((a, b) => new Date(a.Data.split('/').reverse().join('-')) - new Date(b.Data.split('/').reverse().join('-')));
+
+            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Eventos");
+
+            XLSX.writeFile(workbook, "eventos_atualizados.xlsx");
+            showMessage('Planilha de eventos exportada com sucesso!', 'success');
+        }
+
 
         // --- INITIALIZATION & EVENT LISTENERS ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -1994,6 +2094,7 @@
             printOccurrencesBtn.addEventListener('click', () => printSection('printing-occurrences'));
             addEventBtn.addEventListener('click', addEvent);
             printEventsBtn.addEventListener('click', () => printSection('printing-events'));
+            exportEventsExcelBtn.addEventListener('click', exportEventsToExcel);
             showSummaryBtn.addEventListener('click', showSummaryPopup);
             summaryModalClose.addEventListener('click', () => summaryModal.classList.remove('visible'));
             circuitTabBtn.addEventListener('click', () => { circuitTabBtn.classList.add('active'); bethelTabBtn.classList.remove('active'); circuitEventsList.classList.remove('hidden'); bethelEventsList.classList.add('hidden'); });
