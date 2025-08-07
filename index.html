@@ -31,15 +31,16 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8;
+            background-color: #111827; /* Dark background */
+            color: #d1d5db; /* Light gray text */
             line-height: 1.6;
         }
 
         h1.main-title {
             font-family: 'Poppins', sans-serif;
             font-weight: 800;
-            color: #1e3a8a;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            color: #93c5fd; /* Light blue */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         #loading-screen,
@@ -49,7 +50,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #f0f4f8;
+            background-color: #111827;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -98,13 +99,13 @@
             border: 0;
             font-size: 0.875rem;
             font-weight: 600;
-            background-color: #eff6ff;
-            color: #1d4ed8;
+            background-color: #374151;
+            color: #d1d5db;
             cursor: pointer;
         }
 
         .file-input:hover::-webkit-file-upload-button {
-            background-color: #dbeafe;
+            background-color: #4b5563;
         }
 
         .data-table .day-cell,
@@ -114,7 +115,7 @@
         }
 
         .editable-event:hover {
-            background-color: #eff6ff;
+            background-color: #374151;
             border-radius: 4px;
         }
 
@@ -123,35 +124,35 @@
         }
 
         .data-table thead th {
-            background-color: #2c5282;
+            background-color: #1e40af;
             color: white;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
-
-        .data-table tbody tr.main-row:nth-child(4n-1),
-        .data-table tbody tr.main-row:nth-child(4n) {
-             background-color: #edf2f7;
+        
+        .data-table tbody tr.main-row {
+            background-color: #1f2937;
+            border-bottom: 1px solid #374151;
         }
         
         .data-table tbody tr.main-row:hover {
-             background-color: #bee3f8;
+             background-color: #374151;
         }
 
 
         .schedule-table thead th {
-            background-color: #1e3a8a;
+            background-color: #1e40af;
             color: white;
             font-weight: 600;
         }
 
         .schedule-table .sabado-day {
-            background-color: #fef9c3;
+            background-color: #422006;
         }
 
         .schedule-table .domingo-day {
-            background-color: #fee2e2;
+            background-color: #450a0a;
         }
 
         .schedule-table .editable-team-member {
@@ -164,7 +165,7 @@
         }
 
         .schedule-table .editable-team-member:hover {
-            background-color: #bfdbfe;
+            background-color: #3b82f6;
         }
 
         .collapsible-header {
@@ -173,16 +174,16 @@
             justify-content: space-between;
             align-items: center;
             padding: 1rem;
-            background-color: #e2e8f0;
+            background-color: #374151;
             border-radius: 0.5rem;
             font-weight: 600;
-            color: #475569;
+            color: #d1d5db;
             margin-bottom: 1rem;
             transition: background-color 0.3s ease-in-out;
         }
 
         .collapsible-header:hover {
-            background-color: #d1d5db;
+            background-color: #4b5563;
         }
 
         .collapsible-content {
@@ -195,6 +196,11 @@
             max-height: 0;
             opacity: 0;
         }
+        
+        #dataTableContent {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
 
         #custom-confirm-modal,
         #summary-modal {
@@ -203,7 +209,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.7);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -220,7 +226,8 @@
         }
 
         .modal-content {
-            background: white;
+            background: #1f2937;
+            color: #d1d5db;
             padding: 2rem;
             border-radius: 0.5rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -242,8 +249,8 @@
         }
 
         .event-tab.active {
-            border-color: #2563eb;
-            color: #1e3a8a;
+            border-color: #60a5fa;
+            color: #93c5fd;
             font-weight: 600;
         }
         
@@ -268,6 +275,10 @@
                 margin-left: 0 !important;
                 padding: 0 !important;
             }
+            
+            h1.main-title {
+                display: none !important;
+            }
 
             .no-print {
                 display: none !important;
@@ -290,7 +301,6 @@
                 padding: 0 !important;
             }
 
-            h1.main-title,
             h2,
             h3 {
                 text-align: center;
@@ -328,7 +338,7 @@
                 border-radius: 0.25rem !important;
                 border: 1px solid #ccc !important;
             }
-            body.printing-schedule .min-h-\[120px\] {
+            body.printing-schedule .min-h-\[110px\] {
                 min-height: 0 !important;
                 height: 14vh; 
             }
@@ -379,43 +389,43 @@
             class="pulsing-image w-32 h-32"></div>
     <div id="custom-confirm-modal">
         <div class="modal-content">
-            <p id="confirm-modal-text" class="mb-6 text-lg text-gray-700"></p>
+            <p id="confirm-modal-text" class="mb-6 text-lg text-gray-300"></p>
             <div class="flex justify-center gap-4"><button id="confirm-modal-yes"
                     class="px-6 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700">Sim</button><button
                     id="confirm-modal-no"
-                    class="px-6 py-2 bg-gray-300 text-gray-800 font-semibold rounded-lg shadow-md hover:bg-gray-400">Não</button>
+                    class="px-6 py-2 bg-gray-500 text-gray-100 font-semibold rounded-lg shadow-md hover:bg-gray-600">Não</button>
             </div>
         </div>
     </div>
 
     <div id="summary-modal">
         <div class="modal-content">
-            <h3 class="text-2xl font-bold text-blue-800 mb-4 text-center">Resumo de Eventos</h3>
+            <h3 class="text-2xl font-bold text-blue-300 mb-4 text-center">Resumo de Eventos</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                 <div class="text-left space-y-4">
                     <div>
-                        <h4 class="font-bold text-gray-800 mb-2 border-b pb-1">Sup. de Circuito</h4>
-                        <p><span class="font-semibold">Pub. Estimados:</span> <span id="summary-publishers-circuit" class="font-bold text-blue-700"></span></p>
-                        <p><span class="font-semibold">Assist. Estimada:</span> <span id="summary-attendance-circuit" class="font-bold text-blue-700"></span></p>
-                        <p><span class="font-semibold">Fins de Semana:</span> <span id="summary-weekends-circuit" class="font-bold text-blue-700"></span></p>
-                        <p><span class="font-semibold">Circuitos:</span> <span id="summary-circuits-circuit" class="font-bold text-blue-700"></span></p>
-                        <p><span class="font-semibold">Congregações:</span> <span id="summary-congregations-circuit" class="font-bold text-blue-700"></span></p>
+                        <h4 class="font-bold text-gray-300 mb-2 border-b border-gray-600 pb-1">Sup. de Circuito</h4>
+                        <p><span class="font-semibold">Pub. Estimados:</span> <span id="summary-publishers-circuit" class="font-bold text-blue-400"></span></p>
+                        <p><span class="font-semibold">Assist. Estimada:</span> <span id="summary-attendance-circuit" class="font-bold text-blue-400"></span></p>
+                        <p><span class="font-semibold">Fins de Semana:</span> <span id="summary-weekends-circuit" class="font-bold text-blue-400"></span></p>
+                        <p><span class="font-semibold">Circuitos:</span> <span id="summary-circuits-circuit" class="font-bold text-blue-400"></span></p>
+                        <p><span class="font-semibold">Congregações:</span> <span id="summary-congregations-circuit" class="font-bold text-blue-400"></span></p>
                     </div>
                     <div>
-                        <h4 class="font-bold text-gray-800 mb-2 border-b pb-1">Rep. de Betel</h4>
-                        <p><span class="font-semibold">Pub. Estimados:</span> <span id="summary-publishers-bethel" class="font-bold text-green-700"></span></p>
-                        <p><span class="font-semibold">Assist. Estimada:</span> <span id="summary-attendance-bethel" class="font-bold text-green-700"></span></p>
-                        <p><span class="font-semibold">Fins de Semana:</span> <span id="summary-weekends-bethel" class="font-bold text-green-700"></span></p>
-                        <p><span class="font-semibold">Circuitos:</span> <span id="summary-circuits-bethel" class="font-bold text-green-700"></span></p>
-                        <p><span class="font-semibold">Congregações:</span> <span id="summary-congregations-bethel" class="font-bold text-green-700"></span></p>
+                        <h4 class="font-bold text-gray-300 mb-2 border-b border-gray-600 pb-1">Rep. de Betel</h4>
+                        <p><span class="font-semibold">Pub. Estimados:</span> <span id="summary-publishers-bethel" class="font-bold text-green-400"></span></p>
+                        <p><span class="font-semibold">Assist. Estimada:</span> <span id="summary-attendance-bethel" class="font-bold text-green-400"></span></p>
+                        <p><span class="font-semibold">Fins de Semana:</span> <span id="summary-weekends-bethel" class="font-bold text-green-400"></span></p>
+                        <p><span class="font-semibold">Circuitos:</span> <span id="summary-circuits-bethel" class="font-bold text-green-400"></span></p>
+                        <p><span class="font-semibold">Congregações:</span> <span id="summary-congregations-bethel" class="font-bold text-green-400"></span></p>
                     </div>
                      <div>
-                        <h4 class="font-bold text-gray-800 mb-2 border-b-2 border-gray-500 pb-1">Total Geral</h4>
-                        <p><span class="font-semibold">Pub. Estimados:</span> <span id="summary-publishers-total" class="font-bold text-gray-900"></span></p>
-                        <p><span class="font-semibold">Assist. Estimada:</span> <span id="summary-attendance-total" class="font-bold text-gray-900"></span></p>
-                        <p><span class="font-semibold">Fins de Semana:</span> <span id="summary-weekends-total" class="font-bold text-gray-900"></span></p>
-                        <p><span class="font-semibold">Circuitos:</span> <span id="summary-circuits-total" class="font-bold text-gray-900"></span></p>
-                        <p><span class="font-semibold">Congregações:</span> <span id="summary-congregations-total" class="font-bold text-gray-900"></span></p>
+                        <h4 class="font-bold text-gray-300 mb-2 border-b-2 border-gray-500 pb-1">Total Geral</h4>
+                        <p><span class="font-semibold">Pub. Estimados:</span> <span id="summary-publishers-total" class="font-bold text-gray-100"></span></p>
+                        <p><span class="font-semibold">Assist. Estimada:</span> <span id="summary-attendance-total" class="font-bold text-gray-100"></span></p>
+                        <p><span class="font-semibold">Fins de Semana:</span> <span id="summary-weekends-total" class="font-bold text-gray-100"></span></p>
+                        <p><span class="font-semibold">Circuitos:</span> <span id="summary-circuits-total" class="font-bold text-gray-100"></span></p>
+                        <p><span class="font-semibold">Congregações:</span> <span id="summary-congregations-total" class="font-bold text-gray-100"></span></p>
                     </div>
                 </div>
                 <div class="mt-4">
@@ -430,33 +440,33 @@
 
     <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden lg:hidden"></div>
     <nav id="navbar"
-        class="fixed top-0 left-0 h-full w-60 bg-blue-900 text-white shadow-xl z-30 flex flex-col items-center py-8 no-print transform -translate-x-full group-[.menu-open]:translate-x-0 transition-transform duration-300 ease-in-out">
+        class="fixed top-0 left-0 h-full w-60 bg-gray-900 text-gray-300 shadow-xl z-30 flex flex-col items-center py-8 no-print transform -translate-x-full group-[.menu-open]:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="mb-10"><img src="images/logo.png" alt="Logo" class="h-20 w-auto"></div>
         <div class="flex flex-col space-y-3 w-full px-4">
             <a href="#info-section" id="nav-info"
-                class="flex items-center justify-start text-lg font-semibold hover:bg-blue-700 p-3 rounded-lg transition-colors">
+                class="flex items-center justify-start text-lg font-semibold hover:bg-gray-700 p-3 rounded-lg transition-colors">
                 <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 Informações
             </a>
             <a href="#schedule-section" id="nav-schedule"
-                class="flex items-center justify-start text-lg font-semibold hover:bg-blue-700 p-3 rounded-lg transition-colors">
+                class="flex items-center justify-start text-lg font-semibold hover:bg-gray-700 p-3 rounded-lg transition-colors">
                 <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 Escala
             </a>
             <a href="#occurrences-section" id="nav-occurrences"
-                class="flex items-center justify-start text-lg font-semibold hover:bg-blue-700 p-3 rounded-lg transition-colors">
+                class="flex items-center justify-start text-lg font-semibold hover:bg-gray-700 p-3 rounded-lg transition-colors">
                 <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 Ocorrências
             </a>
             <a href="#events-section" id="nav-events"
-                class="flex items-center justify-start text-lg font-semibold hover:bg-blue-700 p-3 rounded-lg transition-colors">
+                class="flex items-center justify-start text-lg font-semibold hover:bg-gray-700 p-3 rounded-lg transition-colors">
                 <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
                 Eventos
             </a>
         </div>
     </nav>
     <button id="menu-toggle"
-        class="fixed top-4 left-4 z-40 p-2 bg-blue-800 text-white rounded-md hover:bg-blue-700 transition-all duration-300 ease-in-out no-print lg:group-[.menu-open]:left-64"><svg
+        class="fixed top-4 left-4 z-40 p-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 transition-all duration-300 ease-in-out no-print lg:group-[.menu-open]:left-64"><svg
             id="menu-open-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -472,9 +482,9 @@
                 Organizacional</h1>
 
             <div id="info-section" class="content-section hidden">
-                <div class="mb-8 p-6 bg-white rounded-lg shadow-md no-print">
+                <div class="mb-8 p-6 bg-gray-800 rounded-lg shadow-md no-print">
                     <div class="flex flex-col items-center gap-4"><input type="file" id="excelFile" accept=".xlsx, .xls"
-                            class="file-input block w-full max-w-sm text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none">
+                            class="file-input block w-full max-w-sm text-sm text-gray-300 border border-gray-600 rounded-lg cursor-pointer bg-gray-700 focus:outline-none">
                         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 w-full"><button id="loadExcel"
                                 class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 w-full">Carregar
                                 Planilha</button><button id="saveData"
@@ -496,12 +506,12 @@
                         <span id="addPersonToggleIcon">►</span>
                     </div>
                     <div id="addPersonFormContent" class="collapsible-content hidden">
-                        <div class="p-6 bg-white rounded-lg shadow-md no-print">
+                        <div class="p-6 bg-gray-800 rounded-lg shadow-md no-print">
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4"><input type="text"
                                     id="newName" placeholder="Nome Completo"
-                                    class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"><select
+                                    class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"><select
                                     id="newMeetingDayWeekday"
-                                    class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">Reunião Meio de Semana</option>
                                     <option value="segunda">Segunda-feira</option>
                                     <option value="terca">Terça-feira</option>
@@ -509,7 +519,7 @@
                                     <option value="quinta">Quinta-feira</option>
                                     <option value="sexta">Sexta-feira</option>
                                 </select><select id="newMeetingDayWeekend"
-                                    class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                                     <option value="">Reunião Fim de Semana</option>
                                     <option value="sabado">Sábado</option>
                                     <option value="domingo">Domingo</option>
@@ -517,33 +527,33 @@
                                 </select></div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div><label for="newStatus"
-                                        class="block text-sm font-medium text-gray-700">Status</label><select id="newStatus"
-                                        class="p-2 border border-gray-300 rounded-md w-full">
+                                        class="block text-sm font-medium text-gray-400">Status</label><select id="newStatus"
+                                        class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md w-full">
                                         <option value="Solteiro(a)">Solteiro(a)</option>
                                         <option value="Casal">Casal</option>
                                     </select></div>
                                 <div id="main-person-gender-container"><label for="newGender"
-                                        class="block text-sm font-medium text-gray-700">Gênero</label><select id="newGender"
-                                        class="p-2 border border-gray-300 rounded-md w-full">
+                                        class="block text-sm font-medium text-gray-400">Gênero</label><select id="newGender"
+                                        class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md w-full">
                                         <option value="Feminino">Feminino</option>
                                         <option value="Masculino">Masculino</option>
                                     </select></div>
                             </div>
                             <div id="couple-container" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div><label for="newSpouseName" class="block text-sm font-medium text-gray-700">Nome do
+                                <div><label for="newSpouseName" class="block text-sm font-medium text-gray-400">Nome do
                                         Cônjuge</label><input type="text" id="newSpouseName" placeholder="Nome do Cônjuge"
-                                        class="p-2 border border-gray-300 rounded-md w-full"></div>
+                                        class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md w-full"></div>
                                 <div id="spouse-gender-container"><label for="newSpouseGender"
-                                        class="block text-sm font-medium text-gray-700">Gênero do Cônjuge</label><select
-                                        id="newSpouseGender" class="p-2 border border-gray-300 rounded-md w-full">
+                                        class="block text-sm font-medium text-gray-400">Gênero do Cônjuge</label><select
+                                        id="newSpouseGender" class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md w-full">
                                         <option value="Masculino">Masculino</option>
                                         <option value="Feminino">Feminino</option>
                                     </select></div>
                             </div>
-                            <div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-1">Dias de Assembleia ou
+                            <div class="mb-4"><label class="block text-sm font-medium text-gray-400 mb-1">Dias de Assembleia ou
                                     Congresso:</label><input type="text" id="newCongressDates"
                                     placeholder="Clique para selecionar o início e o fim..." readonly
-                                    class="p-2 border border-gray-300 rounded-md w-full cursor-pointer bg-white"></div>
+                                    class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md w-full cursor-pointer"></div>
                             <div class="flex flex-wrap gap-4 mb-4"><label class="flex items-center space-x-2"><input
                                         type="checkbox" id="newSeg" class="form-checkbox" checked><span>Seg</span></label><label
                                     class="flex items-center space-x-2"><input type="checkbox" id="newTer" class="form-checkbox"
@@ -573,19 +583,27 @@
             </div>
 
             <div id="schedule-section" class="content-section hidden">
-                <div class="mb-8 p-6 bg-white rounded-lg shadow-md">
+                <div class="mb-8 p-6 bg-gray-800 rounded-lg shadow-md">
                     <div class="no-print">
-                        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Gerador de Escala</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <h2 class="text-2xl font-semibold text-gray-200 mb-4">Gerador de Escala</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             <div>
-                                <label for="scheduleMonth" class="block text-sm font-medium text-gray-700">Mês:</label>
+                                <label for="scheduleMonth" class="block text-sm font-medium text-gray-400">Mês:</label>
                                 <select id="scheduleMonth"
-                                    class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select>
+                                    class="mt-1 block w-full p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md"></select>
                             </div>
                             <div>
-                                <label for="scheduleYear" class="block text-sm font-medium text-gray-700">Ano:</label>
+                                <label for="scheduleYear" class="block text-sm font-medium text-gray-400">Ano:</label>
                                 <input type="number" id="scheduleYear" value="2025" min="2024" max="2050"
-                                    class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                                    class="mt-1 block w-full p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md">
+                            </div>
+                             <div>
+                                <label for="shiftStartTime" class="block text-sm font-medium text-gray-400">Horário de Entrada:</label>
+                                <input type="time" id="shiftStartTime" value="09:00" class="mt-1 block w-full p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md">
+                            </div>
+                            <div>
+                                <label for="shiftEndTime" class="block text-sm font-medium text-gray-400">Horário de Saída:</label>
+                                <input type="time" id="shiftEndTime" value="17:00" class="mt-1 block w-full p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md">
                             </div>
                         </div>
                         <div class="flex flex-wrap gap-4">
@@ -606,41 +624,41 @@
             <div id="occurrences-section" class="content-section hidden">
                 <div class="flex flex-col md:flex-row-reverse gap-6">
                     <aside id="occurrence-filters"
-                        class="w-full md:w-64 flex-shrink-0 bg-white p-4 rounded-lg shadow-md no-print self-start">
-                        <h3 class="font-semibold text-lg mb-4 text-gray-700">Filtrar Ocorrências</h3>
-                        <div><label for="filterYear" class="block text-sm font-medium text-gray-600">Ano</label><select
+                        class="w-full md:w-64 flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-md no-print self-start">
+                        <h3 class="font-semibold text-lg mb-4 text-gray-300">Filtrar Ocorrências</h3>
+                        <div><label for="filterYear" class="block text-sm font-medium text-gray-400">Ano</label><select
                                 id="filterYear"
-                                class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></select></div>
-                        <div class="mt-4"><label class="block text-sm font-medium text-gray-600">Mês</label>
+                                class="mt-1 block w-full p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md"></select></div>
+                        <div class="mt-4"><label class="block text-sm font-medium text-gray-400">Mês</label>
                             <div id="filterMonth" class="mt-1 space-y-1"></div>
                         </div>
                     </aside>
                     <div class="flex-grow">
-                        <div class="mb-8 p-6 bg-white rounded-lg shadow-md no-print">
+                        <div class="mb-8 p-6 bg-gray-800 rounded-lg shadow-md no-print">
                             <div class="flex justify-between items-center mb-4">
-                                <h2 class="text-2xl font-semibold text-gray-800">Registro de Ocorrências</h2><button
+                                <h2 class="text-2xl font-semibold text-gray-200">Registro de Ocorrências</h2><button
                                     id="printOccurrencesBtn"
                                     class="px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 transform hover:scale-105">Imprimir
                                     Ocorrências</button>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div><label for="occurrenceDate" class="block text-sm font-medium text-gray-700">Data da
+                                <div><label for="occurrenceDate" class="block text-sm font-medium text-gray-400">Data da
                                         Ocorrência:</label><input type="date" id="occurrenceDate"
-                                        class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div>
-                                <div><label for="occurrencePeople" class="block text-sm font-medium text-gray-700">No
+                                        class="mt-1 block w-full p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md"></div>
+                                <div><label for="occurrencePeople" class="block text-sm font-medium text-gray-400">No
                                         turno:</label><select id="occurrencePeople" multiple
-                                        class="mt-1 block w-full p-2 border border-gray-300 rounded-md h-32"></select>
+                                        class="mt-1 block w-full p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md h-32"></select>
                                 </div>
                             </div>
                             <div class="mb-4"><label for="occurrenceImages"
-                                    class="block text-sm font-medium text-gray-700">Imagens da Ocorrência:</label><input
+                                    class="block text-sm font-medium text-gray-400">Imagens da Ocorrência:</label><input
                                     type="file" id="occurrenceImages" multiple accept="image/*"
-                                    class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                    class="mt-1 block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-900 file:text-blue-300 hover:file:bg-blue-800">
                             </div>
                             <div class="mb-4"><label for="occurrenceDescription"
-                                    class="block text-sm font-medium text-gray-700">Descrição:</label><textarea
+                                    class="block text-sm font-medium text-gray-400">Descrição:</label><textarea
                                     id="occurrenceDescription" rows="4"
-                                    class="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                                    class="mt-1 block w-full p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md"
                                     placeholder="Descreva o que aconteceu..."></textarea></div><button
                                 id="addOccurrenceBtn"
                                 class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 w-full transform hover:scale-105">Salvar
@@ -656,34 +674,34 @@
                     <div id="eventFormToggle" class="collapsible-header no-print"><span>Adicionar Evento</span><span
                             id="eventToggleIcon">►</span></div>
                     <div id="eventFormContent" class="collapsible-content hidden">
-                        <div class="p-6 bg-white rounded-lg shadow-md no-print">
+                        <div class="p-6 bg-gray-800 rounded-lg shadow-md no-print">
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                                <input type="date" id="newEventDate" class="p-2 border border-gray-300 rounded-md">
-                                <select id="newEventName" class="p-2 border border-gray-300 rounded-md">
+                                <input type="date" id="newEventDate" class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md">
+                                <select id="newEventName" class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md">
                                     <option value="Assembleia" selected>Assembleia</option>
                                     <option value="Congresso">Congresso</option>
                                 </select>
                                 <input type="number" id="newEventPublishers" placeholder="Publicadores Estimados"
-                                    class="p-2 border border-gray-300 rounded-md">
+                                    class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md">
                                 <input type="number" id="newEventQuantity" placeholder="Assistência Estimada"
-                                    class="p-2 border border-gray-300 rounded-md">
+                                    class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md">
                                 <input type="number" id="newEventWeekends" placeholder="Fins de Semana Usados"
-                                    class="p-2 border border-gray-300 rounded-md">
+                                    class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md">
                                 <input type="number" id="newEventCongregations" placeholder="Nº de Congregações"
-                                    class="p-2 border border-gray-300 rounded-md">
+                                    class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md">
                                 <input type="text" id="newEventCircuits" placeholder="Circuitos (ex: SP-01, SP-02)"
-                                    class="p-2 border border-gray-300 rounded-md lg:col-span-2">
-                                <select id="newEventSpeakerType" class="p-2 border border-gray-300 rounded-md">
+                                    class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md lg:col-span-2">
+                                <select id="newEventSpeakerType" class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md">
                                     <option value="">Selecione o Orador</option>
                                     <option value="circuit">Superintendente de Circuito</option>
                                     <option value="bethel">Representante de Betel</option>
                                 </select>
                                 <div id="circuitSpeakerContainer" class="hidden lg:col-span-3"><input type="text"
                                         id="newEventCircuitSpeaker" placeholder="Nome do Sup. de Circuito"
-                                        class="p-2 border border-gray-300 rounded-md w-full"></div>
+                                        class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md w-full"></div>
                                 <div id="bethelSpeakerContainer" class="hidden lg:col-span-3"><input type="text"
                                         id="newEventBethelSpeaker" placeholder="Nome do Rep. de Betel"
-                                        class="p-2 border border-gray-300 rounded-md w-full"></div>
+                                        class="p-2 border border-gray-600 bg-gray-700 text-gray-200 rounded-md w-full"></div>
                             </div>
                             <button id="addEventBtn"
                                 class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 w-full transform hover:scale-105">Salvar
@@ -694,8 +712,8 @@
 
                 <div class="flex flex-col md:flex-row-reverse gap-6">
                     <aside id="event-filters"
-                        class="w-full md:w-64 flex-shrink-0 bg-white p-4 rounded-lg shadow-md no-print self-start">
-                        <h3 class="font-semibold text-lg mb-4 text-gray-700">Opções e Filtros</h3>
+                        class="w-full md:w-64 flex-shrink-0 bg-gray-800 p-4 rounded-lg shadow-md no-print self-start">
+                        <h3 class="font-semibold text-lg mb-4 text-gray-300">Opções e Filtros</h3>
                         <div class="flex flex-col gap-3">
                              <input type="file" id="eventsExcelFile" accept=".xlsx, .xls, .csv" class="hidden">
                              <button id="loadEventsExcelBtn"
@@ -706,15 +724,15 @@
                                 class="w-full px-4 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700">Limpar
                                 Eventos</button>
                         </div>
-                        <hr class="my-4">
+                        <hr class="my-4 border-gray-600">
                         <div>
-                            <label class="block text-sm font-medium text-gray-600 mb-2">Ano</label>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Ano</label>
                             <div id="eventFilterYearButtons" class="flex flex-wrap gap-2">
                                 <!-- Year buttons will be generated here by JS -->
                             </div>
                         </div>
                         <div class="mt-4">
-                            <label class="block text-sm font-medium text-gray-600 mb-2">Mês</label>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Mês</label>
                             <div id="eventFilterMonthButtons" class="grid grid-cols-3 gap-2">
                                 <!-- Month buttons will be generated here by JS -->
                             </div>
@@ -723,7 +741,7 @@
 
                     <div class="flex-grow">
                         <div class="flex justify-between items-center mb-4 no-print">
-                            <h2 class="text-2xl font-semibold text-gray-800">Eventos Registrados</h2>
+                            <h2 class="text-2xl font-semibold text-gray-200">Eventos Registrados</h2>
                             <div class="flex gap-2">
                                 <button id="showSummaryBtn"
                                     class="px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 transform hover:scale-105">Ver
@@ -732,7 +750,7 @@
                                     class="px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 transform hover:scale-105">Imprimir</button>
                             </div>
                         </div>
-                        <div id="event-tabs" class="flex border-b border-gray-300 no-print">
+                        <div id="event-tabs" class="flex border-b border-gray-700 no-print">
                             <button id="all-tab-btn" class="event-tab active">Todos</button>
                             <button id="circuit-tab-btn" class="event-tab">Superintendente de Circuito</button>
                             <button id="bethel-tab-btn" class="event-tab">Representante de Betel</button>
@@ -768,7 +786,8 @@
             newCongressDatesInput = D('newCongressDates'), newSegCheckbox = D('newSeg'), newTerCheckbox = D('newTer'),
             newQuaCheckbox = D('newQua'), newQuiCheckbox = D('newQui'), newSexCheckbox = D('newSex'),
             newSabCheckbox = D('newSab'), newDomCheckbox = D('newDom'), addPersonBtn = D('addPersonBtn'),
-            scheduleMonthSelect = D('scheduleMonth'), scheduleYearInput = D('scheduleYear'), weekTypeContainer = D('week-type-container'),
+            scheduleMonthSelect = D('scheduleMonth'), scheduleYearInput = D('scheduleYear'), 
+            shiftStartTimeInput = D('shiftStartTime'), shiftEndTimeInput = D('shiftEndTime'),
             generateScheduleBtn = D('generateScheduleBtn'),
             printScheduleBtn = D('printScheduleBtn'), saveScheduleBtn = D('saveScheduleBtn'), scheduleOutputDiv = D('schedule-output'), occurrenceDateInput = D('occurrenceDate'),
             occurrencePeopleSelect = D('occurrencePeople'), occurrenceImagesInput = D('occurrenceImages'),
@@ -818,20 +837,20 @@
         function renderData() {
             dataContainer.innerHTML = '';
             if (peopleData.length === 0) {
-                dataContainer.innerHTML = '<p class="text-center text-gray-500 py-8">Nenhum publicador cadastrado. Adicione um publicador ou carregue um arquivo.</p>';
+                dataContainer.innerHTML = '<p class="text-center text-gray-400 py-8">Nenhum publicador cadastrado. Adicione um publicador ou carregue um arquivo.</p>';
                 return;
             }
             const table = document.createElement('table');
-            table.className = 'w-full border-collapse mt-6 bg-white rounded-lg overflow-hidden shadow-md data-table';
+            table.className = 'w-full border-collapse mt-6 bg-gray-800 rounded-lg overflow-hidden shadow-md data-table';
             table.innerHTML = `
                 <thead>
                     <tr>
-                        <th class="p-4 w-12 text-center border-b"><input type="checkbox" id="selectAllCheckbox" class="form-checkbox"></th>
-                        <th class="p-4 text-left border-b">Publicador</th>
-                        <th class="p-4 text-left border-b">Reuniões</th>
-                        <th class="p-4 text-left border-b">Disponibilidade Semanal</th>
-                        <th class="p-4 w-24 text-center border-b">Ações</th>
-                        <th class="p-4 w-12 text-center border-b"></th> <!-- Expander column -->
+                        <th class="p-4 w-12 text-center border-b border-gray-700"><input type="checkbox" id="selectAllCheckbox" class="form-checkbox bg-gray-700 border-gray-600"></th>
+                        <th class="p-4 text-left border-b border-gray-700">Publicador</th>
+                        <th class="p-4 text-left border-b border-gray-700">Reuniões</th>
+                        <th class="p-4 text-left border-b border-gray-700">Disponibilidade Semanal</th>
+                        <th class="p-4 w-24 text-center border-b border-gray-700">Ações</th>
+                        <th class="p-4 w-12 text-center border-b border-gray-700"></th> <!-- Expander column -->
                     </tr>
                 </thead>
                 <tbody></tbody>`;
@@ -845,23 +864,23 @@
                 tr.dataset.index = index;
 
                 let checkboxCell = tr.insertCell();
-                checkboxCell.className = 'p-4 border-b text-center align-middle';
-                checkboxCell.innerHTML = `<input type="checkbox" class="row-checkbox form-checkbox" data-index="${index}">`;
+                checkboxCell.className = 'p-4 border-b border-gray-700 text-center align-middle';
+                checkboxCell.innerHTML = `<input type="checkbox" class="row-checkbox form-checkbox bg-gray-700 border-gray-600" data-index="${index}">`;
 
                 let nameCell = tr.insertCell();
-                nameCell.className = 'p-4 border-b align-middle editable-text-cell';
+                nameCell.className = 'p-4 border-b border-gray-700 align-middle editable-text-cell';
                 nameCell.dataset.field = 'name';
                 nameCell.dataset.index = index;
                 nameCell.textContent = person.name || 'N/A';
 
                 let meetingsCell = tr.insertCell();
-                meetingsCell.className = 'p-4 border-b align-middle text-sm';
+                meetingsCell.className = 'p-4 border-b border-gray-700 align-middle text-sm';
                 const meetingWeekday = person.meetingDayWeekday ? person.meetingDayWeekday.charAt(0).toUpperCase() + person.meetingDayWeekday.slice(1) : 'Nenhuma';
                 const meetingWeekend = person.meetingDayWeekend ? person.meetingDayWeekend.charAt(0).toUpperCase() + person.meetingDayWeekend.slice(1) : 'Nenhuma';
                 meetingsCell.innerHTML = `<div>Semana: <span class="font-semibold editable-text-cell p-1" data-field="meetingDayWeekday" data-index="${index}">${meetingWeekday}</span></div><div>FDS: <span class="font-semibold editable-text-cell p-1" data-field="meetingDayWeekend" data-index="${index}">${meetingWeekend}</span></div>`;
 
                 let availabilityCell = tr.insertCell();
-                availabilityCell.className = 'p-4 border-b align-middle';
+                availabilityCell.className = 'p-4 border-b border-gray-700 align-middle';
                 let availabilityHtml = '<div class="flex flex-wrap gap-1">';
                 dayKeys.forEach(dayKey => {
                     const isAvailable = person[dayKey];
@@ -873,18 +892,18 @@
                 availabilityCell.innerHTML = availabilityHtml;
 
                 let actionsCell = tr.insertCell();
-                actionsCell.className = 'p-4 border-b text-center align-middle';
-                actionsCell.innerHTML = `<button class="px-3 py-1 bg-red-500 text-white rounded-md text-sm delete-person-btn" data-index="${index}">Excluir</button>`;
+                actionsCell.className = 'p-4 border-b border-gray-700 text-center align-middle';
+                actionsCell.innerHTML = `<button class="px-3 py-1 bg-red-600 text-white rounded-md text-sm delete-person-btn" data-index="${index}">Excluir</button>`;
 
                 let expanderCell = tr.insertCell();
-                expanderCell.className = 'p-4 border-b text-center align-middle';
-                expanderCell.innerHTML = `<button class="expand-btn text-blue-600 text-xl transform transition-transform duration-200">▼</button>`;
+                expanderCell.className = 'p-4 border-b border-gray-700 text-center align-middle';
+                expanderCell.innerHTML = `<button class="expand-btn text-blue-400 text-xl transform transition-transform duration-200">▼</button>`;
 
                 const trDetails = tbody.insertRow();
                 trDetails.className = 'hidden';
                 const detailsCell = trDetails.insertCell();
                 detailsCell.colSpan = 6;
-                detailsCell.className = 'p-4 bg-gray-50';
+                detailsCell.className = 'p-4 bg-gray-900';
                 
                 const formattedCongressDates = (person.congress || []).map(dateStr => {
                     const date = new Date(dateStr + 'T00:00:00');
@@ -1084,7 +1103,7 @@
                 inputElement.value = currentValue || '';
             }
 
-            inputElement.className = 'w-full p-1 border border-blue-400 rounded-md focus:outline-none';
+            inputElement.className = 'w-full p-1 border border-blue-400 rounded-md';
             const saveChanges = () => {
                 const oldValue = peopleData[index][field];
                 const newValue = inputElement.value;
@@ -1174,15 +1193,15 @@
                 return yearMatch && monthMatch;
             }).sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            occurrencesListDiv.innerHTML = '<h3 class="text-xl font-semibold text-gray-800 mb-4">Ocorrências Registradas</h3>';
+            occurrencesListDiv.innerHTML = '<h3 class="text-xl font-semibold text-gray-300 mb-4">Ocorrências Registradas</h3>';
             if (filteredOccurrences.length === 0) {
-                occurrencesListDiv.innerHTML += '<p class="text-gray-600">Nenhuma ocorrência encontrada para este período.</p>';
+                occurrencesListDiv.innerHTML += '<p class="text-gray-400">Nenhuma ocorrência encontrada para este período.</p>';
                 return;
             }
 
             filteredOccurrences.forEach(o => {
                 const occurrenceEl = document.createElement('div');
-                occurrenceEl.className = 'bg-white p-4 rounded-lg shadow-md mb-4 fade-in';
+                occurrenceEl.className = 'bg-gray-800 p-4 rounded-lg shadow-md mb-4 fade-in';
                 let imagesHtml = '';
                 if (o.images && o.images.length > 0) {
                     imagesHtml += '<div class="flex flex-wrap gap-2 mb-2">';
@@ -1191,7 +1210,7 @@
                     });
                     imagesHtml += '</div>';
                 }
-                occurrenceEl.innerHTML = `<div class="flex justify-between items-start"><div><p class="font-bold text-lg text-blue-700">${new Date(o.date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>${imagesHtml}<p class="font-semibold text-gray-700 mt-1">No turno: ${o.people.join(', ')}</p><p class="text-gray-600 mt-2">${o.description.replace(/\n/g, '<br>')}</p></div><button class="px-3 py-1 bg-red-500 text-white rounded-md text-sm delete-occurrence-btn no-print" data-id="${o.id}">Excluir</button></div>`;
+                occurrenceEl.innerHTML = `<div class="flex justify-between items-start"><div><p class="font-bold text-lg text-blue-400">${new Date(o.date + 'T00:00:00').toLocaleDateString('pt-BR')}</p>${imagesHtml}<p class="font-semibold text-gray-300 mt-1">No turno: ${o.people.join(', ')}</p><p class="text-gray-400 mt-2">${o.description.replace(/\n/g, '<br>')}</p></div><button class="px-3 py-1 bg-red-600 text-white rounded-md text-sm delete-occurrence-btn no-print" data-id="${o.id}">Excluir</button></div>`;
                 occurrencesListDiv.appendChild(occurrenceEl);
             });
 
@@ -1214,8 +1233,8 @@
             const years = [...new Set(occurrencesData.map(o => new Date(o.date + "T00:00:00").getFullYear()))].sort((a, b) => b - a);
             filterYearSelect.innerHTML = years.map(y => `<option value="${y}" ${y === currentFilterYear ? 'selected' : ''}>${y}</option>`).join('');
             const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-            let monthsHtml = `<a href="#" data-month="-1" class="block p-2 rounded-md text-sm ${currentFilterMonth === -1 ? 'bg-blue-600 text-white' : 'hover:bg-gray-100'}">Todos os Meses</a>`;
-            monthsHtml += monthNames.map((m, i) => `<a href="#" data-month="${i}" class="block p-2 rounded-md text-sm ${i === currentFilterMonth ? 'bg-blue-600 text-white' : 'hover:bg-gray-100'}">${m}</a>`).join('');
+            let monthsHtml = `<a href="#" data-month="-1" class="block p-2 rounded-md text-sm ${currentFilterMonth === -1 ? 'bg-blue-600 text-white' : 'hover:bg-gray-700'}">Todos os Meses</a>`;
+            monthsHtml += monthNames.map((m, i) => `<a href="#" data-month="${i}" class="block p-2 rounded-md text-sm ${i === currentFilterMonth ? 'bg-blue-600 text-white' : 'hover:bg-gray-700'}">${m}</a>`).join('');
             filterMonthDiv.innerHTML = monthsHtml;
             filterMonthDiv.querySelectorAll('a').forEach(link => {
                 link.addEventListener('click', (e) => {
@@ -1300,6 +1319,8 @@
             setTimeout(() => {
                 const month = parseInt(scheduleMonthSelect.value);
                 const year = parseInt(scheduleYearInput.value);
+                const startTime = shiftStartTimeInput.value;
+                const endTime = shiftEndTimeInput.value;
                 const workCount = peopleData.reduce((acc, person) => ({ ...acc, [person.name]: 0 }), {});
                 const coupleWorkCount = {};
                 peopleData.filter(p => p.status === 'Casal' && p.gender === 'Masculino').forEach(p => coupleWorkCount[p.name] = 0);
@@ -1312,8 +1333,7 @@
                     const hasEvent = eventsData.some(event => event.date === currentDateStr);
                     const weekType = hasEvent ? 'com_evento' : 'sem_evento';
                     
-                    let attendants = [];
-                    let watchmen = [];
+                    const assignments = [];
 
                     let availablePeople = peopleData.filter(person => {
                         let isAvailable = person[dayName];
@@ -1322,33 +1342,47 @@
                         if (isAvailable && (person.meetingDayWeekend === dayName || (person.meetingDayWeekend === 'final de semana' && (dayName === 'sabado' || dayName === 'domingo')))) isAvailable = false;
                         return isAvailable;
                     });
+                    
+                    const isWeekend = (dayName === 'sabado' || dayName === 'domingo');
+                    let maxAssignments = 1;
 
-                    if (weekType === 'sem_evento') {
-                        const isWeekend = (dayName === 'sabado' || dayName === 'domingo');
-                        const maxCouples = isWeekend ? 3 : 1;
-                        const result = assignCouples([...availablePeople], workCount, coupleWorkCount, maxCouples, true);
-                        attendants = result.attendants;
-                        watchmen = result.watchmen;
-                    } else {
-                        let coupleAssigned = false;
-                        const result = assignCouples([...availablePeople], workCount, coupleWorkCount, 1, true);
-                        if (result.attendants[0] !== 'VAGO') {
-                            attendants = result.attendants;
-                            watchmen = result.watchmen;
-                            coupleAssigned = true;
-                        }
-                        if (!coupleAssigned) {
-                            let availableMen = availablePeople.filter(p => p.gender === 'Masculino' && p.status !== 'Casal').sort((a, b) => workCount[a.name] - workCount[b.name]);
-                            let availableWomen = availablePeople.filter(p => p.gender === 'Feminino' && p.status !== 'Casal').sort((a, b) => workCount[a.name] - workCount[b.name]);
-                            const assignedWoman = availableWomen.shift();
-                            attendants.push(assignedWoman ? assignedWoman.name : 'VAGO');
-                            if (assignedWoman) workCount[assignedWoman.name]++;
-                            const assignedMan = availableMen.shift();
-                            watchmen.push(assignedMan ? assignedMan.name : 'VAGO');
-                            if (assignedMan) workCount[assignedMan.name]++;
+                    if (isWeekend) {
+                        if (month === 7 && year === 2025) { // August 2025 has a congress
+                            maxAssignments = 1;
+                        } else if (weekType === 'sem_evento') {
+                            maxAssignments = 3;
                         }
                     }
-                    currentSchedule.push({ date: currentDateStr, dayOfWeek: dayName, attendant: attendants, watchman: watchmen });
+
+                    if (maxAssignments > 1) {
+                        const result = assignCouples([...availablePeople], workCount, coupleWorkCount, maxAssignments, true);
+                        
+                        const start = new Date(`1970-01-01T${startTime}`);
+                        const end = new Date(`1970-01-01T${endTime}`);
+                        const durationMinutes = (end - start) / 60000;
+                        const shiftDuration = Math.floor(durationMinutes / maxAssignments);
+                        const formatTime = (date) => date.toTimeString().substring(0, 5);
+
+                        for (let i = 0; i < maxAssignments; i++) {
+                            const shiftStart = new Date(start.getTime() + i * shiftDuration * 60000);
+                            const shiftEnd = new Date(shiftStart.getTime() + shiftDuration * 60000);
+                            assignments.push({
+                                attendant: result.attendants[i],
+                                watchman: result.watchmen[i],
+                                startTime: formatTime(shiftStart),
+                                endTime: (i === maxAssignments - 1) ? endTime : formatTime(shiftEnd)
+                            });
+                        }
+                    } else {
+                        const result = assignCouples([...availablePeople], workCount, coupleWorkCount, 1, true);
+                        assignments.push({
+                            attendant: result.attendants[0],
+                            watchman: result.watchmen[0],
+                            startTime: startTime,
+                            endTime: endTime
+                        });
+                    }
+                    currentSchedule.push({ date: currentDateStr, dayOfWeek: dayName, assignments: assignments });
                 }
                 renderScheduleCalendar();
                 showMessage('Escala gerada com sucesso!', 'success');
@@ -1371,8 +1405,8 @@
             container.className = 'no-print-view';
             
             container.innerHTML = `
-                <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">${monthNames[month]} de ${year}</h3>
-                <div class="grid grid-cols-7 gap-2 mb-2 text-center font-semibold text-gray-600">
+                <h3 class="text-2xl font-bold text-gray-200 mb-6 text-center">${monthNames[month]} de ${year}</h3>
+                <div class="grid grid-cols-7 gap-2 mb-2 text-center font-semibold text-gray-400">
                     ${dayNames.map(day => `<div>${day}</div>`).join('')}
                 </div>
             `;
@@ -1384,41 +1418,35 @@
             
             for (let i = 0; i < firstDayOfMonth; i++) {
                 const emptyDay = document.createElement('div');
-                emptyDay.className = 'rounded-lg border bg-gray-50 min-h-[120px]';
+                emptyDay.className = 'rounded-lg border border-gray-700 bg-gray-800/50 min-h-[110px]';
                 grid.appendChild(emptyDay);
             }
 
             currentSchedule.forEach((entry, dayIndex) => {
                 const dateObj = new Date(entry.date + 'T00:00:00');
                 const dayOfMonth = dateObj.getDate();
-                let dayClass = 'border-gray-200 bg-white';
-                if (entry.dayOfWeek === 'sabado') dayClass = 'bg-yellow-50 border-yellow-200';
-                if (entry.dayOfWeek === 'domingo') dayClass = 'bg-red-50 border-red-200';
+                let dayClass = 'border-gray-700 bg-gray-800';
+                if (entry.dayOfWeek === 'sabado') dayClass = 'bg-yellow-900/30 border-yellow-700';
+                if (entry.dayOfWeek === 'domingo') dayClass = 'bg-red-900/30 border-red-800';
 
-                const attendantsHtml = entry.attendant.map((name, personIndex) => `<span class="editable-team-member block truncate" data-day-index="${dayIndex}" data-role="attendant" data-person-index="${personIndex}">${name}</span>`).join('');
-                const watchmenHtml = entry.watchman.map((name, personIndex) => `<span class="editable-team-member block truncate" data-day-index="${dayIndex}" data-role="watchman" data-person-index="${personIndex}">${name}</span>`).join('');
+                const assignmentsHtml = entry.assignments.map((assign, assignIndex) => `
+                    <div class="assignment-group border-t border-gray-700/50 pt-1 mt-1 first:mt-0 first:pt-0 first:border-0">
+                        <div class="text-center text-xs font-bold text-gray-400 mb-1 editable-time cursor-pointer" data-day-index="${dayIndex}" data-assign-index="${assignIndex}">${assign.startTime} - ${assign.endTime}</div>
+                        <div class="pl-1">
+                            <span class="editable-team-member block truncate text-blue-400" data-day-index="${dayIndex}" data-assign-index="${assignIndex}" data-role="attendant">${assign.attendant}</span>
+                            <span class="editable-team-member block truncate text-green-400" data-day-index="${dayIndex}" data-assign-index="${assignIndex}" data-role="watchman">${assign.watchman}</span>
+                        </div>
+                    </div>
+                `).join('');
                 
                 const dayDiv = document.createElement('div');
-                dayDiv.className = `rounded-lg border p-2 flex flex-col ${dayClass} min-h-[120px] fade-in`;
+                dayDiv.className = `rounded-lg border p-1 flex flex-col ${dayClass} min-h-[110px] fade-in`;
                 dayDiv.style.animationDelay = `${dayIndex * 20}ms`;
                 
                 dayDiv.innerHTML = `
-                    <div class="font-bold text-right text-gray-700">${dayOfMonth}</div>
-                    <div class="mt-1 text-xs flex-grow space-y-2">
-                        <div class="assignment-group">
-                            <strong class="flex items-center gap-1 text-blue-800">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                                Atendente(s)
-                            </strong>
-                            <div class="pl-2">${attendantsHtml}</div>
-                        </div>
-                        <div class="assignment-group">
-                            <strong class="flex items-center gap-1 text-green-800">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                Vigia(s)
-                            </strong>
-                            <div class="pl-2">${watchmenHtml}</div>
-                        </div>
+                    <div class="font-bold text-right text-gray-300 text-sm">${dayOfMonth}</div>
+                    <div class="mt-1 text-xs flex-grow space-y-1">
+                        ${assignmentsHtml}
                     </div>
                 `;
                 grid.appendChild(dayDiv);
@@ -1428,17 +1456,20 @@
             scheduleOutputDiv.appendChild(container);
 
             document.querySelectorAll('.editable-team-member').forEach(span => {
-                span.addEventListener('click', handleScheduleEdit);
+                span.addEventListener('click', handleScheduleTeamEdit);
+            });
+            document.querySelectorAll('.editable-time').forEach(span => {
+                span.addEventListener('click', handleScheduleTimeEdit);
             });
         }
 
 
-        function handleScheduleEdit(event) {
+        function handleScheduleTeamEdit(event) {
             const span = event.target;
             if (span.querySelector('select')) return;
             const dayIndex = parseInt(span.dataset.dayIndex);
+            const assignIndex = parseInt(span.dataset.assignIndex);
             const role = span.dataset.role;
-            const personIndex = parseInt(span.dataset.personIndex);
             const scheduleEntry = currentSchedule[dayIndex];
             const originalName = span.textContent;
 
@@ -1453,7 +1484,7 @@
             const genderForRole = role === 'attendant' ? 'Feminino' : 'Masculino';
             const roleSpecificOptions = availablePeople.filter(p => p.gender === genderForRole);
             const select = document.createElement('select');
-            select.className = 'w-full p-1 border border-blue-400 rounded-md';
+            select.className = 'w-full p-1 border border-blue-400 rounded-md bg-gray-900 text-gray-200';
             let optionsHtml = `<option value="${originalName}">${originalName}</option>`;
             if (originalName !== 'VAGO') {
                 optionsHtml += `<option value="VAGO">-- VAGO --</option>`;
@@ -1468,11 +1499,46 @@
             span.appendChild(select);
             select.focus();
             const saveChange = () => {
-                scheduleEntry[role][personIndex] = select.value;
+                currentSchedule[dayIndex].assignments[assignIndex][role] = select.value;
                 renderScheduleCalendar();
             };
             select.addEventListener('blur', saveChange);
             select.addEventListener('change', saveChange);
+        }
+
+        function handleScheduleTimeEdit(event) {
+            const span = event.target.closest('.editable-time');
+            if (span.querySelector('input')) return;
+
+            const dayIndex = parseInt(span.dataset.dayIndex);
+            const assignIndex = parseInt(span.dataset.assignIndex);
+            const assignment = currentSchedule[dayIndex].assignments[assignIndex];
+
+            span.innerHTML = `
+                <input type="time" value="${assignment.startTime}" class="bg-gray-900 border border-gray-600 rounded w-16 p-0 text-center text-gray-200">
+                <input type="time" value="${assignment.endTime}" class="bg-gray-900 border border-gray-600 rounded w-16 p-0 text-center text-gray-200">
+            `;
+
+            const inputs = span.querySelectorAll('input');
+            inputs[0].focus();
+
+            const saveTimeChanges = () => {
+                assignment.startTime = inputs[0].value;
+                assignment.endTime = inputs[1].value;
+                renderScheduleCalendar(); // Re-render to show changes and re-attach listeners
+            };
+
+            inputs.forEach(input => {
+                input.addEventListener('blur', saveTimeChanges);
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        input.blur();
+                    }
+                    if (e.key === 'Escape') {
+                        renderScheduleCalendar(); // Cancel edit
+                    }
+                });
+            });
         }
 
         function saveScheduleToFile() {
@@ -1486,16 +1552,21 @@
             const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
             const filename = `escala_${monthNames[month].toLowerCase()}_${year}.csv`;
 
-            let csvContent = "Data;Dia da Semana;Atendente(s);Vigia(s)\n";
+            let csvContent = "Data;Dia da Semana;Horário Entrada;Horário Saída;Atendente;Vigia\n";
             const displayDayNames = { "segunda": "Segunda-feira", "terca": "Terça-feira", "quarta": "Quarta-feira", "quinta": "Quinta-feira", "sexta": "Sexta-feira", "sabado": "Sábado", "domingo": "Domingo" };
 
             currentSchedule.forEach(entry => {
                 const dateObj = new Date(entry.date + 'T00:00:00');
                 const formattedDate = dateObj.toLocaleDateString('pt-BR');
                 const dayOfWeek = displayDayNames[entry.dayOfWeek];
-                const attendants = `"${entry.attendant.join(', ')}"`;
-                const watchmen = `"${entry.watchman.join(', ')}"`;
-                csvContent += `${formattedDate};${dayOfWeek};${attendants};${watchmen}\n`;
+                
+                entry.assignments.forEach(assign => {
+                    if (assign.attendant !== 'VAGO' || assign.watchman !== 'VAGO') {
+                         const attendant = `"${assign.attendant}"`;
+                         const watchman = `"${assign.watchman}"`;
+                         csvContent += `${formattedDate};${dayOfWeek};${assign.startTime};${assign.endTime};${attendant};${watchman}\n`;
+                    }
+                });
             });
 
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1567,7 +1638,7 @@
 
             const renderEventList = (eventList, containerElement) => {
                 if (eventList.length === 0) {
-                    containerElement.innerHTML = `<p class="text-gray-600 p-4">Nenhum evento registrado para este período.</p>`;
+                    containerElement.innerHTML = `<p class="text-gray-400 p-4">Nenhum evento registrado para este período.</p>`;
                     return;
                 }
 
@@ -1598,7 +1669,7 @@
                     let summaryHtml = '';
                     if (eventsOnDay.length > 1) {
                         summaryHtml = `
-                            <div class="text-xs bg-blue-50 border border-blue-200 rounded-md p-2 ml-4">
+                            <div class="text-xs bg-blue-900/50 border border-blue-800 rounded-md p-2 ml-4">
                                 <p class="font-bold">Total do Dia:</p>
                                 <p><strong>Pubs:</strong> ${totalPublishersForDay}</p>
                                 <p><strong>Assist.:</strong> ${totalQuantityForDay}</p>
@@ -1606,24 +1677,24 @@
                         `;
                     }
 
-                    finalHtml += `<div class="bg-white p-4 rounded-lg shadow-md mb-4 fade-in">`;
-                    finalHtml += `<div class="flex justify-between items-start mb-2"><div class="flex items-start"><p class="font-bold text-lg text-blue-700">${dateObj.toLocaleDateString('pt-BR')} - <span class="font-semibold">Local: ${auditoriumForDay}</span></p>${summaryHtml}</div><button class="px-3 py-1 bg-red-500 text-white rounded-md text-sm delete-event-btn no-print" data-id="${eventsOnDay[0].id}">Excluir Dia</button></div>`;
+                    finalHtml += `<div class="bg-gray-800 p-4 rounded-lg shadow-md mb-4 fade-in">`;
+                    finalHtml += `<div class="flex justify-between items-start mb-2"><div class="flex items-start"><p class="font-bold text-lg text-blue-400">${dateObj.toLocaleDateString('pt-BR')} - <span class="font-semibold">Local: ${auditoriumForDay}</span></p>${summaryHtml}</div><button class="px-3 py-1 bg-red-600 text-white rounded-md text-sm delete-event-btn no-print" data-id="${eventsOnDay[0].id}">Excluir Dia</button></div>`;
                     
                     eventsOnDay.forEach((event, index) => {
                         const alertCircuits = /SP-?0?26|SP-?0?28|crioulo/i;
                         const hasAlert = alertCircuits.test(event.circuitsList);
-                        const alertClass = hasAlert ? 'bg-yellow-50 border-l-4 border-yellow-400 pl-3' : '';
+                        const alertClass = hasAlert ? 'bg-yellow-900/30 border-l-4 border-yellow-500 pl-3' : '';
                         
                         finalHtml += `<div class="py-2 ${alertClass}">`;
-                        finalHtml += `<p class="text-gray-700"><span class="font-semibold">Responsável (Presidente):</span> <span class="editable-event" data-id="${event.id}" data-field="speakerName">${event.speakerName}</span></p>`;
-                        finalHtml += `<p class="text-gray-700"><span class="font-semibold">Circuitos (${event.circuits}):</span> <span class="editable-event" data-id="${event.id}" data-field="circuitsList">${event.circuitsList}</span></p>`;
-                        finalHtml += `<p class="text-gray-700"><span class="font-semibold">Nº Congs:</span> <span class="editable-event" data-id="${event.id}" data-field="congregations">${event.congregations}</span></p>`;
-                        finalHtml += `<p class="text-gray-700"><span class="font-semibold">FDS Usados:</span> <span class="editable-event" data-id="${event.id}" data-field="weekends">${event.weekends}</span></p>`;
-                        finalHtml += `<p class="text-gray-700"><span class="font-semibold">Pubs. Estimados:</span> <span class="editable-event" data-id="${event.id}" data-field="publishers">${event.publishers}</span></p>`;
-                        finalHtml += `<p class="text-gray-700"><span class="font-semibold">Assist. Estimada:</span> <span class="editable-event" data-id="${event.id}" data-field="quantity">${event.quantity}</span></p>`;
+                        finalHtml += `<p class="text-gray-300"><span class="font-semibold">Responsável (Presidente):</span> <span class="editable-event" data-id="${event.id}" data-field="speakerName">${event.speakerName}</span></p>`;
+                        finalHtml += `<p class="text-gray-300"><span class="font-semibold">Circuitos (${event.circuits}):</span> <span class="editable-event" data-id="${event.id}" data-field="circuitsList">${event.circuitsList}</span></p>`;
+                        finalHtml += `<p class="text-gray-300"><span class="font-semibold">Nº Congs:</span> <span class="editable-event" data-id="${event.id}" data-field="congregations">${event.congregations}</span></p>`;
+                        finalHtml += `<p class="text-gray-300"><span class="font-semibold">FDS Usados:</span> <span class="editable-event" data-id="${event.id}" data-field="weekends">${event.weekends}</span></p>`;
+                        finalHtml += `<p class="text-gray-300"><span class="font-semibold">Pubs. Estimados:</span> <span class="editable-event" data-id="${event.id}" data-field="publishers">${event.publishers}</span></p>`;
+                        finalHtml += `<p class="text-gray-300"><span class="font-semibold">Assist. Estimada:</span> <span class="editable-event" data-id="${event.id}" data-field="quantity">${event.quantity}</span></p>`;
                         
                         if (index < eventsOnDay.length - 1) {
-                            finalHtml += `<hr class="my-2">`;
+                            finalHtml += `<hr class="my-2 border-gray-700">`;
                         }
                         finalHtml += `</div>`;
                     });
@@ -1675,7 +1746,7 @@
             const allYearBtn = document.createElement('button');
             allYearBtn.dataset.year = 'all';
             allYearBtn.textContent = 'Todos';
-            allYearBtn.className = `px-3 py-1 text-sm rounded-md transition-colors ${eventFilterYear === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`;
+            allYearBtn.className = `px-3 py-1 text-sm rounded-md transition-colors ${eventFilterYear === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-600 hover:bg-gray-700'}`;
             allYearBtn.addEventListener('click', () => {
                 eventFilterYear = 'all';
                 renderEvents();
@@ -1686,7 +1757,7 @@
                 const yearBtn = document.createElement('button');
                 yearBtn.dataset.year = y;
                 yearBtn.textContent = y;
-                yearBtn.className = `px-3 py-1 text-sm rounded-md transition-colors ${eventFilterYear === y ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`;
+                yearBtn.className = `px-3 py-1 text-sm rounded-md transition-colors ${eventFilterYear === y ? 'bg-blue-600 text-white' : 'bg-gray-600 hover:bg-gray-700'}`;
                 yearBtn.addEventListener('click', () => {
                     eventFilterYear = y;
                     renderEvents();
@@ -1699,7 +1770,7 @@
             const allMonthBtn = document.createElement('button');
             allMonthBtn.dataset.month = '-1';
             allMonthBtn.textContent = 'Todos os Meses';
-            allMonthBtn.className = `col-span-3 px-3 py-1 text-sm rounded-md transition-colors ${eventFilterMonth === -1 ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`;
+            allMonthBtn.className = `col-span-3 px-3 py-1 text-sm rounded-md transition-colors ${eventFilterMonth === -1 ? 'bg-blue-600 text-white' : 'bg-gray-600 hover:bg-gray-700'}`;
             allMonthBtn.addEventListener('click', () => {
                 eventFilterMonth = -1;
                 renderEvents();
@@ -1710,7 +1781,7 @@
                 const monthBtn = document.createElement('button');
                 monthBtn.dataset.month = i;
                 monthBtn.textContent = m;
-                monthBtn.className = `px-3 py-1 text-sm rounded-md transition-colors ${eventFilterMonth === i ? 'bg-blue-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`;
+                monthBtn.className = `px-3 py-1 text-sm rounded-md transition-colors ${eventFilterMonth === i ? 'bg-blue-600 text-white' : 'bg-gray-600 hover:bg-gray-700'}`;
                 monthBtn.addEventListener('click', () => {
                     eventFilterMonth = i;
                     renderEvents();
@@ -1791,7 +1862,18 @@
                     responsive: true,
                     scales: {
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            ticks: { color: '#d1d5db' }
+                        },
+                        x: {
+                            ticks: { color: '#d1d5db' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#d1d5db'
+                            }
                         }
                     }
                 }
@@ -2168,8 +2250,6 @@
             loadEventsExcelBtn.addEventListener('click', () => eventsExcelFileInput.click());
             eventsExcelFileInput.addEventListener('change', loadEventsFromExcel);
             clearAllEventsBtn.addEventListener('click', clearAllEvents);
-            scheduleMonthSelect.addEventListener('change', populateWeekTypeControls);
-            scheduleYearInput.addEventListener('change', populateWeekTypeControls);
         });
     </script>
 </body>
